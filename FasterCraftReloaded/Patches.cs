@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using GYKHelper;
 using HarmonyLib;
 
 namespace FasterCraftReloaded;
@@ -6,59 +7,120 @@ namespace FasterCraftReloaded;
 [HarmonyPatch]
 public static class Patches
 {
+    private static readonly string[] Exclude =
+    {
+        "zombie", "refugee", "bee", "tree", "berry", "bush", "pump", "compost", "peat", "slime", "candelabrum", "incense", "garden", "planting"
+    };
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(AutopsyGUI), nameof(AutopsyGUI.OnBodyItemPress), typeof(BaseItemCellGUI))]
-    public static bool AutopsyGUI_OnBodyItemPress_Postfix(ref AutopsyGUI __instance, BaseItemCellGUI item_gui)
+    [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.ProcessRemovingCraft))]
+    public static void BuildModeLogics_ProcessRemovingCraft(ref WorldGameObject wgo, ref float delta_time)
     {
-        if (item_gui.item.id == "insertion_button_pseudoitem")
+        if (!Plugin.IncreaseBuildAndDestroySpeed.Value) return;
+        Helpers.Log($"[BuildModeHelpers.Logics.ProcessRemovingCraft]: WGO: {wgo.obj_id}");
+
+        delta_time *= 4f;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.DoAction))]
+    public static void WorldGameObject_DoAction(WorldGameObject other_obj, ref float delta_time)
+    {
+        if (!Plugin.IncreaseBuildAndDestroySpeed.Value) return;
+
+        Helpers.Log($"[WorldGameObject.DoAction]: WGO: {other_obj.obj_id}");
+        delta_time *= 4;
+    }
+
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.DoAction))]
+    public static void CraftComponent_DoAction(CraftComponent __instance, ref float delta_time)
+    {
+        // if (__instance?.current_craft == null) return;
+        if (__instance.other_obj == null) return;
+        if (!__instance.other_obj.is_player) return;
+
+        if (Exclude.Any(__instance.wgo.obj_id.ToLowerInvariant().Contains))
         {
-            var obj = MainGame.me.player;
-            if (GlobalCraftControlGUI.is_global_control_active && __instance._autopti_obj != null) obj = __instance._autopti_obj;
-
-            var inventory = __instance._parts_inventory;
-            var instance = __instance;
-            GUIElements.me.resource_picker.Open(obj, delegate(Item item, InventoryWidget _)
-                {
-                    if (item == null || item.IsEmpty())
-                    {
-                        // if (_wms && _cfg.HideInvalidSelections)
-                        // {
-                        //     return InventoryWidget.ItemFilterResult.Inactive;
-                        // }
-
-                        return InventoryWidget.ItemFilterResult.Hide;
-                    }
-
-                    if (item.definition.type != ItemDefinition.ItemType.BodyUniversalPart)
-                        return InventoryWidget.ItemFilterResult.Inactive;
-
-                    var text = item.id;
-                    if (text.Contains(":")) text = text.Split(':')[0];
-
-                    text = text.Replace("_dark", "");
-                    if (inventory.data.inventory.Any(item2 =>
-                            item2 != null && !item2.IsEmpty() && item2.id.StartsWith(text)))
-                        return InventoryWidget.ItemFilterResult.Inactive;
-
-                    return instance.GetInsertCraftDefinition(item) == null
-                        ? InventoryWidget.ItemFilterResult.Inactive
-                        : InventoryWidget.ItemFilterResult.Active;
-                },
-                __instance.OnItemForInsertionPicked);
-            return true;
+            Helpers.Log($"[ModifyCraftSpeed - REJECTED]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+            return;
         }
 
-        var craftDefinition = __instance.GetExtractCraftDefinition(item_gui.item);
+        Helpers.Log(
+            $"[CC.DoAction]: WGO: {__instance.wgo.obj_id}, WgoIsPlayer: {__instance.wgo.is_player}, Craft: {__instance.current_craft.id}, OtherObj: {__instance.other_obj.obj_id}, OtherWgoIsPlayer: {__instance.other_obj.is_player}");
 
-        if (craftDefinition == null) return true;
-
-        AutopsyGUI.RemoveBodyPartFromBody(__instance._body, item_gui.item);
-
-        __instance._autopti_obj.components.craft.CraftAsPlayer(craftDefinition, item_gui.item);
-        
-            __instance.Hide();
-            return false;
+        delta_time *= Plugin.CraftSpeedMultiplier.Value;
     }
-    
+
+
+    [HarmonyPrefix]
+    [HarmonyAfter("p1xel8ted.GraveyardKeeper.TheSeedEqualizer", "p1xel8ted.GraveyardKeeper.AppleTreesEnhanced")]
+    [HarmonyPriority(3)]
+    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.ReallyUpdateComponent))]
+    public static void CraftComponent_ReallyUpdateComponent(CraftComponent __instance, ref float delta_time)
+    {
+        if (__instance?.current_craft == null) return;
+
+        Helpers.Log($"[CraftComponent.ReallyUpdateComponent]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+
+        if (Plugin.ModifyCompostSpeed.Value && Tools.CompostCraft(__instance.wgo))
+        {
+            delta_time *= Plugin.CompostSpeedMultiplier.Value;
+            Helpers.Log($"[ModifyCompostSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+            return;
+        }
+
+        if (Plugin.ModifyZombieMinesSpeed.Value && Tools.ZombieMineCraft(__instance.wgo))
+        {
+            delta_time *= Plugin.ZombieMinesSpeedMultiplier.Value;
+            Helpers.Log($"[ModifyZombieMinesSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+            return;
+        }
+
+        if (Plugin.ModifyZombieSawmillSpeed.Value && Tools.ZombieSawmillCraft(__instance.wgo))
+        {
+            delta_time *= Plugin.ZombieSawmillSpeedMultiplier.Value;
+            Helpers.Log($"[ZombieSawmillSpeedMultiplier]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+            return;
+        }
+
+        if (Plugin.ModifyPlayerGardenSpeed.Value && Tools.PlayerGardenCraft(__instance.wgo))
+        {
+            delta_time *= Plugin.PlayerGardenSpeedMultiplier.Value;
+            Helpers.Log($"[ModifyPlayerGardenSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+            return;
+        }
+
+        if (Plugin.ModifyRefugeeGardenSpeed.Value && Tools.RefugeeGardenCraft(__instance.wgo))
+        {
+            delta_time *= Plugin.RefugeeGardenSpeedMultiplier.Value;
+            Helpers.Log($"[ModifyRefugeeGardenSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+            return;
+        }
+
+        if (Plugin.ModifyZombieGardenSpeed.Value && Tools.ZombieGardenCraft(__instance.wgo))
+        {
+            delta_time *= Plugin.ZombieGardenSpeedMultiplier.Value;
+            Helpers.Log($"[ModifyZombieGardenSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+            return;
+        }
+
+        if (Plugin.ModifyZombieVineyardSpeed.Value && Tools.ZombieVineyardCraft(__instance.wgo))
+        {
+            delta_time *= Plugin.ZombieVineyardSpeedMultiplier.Value;
+            Helpers.Log($"[ModifyZombieVineyardSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+            return;
+        }
+
+        if (Exclude.Any(__instance.wgo.obj_id.ToLowerInvariant().Contains))
+        {
+            Helpers.Log($"[ModifyCraftSpeed - REJECTED]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+            return;
+        }
+
+        Helpers.Log(
+            $"[CC.ReallyUpdateComponent]: WGO: {__instance.wgo.obj_id}, WgoIsPlayer: {__instance.wgo.is_player}, Craft: {__instance.current_craft.id}");
+        delta_time *= Plugin.CraftSpeedMultiplier.Value;
+    }
 }

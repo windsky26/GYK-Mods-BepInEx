@@ -1,4 +1,4 @@
-﻿namespace WheresMaPoints;
+﻿namespace FasterCraftReloaded;
 
 public static class Helpers
 {
@@ -12,7 +12,7 @@ public static class Helpers
         {
             if (Plugin.Debug.Value)
             {
-                Plugin.Log.LogInfo($"{message}");
+                Plugin.Log.LogWarning($"{message}");
             }
         }
     }
