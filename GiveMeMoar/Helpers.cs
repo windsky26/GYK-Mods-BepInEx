@@ -1,4 +1,4 @@
-﻿namespace WheresMaPoints;
+﻿namespace GiveMeMoar;
 
 public static class Helpers
 {
