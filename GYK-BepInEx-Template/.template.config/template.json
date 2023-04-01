@@ -1,0 +1,69 @@
+{
+    "author": "p1xel8ted",
+    "name": "GYK BepInEx 5",
+    "description": "BepInEx 5 for GYK",
+    "identity": "p1xel8ted.gykplugin.1.0",
+    "shortName": "GYKBepInEx5",
+    "tags": {
+        "type": "project",
+        "language": "C#",
+        "platform": ".NET"
+    },
+    "preferNameDirectory": true,
+    "sourceName": "MyProject",
+    "symbols": {
+        "Framework": {
+            "type": "parameter",
+            "description": "The target framework for the project.",
+            "datatype": "text",
+            "replaces": "v4.5",
+            "isRequired": "true",
+            "defaultValue": "<FullTargetFramework>"
+        },
+        "CompanyName": {
+            "type": "parameter",
+            "datatype": "text",
+            "replaces": "CompanyName",
+            "defaultValue": ""
+        },
+        "CompanyTrademark": {
+            "type": "parameter",
+            "datatype": "text",
+            "replaces": "CompanyTrademark",
+            "defaultValue": ""
+        },
+        "Year": {
+            "type": "generated",
+            "generator": "now",
+            "replaces": "Year",
+            "parameters": {
+                "format": "yyyy"
+            }
+        }
+    },
+    "primaryOutputs": [
+        {
+            "path": "GYK_BepInEx.csproj"
+        },
+        {
+            "path": "NuGet.Config"
+        },
+        {
+            "path": "Patches.cs"
+        },
+        {
+            "path": "Plugin.cs"
+        }
+    ],
+    "postActions": [
+        {
+            "description": "Opens Plugin.cs in the editor",
+            "manualInstructions": [],
+            "actionId": "84C0DA21-51C8-4541-9940-6CA19AF04EE6",
+            "args": {
+                "files": "2"
+            },
+            "continueOnError": true
+        }
+    ]
+}

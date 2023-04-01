@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Description>$(MSBuildProjectName)</Description>
+        <Version>3.4.1</Version>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+        <FileVersion>$(Version)</FileVersion>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\GYKHelper\GYKHelper.csproj" />
+    </ItemGroup>
+</Project>
