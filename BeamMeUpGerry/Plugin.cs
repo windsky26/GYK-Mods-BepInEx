@@ -71,11 +71,13 @@ namespace BeamMeUpGerry
 
             if (ticked)
             {
+                Actions.WorldGameObjectInteract += Patches.WorldGameObject_Interact;
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
+                Actions.WorldGameObjectInteract -= Patches.WorldGameObject_Interact;
                 Log.LogWarning($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }

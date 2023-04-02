@@ -43,7 +43,7 @@ public static class Actions
     {
         if (is_local_player)
         {
-            Plugin.Log.LogWarning($"Player spawned in. Invoking PlayerSpawnedIn Action for attached mods.");
+            Plugin.Log.LogWarning("Player spawned in. Invoking PlayerSpawnedIn Action for attached mods.");
             PlayerSpawnedIn?.Invoke();
         }
     }
@@ -52,7 +52,7 @@ public static class Actions
     [HarmonyPatch(typeof(GameSave), nameof(GameSave.GlobalEventsCheck))]
     public static void GameSave_GlobalEventsCheck()
     {
-        Plugin.Log.LogWarning($"Final load task complete. Game starting. Invoking GameStartedPlaying Action for attached mods.");
+        Plugin.Log.LogWarning("Final load task complete. Game starting. Invoking GameStartedPlaying Action for attached mods.");
         GameStartedPlaying?.Invoke(MainGame.me);
     }
 
@@ -80,7 +80,7 @@ public static class Actions
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
     private static void GameBalance_LoadGameBalance_Postfix()
     {
-        Plugin.Log.LogWarning($"Game balance loaded. Invoking GameBalanceLoad Action for attached mods.");
+        Plugin.Log.LogWarning("Game balance loaded. Invoking GameBalanceLoad Action for attached mods.");
         GameBalanceLoad?.Invoke(GameBalance.me);
     }
 
@@ -88,7 +88,7 @@ public static class Actions
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
     private static void WorldGameObject_Interact_Postfix(ref WorldGameObject __instance)
     {
-        Plugin.Log.LogWarning($"WGO interacted with (postfix). Invoking WorldGameObjectInteract Action for attached mods.");
+        Plugin.Log.LogWarning("WGO interacted with (postfix). Invoking WorldGameObjectInteract Action for attached mods.");
         WorldGameObjectInteract?.Invoke(__instance);
     }
 
@@ -96,7 +96,7 @@ public static class Actions
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
     private static void WorldGameObject_Interact_Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
     {
-        Plugin.Log.LogWarning($"WGO interacted with (prefix). Invoking WorldGameObjectInteractPrefix Action for attached mods.");
+        Plugin.Log.LogWarning("WGO interacted with (prefix). Invoking WorldGameObjectInteractPrefix Action for attached mods.");
         WorldGameObjectInteractPrefix?.Invoke(__instance, other_obj);
     }
 
@@ -166,7 +166,7 @@ public static class Actions
         }
 
         //find gerrys that match any gerrys made by mods
-        var gerrys = WorldMap.GetWorldGameObjectsByCustomTag(CrossModFields.ModGerryTag, false);
+        var gerrys = WorldMap.GetWorldGameObjectsByCustomTag(CrossModFields.ModGerryTag);
 
         //log each mod_gerry object found
         foreach (var g in gerrys.Where(g => g != null))

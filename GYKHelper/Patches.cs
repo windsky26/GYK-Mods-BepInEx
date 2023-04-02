@@ -1,8 +1,9 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using HarmonyLib;
 using UnityEngine;
 
 namespace GYKHelper
@@ -75,15 +76,6 @@ namespace GYKHelper
         public static void MainMenuGUI_Open_Postfix(ref MainMenuGUI __instance)
         {
             if (__instance == null) return;
-            foreach (var comp in __instance.GetComponentsInChildren<UILabel>()
-                         .Where(x => x.name.Contains("credits")))
-            {
-                comp.text =
-                    "[F7B000]BepInEx Modded[-] by [F7B000]p1xel8ted[-]\r\ngame by: [F7B000]Lazy Bear Games[-]\r\npublished by: [F7B000]tinyBuild[-]";
-                comp.overflowMethod = UILabel.Overflow.ResizeFreely;
-                comp.multiLine = true;
-                comp.MakePixelPerfect();
-            }
 
             foreach (var comp in __instance.GetComponentsInChildren<UILabel>()
                          .Where(x => x.name.Contains("ver txt")))

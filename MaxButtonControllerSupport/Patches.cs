@@ -1,64 +1,86 @@
 ﻿using System.Linq;
 using HarmonyLib;
-
 namespace MaxButtonControllerSupport;
 
 [HarmonyPatch]
-public static class Patches
+public partial class Plugin
 {
+    private static bool _craftGuiOpen;
+    private static bool _itemCountGuiOpen;
+    private static CraftItemGUI _craftItemGui;
+    private static WorldGameObject _crafteryWgo;
+    private static SmartSlider _slider;
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(AutopsyGUI), nameof(AutopsyGUI.OnBodyItemPress), typeof(BaseItemCellGUI))]
-    public static bool AutopsyGUI_OnBodyItemPress_Postfix(ref AutopsyGUI __instance, BaseItemCellGUI item_gui)
+    private static bool _unsafeInteraction;
+
+    private static readonly string[] UnSafeCraftObjects =
     {
-        if (item_gui.item.id == "insertion_button_pseudoitem")
-        {
-            var obj = MainGame.me.player;
-            if (GlobalCraftControlGUI.is_global_control_active && __instance._autopti_obj != null) obj = __instance._autopti_obj;
+        "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground",
+        "tile_church_semicircle_2floors", "mf_grindstone_1", "zombie_garden_desk_1", "zombie_garden_desk_2", "zombie_garden_desk_3",
+        "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk", "blockage_H_low", "blockage_V_low",
+        "blockage_H_high", "blockage_V_high", "wood_obstacle_v", "refugee_camp_garden_bed", "refugee_camp_garden_bed_1", "refugee_camp_garden_bed_2",
+        "refugee_camp_garden_bed_3"
+    };
 
-            var inventory = __instance._parts_inventory;
-            var instance = __instance;
-            GUIElements.me.resource_picker.Open(obj, delegate(Item item, InventoryWidget _)
-                {
-                    if (item == null || item.IsEmpty())
-                    {
-                        // if (_wms && _cfg.HideInvalidSelections)
-                        // {
-                        //     return InventoryWidget.ItemFilterResult.Inactive;
-                        // }
+    private static readonly string[] UnSafeCraftZones =
+    {
+        "church"
+    };
 
-                        return InventoryWidget.ItemFilterResult.Hide;
-                    }
+    private static readonly string[] UnSafePartials =
+    {
+        "blockage", "obstacle", "builddesk", "fix", "broken"
+    };
 
-                    if (item.definition.type != ItemDefinition.ItemType.BodyUniversalPart)
-                        return InventoryWidget.ItemFilterResult.Inactive;
 
-                    var text = item.id;
-                    if (text.Contains(":")) text = text.Split(':')[0];
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(CraftGUI), nameof(CraftGUI.Open))]
+    public static void CraftGUI_Open()
+    {
+        _craftGuiOpen = true;
+    }
 
-                    text = text.Replace("_dark", "");
-                    if (inventory.data.inventory.Any(item2 =>
-                            item2 != null && !item2.IsEmpty() && item2.id.StartsWith(text)))
-                        return InventoryWidget.ItemFilterResult.Inactive;
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(CraftGUI), nameof(CraftGUI.OnClosePressed))]
+    public static void CraftGUI_OnClosePressed()
+    {
+        _craftGuiOpen = false;
+    }
 
-                    return instance.GetInsertCraftDefinition(item) == null
-                        ? InventoryWidget.ItemFilterResult.Inactive
-                        : InventoryWidget.ItemFilterResult.Active;
-                },
-                __instance.OnItemForInsertionPicked);
-            return true;
-        }
-
-        var craftDefinition = __instance.GetExtractCraftDefinition(item_gui.item);
-
-        if (craftDefinition == null) return true;
-
-        AutopsyGUI.RemoveBodyPartFromBody(__instance._body, item_gui.item);
-
-        __instance._autopti_obj.components.craft.CraftAsPlayer(craftDefinition, item_gui.item);
-        
-            __instance.Hide();
-            return false;
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(CraftItemGUI), nameof(CraftItemGUI.OnOver))]
+    public static void CraftItemGUI_OnOver()
+    {
+        _craftItemGui = CraftItemGUI.current_overed;
+        _crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
     }
     
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ItemCountGUI), nameof(ItemCountGUI.Open))]
+    public static void OpenPostfix(ref ItemCountGUI __instance)
+    {
+        _itemCountGuiOpen = true;
+        _slider = __instance.transform.Find("window/Container/smart slider").GetComponent<SmartSlider>();
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ItemCountGUI), nameof(ItemCountGUI.OnPressedBack))]
+    [HarmonyPatch(typeof(ItemCountGUI), nameof(ItemCountGUI.OnConfirm))]
+    public static void ItemCountGUI_OnPressedBack()
+    {
+        _itemCountGuiOpen = false;
+    }
+
+
+    public static void WorldGameObject_Interact(WorldGameObject instance, WorldGameObject other)
+    {
+        if (UnSafeCraftZones.Contains(instance.GetMyWorldZoneId()) || UnSafePartials.Any(instance.obj_id.Contains) || UnSafeCraftObjects.Contains(instance.obj_id))
+        {
+            _unsafeInteraction = true;
+        }
+        else
+        {
+            _unsafeInteraction = false;
+        }
+    }
 }

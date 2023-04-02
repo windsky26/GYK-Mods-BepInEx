@@ -1,8 +1,16 @@
-﻿namespace WheresMaPoints;
+﻿using System.Threading;
+using GYKHelper;
 
-public static class Helpers
+namespace PrayTheDayAway;
+
+public partial class Plugin
 {
-    internal static void Log(string message, bool error = false)
+    internal static string GetLocalizedString(string content)
+    {
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+        return content;
+    }
+    internal static void WriteLog(string message, bool error = false)
     {
         if (error)
         {
@@ -10,7 +18,7 @@ public static class Helpers
         }
         else
         {
-            if (Plugin.Debug.Value)
+            if (Plugin._debug.Value)
             {
                 Plugin.Log.LogInfo($"{message}");
             }

@@ -86,11 +86,13 @@ namespace AutoLootHeavies
 
             if (ticked)
             {
+                Actions.WorldGameObjectInteract += WorldGameObjectInteract;
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
+                Actions.WorldGameObjectInteract -= WorldGameObjectInteract;
                 Log.LogWarning($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }

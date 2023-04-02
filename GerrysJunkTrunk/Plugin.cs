@@ -75,11 +75,13 @@ namespace GerrysJunkTrunk
 
             if (ticked)
             {
+                Actions.WorldGameObjectInteractPrefix += WorldGameObject_Interact;
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
+                Actions.WorldGameObjectInteractPrefix -= WorldGameObject_Interact;
                 Log.LogWarning($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }

@@ -1,4 +1,4 @@
-﻿namespace WheresMaPoints;
+﻿namespace ShowMeMoar;
 
 public static class Helpers
 {
@@ -10,10 +10,7 @@ public static class Helpers
         }
         else
         {
-            if (Plugin.Debug.Value)
-            {
-                Plugin.Log.LogInfo($"{message}");
-            }
+            Plugin.Log.LogInfo($"{message}");
         }
     }
 }
