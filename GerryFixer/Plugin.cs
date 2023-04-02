@@ -28,7 +28,7 @@ namespace GerryFixer
         private void Awake()
         {
             _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 12,CustomDrawer = ToggleMod}));
-            Debug = Config.Bind("General", "Debug", false, new ConfigDescription("Enable debug logging", null, new ConfigurationManagerAttributes {Order = 11}));
+            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 11}));
             AttemptToFixCutsceneGerrys = Config.Bind("Gerry", "Attempt To Fix Cutscene Gerrys", false, new ConfigDescription("Enable or disable attempts to fix cutscene Gerrys", null, new ConfigurationManagerAttributes {Order = 10}));
             SpawnTavernCellarGerry = Config.Bind("Gerry", "Spawn Tavern Cellar Gerry", false, new ConfigDescription("Enable or disable spawning Gerry in the tavern cellar", null, new ConfigurationManagerAttributes {Order = 9}));
             SpawnTavernMorgueGerry = Config.Bind("Gerry", "Spawn Tavern Morgue Gerry", false, new ConfigDescription("Enable or disable spawning Gerry in the tavern morgue", null, new ConfigurationManagerAttributes {Order = 8}));
@@ -37,7 +37,7 @@ namespace GerryFixer
             _harmony = new Harmony(PluginGuid);
             if (_modEnabled.Value)
             {
-                Actions.SpawnPlayer += Patches.FixGerry;
+                Actions.PlayerSpawnedIn += Patches.FixGerry;
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
@@ -53,13 +53,13 @@ namespace GerryFixer
         
             if (ticked)
             {
-                Actions.SpawnPlayer += Patches.FixGerry;
+                Actions.PlayerSpawnedIn += Patches.FixGerry;
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());   
             }
             else
             {
-                Actions.SpawnPlayer -= Patches.FixGerry;
+                Actions.PlayerSpawnedIn -= Patches.FixGerry;
                 Log.LogWarning($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf(); 
             }

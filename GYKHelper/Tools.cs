@@ -115,7 +115,7 @@ namespace GYKHelper
             return !MainGame.me.save.IsInTutorial() && completed;
         }
 
-        private static void NameSpawnedGerry(WorldGameObject gerry, string customTag = "")
+        public static void NameSpawnedGerry(WorldGameObject gerry, string customTag = "")
         {
             if (string.IsNullOrEmpty(customTag))
             {

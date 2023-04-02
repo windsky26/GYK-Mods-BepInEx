@@ -43,8 +43,8 @@ namespace MiscBitsAndBobs
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
-            Debug = Config.Bind("General", "Debug", false, "Enable debug logging");
+            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 31,CustomDrawer = ToggleMod}));
+            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 7}));
 
             QuietMusicInGuiConfig = Config.Bind("Audio", "Quiet Music In GUI", true, new ConfigDescription("Enable or disable quiet music in GUI", null, new ConfigurationManagerAttributes {Order = 30}));
             CondenseXpBarConfig = Config.Bind("UI", "Condense XP Bar", true, new ConfigDescription("Enable or disable condensing the XP bar", null, new ConfigurationManagerAttributes {Order = 29}));
@@ -72,7 +72,7 @@ namespace MiscBitsAndBobs
 
             if (_modEnabled.Value)
             {
-                Actions.SpawnPlayer += Helpers.ActionsOnSpawnPlayer;
+                Actions.PlayerSpawnedIn += Helpers.ActionsOnSpawnPlayer;
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
@@ -90,14 +90,14 @@ namespace MiscBitsAndBobs
             {
                 Log.LogWarning($"Applying patches for {PluginName}");
                 Application.runInBackground = KeepGamingRunningInBackgroundConfig.Value;
-                Actions.SpawnPlayer += Helpers.ActionsOnSpawnPlayer;
+                Actions.PlayerSpawnedIn += Helpers.ActionsOnSpawnPlayer;
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
                 Log.LogWarning($"Removing patches for {PluginName}");
                 Application.runInBackground = false;
-                Actions.SpawnPlayer -= Helpers.ActionsOnSpawnPlayer;
+                Actions.PlayerSpawnedIn -= Helpers.ActionsOnSpawnPlayer;
                 _harmony.UnpatchSelf();
             }
         }

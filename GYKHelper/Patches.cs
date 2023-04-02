@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using System;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -90,7 +89,7 @@ namespace GYKHelper
                          .Where(x => x.name.Contains("ver txt")))
             {
                 comp.text =
-                    $"[F7B000] BepInEx Modded[-] [2BFF00]Enabled[-] [F7B000](GYKHelper v{Assembly.GetExecutingAssembly().GetName().Version.Major}.{Assembly.GetExecutingAssembly().GetName().Version.Minor}.{Assembly.GetExecutingAssembly().GetName().Version.Build})[-]";
+                    $"[F7B000] BepInEx Modded[-] [F7B000]GYKHelper v{Assembly.GetExecutingAssembly().GetName().Version.Major}.{Assembly.GetExecutingAssembly().GetName().Version.Minor}.{Assembly.GetExecutingAssembly().GetName().Version.Build}[-]";
                 comp.overflowMethod = UILabel.Overflow.ResizeFreely;
                 comp.multiLine = true;
                 comp.MakePixelPerfect();

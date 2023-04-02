@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using AutoLootHeavies.lang;
 using BepInEx;
 using BepInEx.Configuration;
@@ -19,83 +20,90 @@ namespace AutoLootHeavies
 
         internal static ManualLogSource Log { get; private set; }
         private static Harmony _harmony;
+        private static readonly List<Stockpile> SortedStockpiles = new();
 
+        private static float _lastBubbleTime;
+
+        // private static bool _needScanning = true;
+        private static List<WorldGameObject> _objects;
+
+        private static float _xAdjustment;
+        private const float EnergyRequirement = 3f;
+    
+        internal static ConfigEntry<bool> TeleportToDumpSiteWhenAllStockPilesFull;
+        internal static ConfigEntry<Vector3> DesignatedTimberLocation;
+        internal static ConfigEntry<Vector3> DesignatedOreLocation;
+        internal static ConfigEntry<Vector3> DesignatedStoneLocation;
+        internal static ConfigEntry<bool> DisableImmersionMode;
+        internal static ConfigEntry<bool> Debug;
+        internal static ConfigEntry<KeyboardShortcut> ToggleTeleportToDumpSiteKeybind;
+        internal static ConfigEntry<KeyboardShortcut> SetTimberLocationKeybind;
+        internal static ConfigEntry<KeyboardShortcut> SetOreLocationKeybind;
+        internal static ConfigEntry<KeyboardShortcut> SetStoneLocationKeybind;
+
+        private static ConfigEntry<bool> _modEnabled;
 
         private void Awake()
         {
-            Log = Logger;
-            _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginGuid);
+            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
+            TeleportToDumpSiteWhenAllStockPilesFull = Config.Bind("General", "Teleport To Dump Site When All Stock Piles Full", true, new ConfigDescription("Enable or disable teleporting to the dump site when all stockpiles are full.", null, new ConfigurationManagerAttributes {Order = 500}));
 
-            TeleportToDumpSiteWhenAllStockPilesFull = Config.Bind("General", "TeleportToDumpSiteWhenAllStockPilesFull", false, "Teleport to dump site when all stock piles are full.");
-            DesignatedTimberLocation = Config.Bind("General", "DesignatedTimberLocation", new Vector3(-3712.003f, 6144, 1294.643f), "Designated timber location.");
-            DesignatedOreLocation = Config.Bind("General", "DesignatedOreLocation", new Vector3(-3712.003f, 6144, 1294.643f), "Designated ore location.");
-            DesignatedStoneLocation = Config.Bind("General", "DesignatedStoneLocation", new Vector3(-3712.003f, 6144, 1294.643f), "Designated stone location.");
-            DisableImmersionMode = Config.Bind("General", "DisableImmersionMode", false, "Disable immersion mode.");
-            Debug = Config.Bind("General", "Debug", false, "Debug.");
-            ToggleTeleportToDumpSiteKeybind = Config.Bind("Keybinds", "ToggleTeleportToDumpSiteKeybind", KeyCode.Alpha6, "Toggle teleport to dump site keybind.");
-            SetTimberLocationKeybind = Config.Bind("Keybinds", "SetTimberLocationKeybind", KeyCode.Alpha7, "Set timber location keybind.");
-            SetOreLocationKeybind = Config.Bind("Keybinds", "SetOreLocationKeybind", KeyCode.Alpha8, "Set ore location keybind.");
-            SetStoneLocationKeybind = Config.Bind("Keybinds", "SetStoneLocationKeybind", KeyCode.Alpha9, "Set stone location keybind.");
+            DisableImmersionMode = Config.Bind("General", "Disable Immersion Mode", false, new ConfigDescription("Enable or disable Immersion Mode.", null, new ConfigurationManagerAttributes {Order = 499}));
+
+            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 498}));
+
+            DesignatedTimberLocation = Config.Bind("Locations", "Designated Timber Location", new Vector3(-3712.003f, 6144f, 1294.643f), new ConfigDescription("Set the designated Timber Location.", null, new ConfigurationManagerAttributes {Order = 497}));
+
+            DesignatedOreLocation = Config.Bind("Locations", "Designated Ore Location", new Vector3(-3712.003f, 6144f, 1294.643f), new ConfigDescription("Set the designated Ore Location.", null, new ConfigurationManagerAttributes {Order = 496}));
+
+            DesignatedStoneLocation = Config.Bind("Locations", "Designated Stone Location", new Vector3(-3712.003f, 6144f, 1294.643f), new ConfigDescription("Set the designated Stone Location.", null, new ConfigurationManagerAttributes {Order = 495}));
+
+            ToggleTeleportToDumpSiteKeybind = Config.Bind("Keybinds", "Toggle Teleport To Dump Site Keybind", new KeyboardShortcut(KeyCode.Alpha6), new ConfigDescription("Set the keybind for toggling Teleport To Dump Site.", null, new ConfigurationManagerAttributes {Order = 494}));
+
+            SetTimberLocationKeybind = Config.Bind("Keybinds", "Set Timber Location Keybind", new KeyboardShortcut(KeyCode.Alpha7), new ConfigDescription("Set the keybind for setting Timber Location.", null, new ConfigurationManagerAttributes {Order = 493}));
+
+            SetOreLocationKeybind = Config.Bind("Keybinds", "Set Ore Location Keybind", new KeyboardShortcut(KeyCode.Alpha8), new ConfigDescription("Set the keybind for setting Ore Location.", null, new ConfigurationManagerAttributes {Order = 492}));
+
+            SetStoneLocationKeybind = Config.Bind("Keybinds", "Set Stone Location Keybind", new KeyboardShortcut(KeyCode.Alpha9), new ConfigDescription("Set the keybind for setting Stone Location.", null, new ConfigurationManagerAttributes {Order = 491}));
+
+            
+            Log = Logger;
+            _harmony = new Harmony(PluginGuid);
+            if (_modEnabled.Value)
+            {
+                Actions.WorldGameObjectInteract += WorldGameObjectInteract;
+                Log.LogWarning($"Applying patches for {PluginName}");
+                _harmony.PatchAll(Assembly.GetExecutingAssembly());
+            }
         }
 
+        private static void ToggleMod(ConfigEntryBase entry)
+        {
+            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
+
+            if (ticked == _modEnabled.Value) return;
+            _modEnabled.Value = ticked;
+
+            if (ticked)
+            {
+                Log.LogWarning($"Applying patches for {PluginName}");
+                _harmony.PatchAll(Assembly.GetExecutingAssembly());
+            }
+            else
+            {
+                Log.LogWarning($"Removing patches for {PluginName}");
+                _harmony.UnpatchSelf();
+            }
+        }
 
         private void OnEnable()
         {
-            Log.LogInfo($"Plugin {PluginName} is enabled!");
+            Log.LogInfo($"Plugin {PluginName} has been enabled!");
         }
 
         private void OnDisable()
         {
-            _harmony.UnpatchSelf();
-            Log.LogInfo($"Disabled {PluginName}!");
-        }
-
-        private void Update()
-        {
-            if (!MainGame.game_started) return;
-
-            if (!Fields.InitialFullUpdate)
-            {
-                Fields.InitialFullUpdate = true;
-                MainGame.me.StartCoroutine(Helpers.RunFullUpdate());
-            }
-
-            if (Input.GetKeyUp(ToggleTeleportToDumpSiteKeybind.Value))
-            {
-                if (!TeleportToDumpSiteWhenAllStockPilesFull.Value)
-                {
-                    TeleportToDumpSiteWhenAllStockPilesFull.Value = true;
-                    Helpers.Log($"Enabled teleport to dump site when stockpiles full.");
-                    Tools.ShowMessage(strings.TeleOn, Vector3.zero);
-                }
-                else
-                {
-                    TeleportToDumpSiteWhenAllStockPilesFull.Value = false;
-                    Helpers.Log($"Disabled teleport to dump site when stockpiles full.");
-                    Tools.ShowMessage(strings.TeleOff, Vector3.zero);
-                }
-            }
-
-            if (Input.GetKeyUp(SetTimberLocationKeybind.Value))
-            {
-                DesignatedTimberLocation.Value = MainGame.me.player_pos;
-                Helpers.Log($"Set timber dump site to {DesignatedTimberLocation.Value}.");
-                Tools.ShowMessage(strings.DumpTimber, DesignatedTimberLocation.Value);
-            }
-
-            if (Input.GetKeyUp(SetOreLocationKeybind.Value))
-            {
-                DesignatedOreLocation.Value = MainGame.me.player_pos;
-                Helpers.Log($"Set ore dump site to {DesignatedOreLocation.Value}.");
-                Tools.ShowMessage(strings.DumpOre, DesignatedOreLocation.Value);
-            }
-
-            if (Input.GetKeyUp(SetStoneLocationKeybind.Value))
-            {
-                DesignatedStoneLocation.Value = MainGame.me.player_pos;
-                Helpers.Log($"Set stone dump site to {DesignatedStoneLocation.Value}.");
-                Tools.ShowMessage(strings.DumpStone, DesignatedStoneLocation.Value);
-            }
+            Log.LogError($"Plugin {PluginName} has been disabled!");
         }
     }
 }

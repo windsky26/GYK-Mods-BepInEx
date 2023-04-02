@@ -24,10 +24,8 @@ namespace UltraWide
 
         private void Awake()
         {
-  
-            
             _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 2,CustomDrawer = ToggleMod}));
-            Debug = Config.Bind("General", "Debug", false, new ConfigDescription("Enable debug logging", null, new ConfigurationManagerAttributes {Order = 1}));
+            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 2}));
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
             if (_modEnabled.Value)

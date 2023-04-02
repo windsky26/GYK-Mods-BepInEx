@@ -27,7 +27,7 @@ public partial class Plugin : BaseUnityPlugin
     private void Awake()
     {
         _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod, Order = 8}));
-        _debug = Config.Bind("General", "Debug", false, new ConfigDescription("Enable debug logging", null, new ConfigurationManagerAttributes {Order = 7}));
+        _debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 7}));
 
         IncludeGardenBerryBushes = Config.Bind("Player Garden", "Include Garden Berry Bushes", true, new ConfigDescription("Enhance player garden berry bushes.", null, new ConfigurationManagerAttributes {Order = 6}));
         IncludeGardenTrees = Config.Bind("Player Garden", "Include Garden Trees", true, new ConfigDescription("Enhance player garden trees.", null, new ConfigurationManagerAttributes {Order = 5}));
@@ -45,7 +45,7 @@ public partial class Plugin : BaseUnityPlugin
         if (_modEnabled.Value)
         {
             Log.LogWarning($"Applying patches for {PluginName}");
-            Actions.SpawnPlayer += CleanUpTrees;
+            Actions.PlayerSpawnedIn += CleanUpTrees;
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
     }
@@ -61,13 +61,13 @@ public partial class Plugin : BaseUnityPlugin
         if (ticked)
         {
             Log.LogWarning($"Applying patches for {PluginName}");
-            Actions.SpawnPlayer += CleanUpTrees;
+            Actions.PlayerSpawnedIn += CleanUpTrees;
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
         else
         {
             Log.LogWarning($"Removing patches for {PluginName}");
-            Actions.SpawnPlayer -= CleanUpTrees;
+            Actions.PlayerSpawnedIn -= CleanUpTrees;
             _harmony.UnpatchSelf();
         }
     }

@@ -54,7 +54,7 @@ namespace GiveMeMoar
 
             HappinessMultiplier = Config.Bind("Multipliers", "Happiness Multiplier", 1f, new ConfigDescription("Multiplier for happiness.", new AcceptableValueRange<float>(1f, 50f), new ConfigurationManagerAttributes {Order = 492}));
 
-            Debug = Config.Bind("Debug Settings", "Debug", false, new ConfigDescription("Enable or disable debugging features.", null, new ConfigurationManagerAttributes {Order = 491}));
+            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 491}));
 
             DisableSticks = Config.Bind("Miscellaneous", "Disable Sticks", false, new ConfigDescription("Enable or disable stick functionality.", null, new ConfigurationManagerAttributes {Order = 490}));
 

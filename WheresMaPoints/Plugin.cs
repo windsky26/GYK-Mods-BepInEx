@@ -30,7 +30,7 @@ namespace WheresMaPoints
         private void Awake()
         {
             _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod,Order = 5}));
-            Debug = Config.Bind("General", "Debug", false, new ConfigDescription("Enable debug logging", null, new ConfigurationManagerAttributes {Order = 4}));
+            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 4}));
 
             ShowPointGainAboveKeeper = Config.Bind("Visual Feedback", "Show Point Gain Above Keeper", true, new ConfigDescription("Show the point gain above the keeper's head when points are earned.", null, new ConfigurationManagerAttributes {Order = 3}));
             StillPlayCollectAudio = Config.Bind("Audio Feedback", "Still Play Collect Audio", false, new ConfigDescription("Play the collect audio even when the point gain is displayed above the keeper's head.", null, new ConfigurationManagerAttributes {Order = 2}));

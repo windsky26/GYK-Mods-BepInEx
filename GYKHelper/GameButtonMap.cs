@@ -7,8 +7,7 @@ public static class GameButtonMap
     public static readonly Dictionary<GamePadButton, int> Bindings = new()
     {
         {
-            GamePadButton.A,
-            2
+            GamePadButton.A, 2
         },
         {
             GamePadButton.B,
@@ -23,7 +22,7 @@ public static class GameButtonMap
             5
         },
         {
-            GamePadButton.LB,
+             GamePadButton.LB,
             6
         },
         {

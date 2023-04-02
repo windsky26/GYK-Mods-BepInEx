@@ -2,36 +2,34 @@
 using System.Linq;
 using System.Threading;
 using GYKHelper;
-using UnityEngine.SceneManagement;
 
 namespace WheresMaStorage;
 
 public static class Helpers
 {
-    internal static void RunWmsTasks()
+    internal static void RunWmsTasks(MainGame mainGame)
     {
         Plugin.Log.LogWarning($"Running WMS Tasks as the Player has spawned in.");
         if (!MainGame.game_started) return;
-        
+
         if (Plugin.Debug.Value & !Fields.DebugMessageShown)
         {
             Tools.ShowAlertDialog("Where's Ma Storage!", "Please note you have debug mode turned on. It isn't recommended to leave this on unless you have a purpose for it.", string.Empty, true);
             Fields.DebugMessageShown = true;
         }
 
-        if (!Fields.InvsLoaded)
-        {
-            MainGame.me.StartCoroutine(Invents.LoadWildernessInventories());
-            MainGame.me.StartCoroutine(Invents.LoadInventories());
-        }
+
+        mainGame.StartCoroutine(Invents.LoadWildernessInventories());
+        mainGame.StartCoroutine(Invents.LoadInventories());
+
 
         if (Plugin.CollectDropsOnGameLoad.Value && !Fields.DropsCleaned)
         {
-            Helpers.CollectDrops();
+            CollectDrops();
         }
     }
-    
-    internal static void GameBalanceLoad(GameBalance obj)
+
+    internal static void GameBalanceLoad(GameBalance gameBalance)
     {
         if (Fields.GameBalanceAlreadyRun) return;
         Fields.GameBalanceAlreadyRun = true;
@@ -40,7 +38,7 @@ public static class Helpers
 
         if (Plugin.AllowHandToolDestroy.Value)
         {
-            foreach (var itemDef in GameBalance.me.items_data.Where(a => Fields.ToolItems.Contains(a.type)))
+            foreach (var itemDef in gameBalance.items_data.Where(a => Fields.ToolItems.Contains(a.type)))
             {
                 itemDef.player_cant_throw_out = false;
             }
@@ -48,7 +46,7 @@ public static class Helpers
 
         if (Plugin.EnableToolAndPrayerStacking.Value || Plugin.EnableGraveItemStacking.Value || Plugin.EnablePenPaperInkStacking.Value || Plugin.EnableChiselStacking.Value)
         {
-            foreach (var item in GameBalance.me.items_data.Where(item => item.stack_count == 1))
+            foreach (var item in gameBalance.items_data.Where(item => item.stack_count == 1))
             {
                 if (Plugin.EnableToolAndPrayerStacking.Value)
                 {
@@ -85,7 +83,7 @@ public static class Helpers
 
         if (Plugin.ModifyInventorySize.Value)
         {
-            foreach (var od in GameBalance.me.objs_data.Where(od =>
+            foreach (var od in gameBalance.objs_data.Where(od =>
                          od.interaction_type == ObjectDefinition.InteractionType.Chest))
             {
                 od.inventory_size += Plugin.AdditionalInventorySpace.Value;
@@ -94,7 +92,7 @@ public static class Helpers
 
         if (!Plugin.ModifyStackSize.Value) return;
 
-        foreach (var id in GameBalance.me.items_data.Where(id => id.stack_count is > 1 and <= 999))
+        foreach (var id in gameBalance.items_data.Where(id => id.stack_count is > 1 and <= 999))
         {
             id.stack_count = id.stack_count + Plugin.StackSizeForStackables.Value > 999 ? 999 : Plugin.StackSizeForStackables.Value;
         }

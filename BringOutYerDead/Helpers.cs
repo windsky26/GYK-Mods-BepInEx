@@ -1,7 +1,16 @@
-﻿namespace WheresMaPoints;
+﻿using System.Threading;
+using GYKHelper;
+
+namespace BringOutYerDead;
 
 public static class Helpers
 {
+    internal static string GetLocalizedString(string content)
+    {
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+        return content;
+    }
+    
     internal static void Log(string message, bool error = false)
     {
         if (error)
@@ -16,4 +25,6 @@ public static class Helpers
             }
         }
     }
+    
+    
 }

@@ -12,7 +12,7 @@ namespace WheresMaStorage;
 [BepInDependency("p1xel8ted.gyk.gykhelper")]
 public class Plugin : BaseUnityPlugin
 {
-    private const string PluginGuid = "p1xel8ted.gyk.WheresMaStorage";
+    private const string PluginGuid = "p1xel8ted.gyk.wheresmastorage";
     private const string PluginName = "Where's Ma' Storage!";
     private const string PluginVer = "0.0.1";
 
@@ -56,7 +56,7 @@ public class Plugin : BaseUnityPlugin
         ModifyStackSize = Config.Bind("Inventory", "Modify Stack Size", true, new ConfigDescription("Enable or disable modifying the stack size of items", null, new ConfigurationManagerAttributes {Order = 44}));
 
         _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 43}));
-        Debug = Config.Bind("General", "Debug", false, new ConfigDescription("Enable or disable debug mode for the plugin", null, new ConfigurationManagerAttributes {Order = 43}));
+        Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 498}));
         SharedInventory = Config.Bind("Inventory", "Shared Inventory", true, new ConfigDescription("Enable or disable shared inventory between players", null, new ConfigurationManagerAttributes {Order = 42}));
         DontShowEmptyRowsInInventory = Config.Bind("Inventory", "Dont Show Empty Rows In Inventory", true, new ConfigDescription("Enable or disable displaying empty rows in the inventory", null, new ConfigurationManagerAttributes {Order = 41}));
         ShowUsedSpaceInTitles = Config.Bind("Inventory", "Show Used Space In Titles", true, new ConfigDescription("Enable or disable showing used space in inventory titles", null, new ConfigurationManagerAttributes {Order = 40}));
@@ -86,7 +86,7 @@ public class Plugin : BaseUnityPlugin
         _harmony = new Harmony(PluginGuid);
         if (_modEnabled.Value)
         {
-            Actions.SpawnPlayer += Helpers.RunWmsTasks;
+            Actions.GameStartedPlaying += Helpers.RunWmsTasks;
             Actions.GameBalanceLoad += Helpers.GameBalanceLoad;
             Log.LogMessage($"Applying patches for {PluginName}");
             _harmony.PatchAll(Assembly.GetExecutingAssembly());

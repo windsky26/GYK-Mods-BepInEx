@@ -1,64 +1,145 @@
 ﻿using System.Linq;
+using System.Threading;
+using GYKHelper;
 using HarmonyLib;
+using IBuildWhereIWant.lang;
 
 namespace IBuildWhereIWant;
 
 [HarmonyPatch]
-public static class Patches
+public partial class Plugin
 {
+    private const string RefugeeZoneId = "refugee";
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(AutopsyGUI), nameof(AutopsyGUI.OnBodyItemPress), typeof(BaseItemCellGUI))]
-    public static bool AutopsyGUI_OnBodyItemPress_Postfix(ref AutopsyGUI __instance, BaseItemCellGUI item_gui)
+    [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ShowBuildGrid))]
+    public static void BuildGrid_ShowBuildGrid(ref bool show)
     {
-        if (item_gui.item.id == "insertion_button_pseudoitem")
-        {
-            var obj = MainGame.me.player;
-            if (GlobalCraftControlGUI.is_global_control_active && __instance._autopti_obj != null) obj = __instance._autopti_obj;
-
-            var inventory = __instance._parts_inventory;
-            var instance = __instance;
-            GUIElements.me.resource_picker.Open(obj, delegate(Item item, InventoryWidget _)
-                {
-                    if (item == null || item.IsEmpty())
-                    {
-                        // if (_wms && _cfg.HideInvalidSelections)
-                        // {
-                        //     return InventoryWidget.ItemFilterResult.Inactive;
-                        // }
-
-                        return InventoryWidget.ItemFilterResult.Hide;
-                    }
-
-                    if (item.definition.type != ItemDefinition.ItemType.BodyUniversalPart)
-                        return InventoryWidget.ItemFilterResult.Inactive;
-
-                    var text = item.id;
-                    if (text.Contains(":")) text = text.Split(':')[0];
-
-                    text = text.Replace("_dark", "");
-                    if (inventory.data.inventory.Any(item2 =>
-                            item2 != null && !item2.IsEmpty() && item2.id.StartsWith(text)))
-                        return InventoryWidget.ItemFilterResult.Inactive;
-
-                    return instance.GetInsertCraftDefinition(item) == null
-                        ? InventoryWidget.ItemFilterResult.Inactive
-                        : InventoryWidget.ItemFilterResult.Active;
-                },
-                __instance.OnItemForInsertionPicked);
-            return true;
-        }
-
-        var craftDefinition = __instance.GetExtractCraftDefinition(item_gui.item);
-
-        if (craftDefinition == null) return true;
-
-        AutopsyGUI.RemoveBodyPartFromBody(__instance._body, item_gui.item);
-
-        __instance._autopti_obj.components.craft.CraftAsPlayer(craftDefinition, item_gui.item);
-        
-            __instance.Hide();
-            return false;
+        if (!DisableGrid.Value) return;
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        show = false;
     }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ClearPreviousTotemRadius))]
+    public static void BuildGrid_ClearPreviousTotemRadius(ref bool apply_colors)
+    {
+        if (!DisableGrid.Value) return;
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        apply_colors = false;
+    }
+
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.EnterRemoveMode))]
+    public static void BuildModeLogics_EnterRemoveMode(ref BuildModeLogics __instance)
+    {
+        if (!DisableGreyRemoveOverlay.Value) return;
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        __instance._remove_grey_spr.SetActive(false);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.CancelCurrentMode))]
+    public static void BuildModeLogics_CancelCurrentMode()
+    {
+        if (!CrossModFields.CraftAnywhere) return;
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        OpenCraftAnywhere();
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.CanBuild))]
+    private static void BuildModeLogics_CanBuild(ref BuildModeLogics __instance)
+    {
+        __instance._multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.DoPlace))]
+    private static void BuildModeLogics_DoPlace(ref BuildModeLogics __instance)
+    {
+        __instance._multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
+        if (CrossModFields.CraftAnywhere && MainGame.me.player.cur_zone.Length <= 0)
+        {
+            if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+            BuildGrid.ShowBuildGrid(false);
+        }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.FocusCameraOnBuildZone))]
+    private static void BuildModeLogics_FocusCameraOnBuildZone(ref string zone_id)
+    {
+        if (!CrossModFields.CraftAnywhere) return;
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        zone_id = string.Empty;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.GetObjectRemoveCraftDefinition))]
+    private static void BuildModeLogics_GetObjectRemoveCraftDefinition(string obj_id, ref ObjectCraftDefinition __result)
+    {
+        if (!CrossModFields.CraftAnywhere || MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
     
+        WriteLog($"[Remove]{obj_id}", true);
+
+        __result = GameBalance.me.craft_obj_data
+            .FirstOrDefault(objectCraftDefinition =>
+                objectCraftDefinition.out_obj == obj_id &&
+                objectCraftDefinition.build_type == ObjectCraftDefinition.BuildType.Remove);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.OnBuildCraftSelected))]
+    private static void BuildModeLogics_OnBuildCraftSelected(ref BuildModeLogics __instance)
+    {
+        if (!CrossModFields.CraftAnywhere) return;
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        BuildModeLogics.last_build_desk = _buildDeskClone;
+        __instance._cur_build_zone_id = Zone;
+        __instance._cur_build_zone = WorldZone.GetZoneByID(Zone);
+        __instance._cur_build_zone_bounds = __instance._cur_build_zone.GetBounds();
+    }
+
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(FloatingWorldGameObject), nameof(FloatingWorldGameObject.RecalculateAvailability))]
+    public static void FloatingWorldGameObject_RecalculateAvailability()
+    {
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        if (DisableBuildingCollision.Value)
+        {
+            FloatingWorldGameObject.can_be_built = true;
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(FlowGridCell), nameof(FlowGridCell.IsInsideWorldZone))]
+    public static void FlowGridCell_IsInsideWorldZone(ref bool __result)
+    {
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        __result = true;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(FlowGridCell), nameof(FlowGridCell.IsPlaceAvailable))]
+    public static void FlowGridCell_IsPlaceAvailable(ref bool __result)
+    {
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        __result = true;
+    }
+
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetUniversalObjectInfo))]
+    public static void WorldGameObject_GetUniversalObjectInfo(ref WorldGameObject __instance, ref UniversalObjectInfo __result)
+    {
+        if (_buildDeskClone == null) return;
+        if (__instance != _buildDeskClone) return;
+        if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+        __result.header = strings.Header;
+        __result.descr = strings.Description;
+    }
 }

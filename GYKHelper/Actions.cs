@@ -8,7 +8,6 @@ namespace GYKHelper;
 [HarmonyPatch]
 public static class Actions
 {
-    
     internal static readonly string[] SafeGerryTags =
     {
         "tavern_skull",
@@ -28,24 +27,33 @@ public static class Actions
     };
 
     //public static Action GameStatusInGame;
-    public static Action SpawnPlayer;
+    public static Action PlayerSpawnedIn;
     public static Action GameStatusInMenu;
     public static Action GameStatusUndefined;
+    public static Action<MainGame> GameStartedPlaying;
 
     public static Action<GameBalance> GameBalanceLoad;
     public static Action<WorldGameObject> WorldGameObjectInteract;
 
     public static Action<WorldGameObject, WorldGameObject> WorldGameObjectInteractPrefix;
-    
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerComponent), nameof(PlayerComponent.SpawnPlayer), typeof(bool), typeof(Item))]
     public static void PlayerComponent_SpawnPlayer(bool is_local_player)
     {
         if (is_local_player)
         {
-            Plugin.Log.LogWarning($"Player spawned in. Invoking SpawnPlayer Action for attached mods.");
-            SpawnPlayer?.Invoke();
+            Plugin.Log.LogWarning($"Player spawned in. Invoking PlayerSpawnedIn Action for attached mods.");
+            PlayerSpawnedIn?.Invoke();
         }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameSave), nameof(GameSave.GlobalEventsCheck))]
+    public static void GameSave_GlobalEventsCheck()
+    {
+        Plugin.Log.LogWarning($"Final load task complete. Game starting. Invoking GameStartedPlaying Action for attached mods.");
+        GameStartedPlaying?.Invoke(MainGame.me);
     }
 
     // [HarmonyPostfix]
@@ -70,10 +78,10 @@ public static class Actions
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
-    private static void GameBalance_LoadGameBalance_Postfix(GameBalance __instance)
+    private static void GameBalance_LoadGameBalance_Postfix()
     {
         Plugin.Log.LogWarning($"Game balance loaded. Invoking GameBalanceLoad Action for attached mods.");
-        GameBalanceLoad?.Invoke(__instance);
+        GameBalanceLoad?.Invoke(GameBalance.me);
     }
 
     [HarmonyPostfix]
@@ -140,7 +148,7 @@ public static class Actions
         //Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
     }
 
-    public static void CleanGerries()
+    public static void CleanGerries(MainGame mainGame)
     {
         if (!MainGame.game_started) return;
 

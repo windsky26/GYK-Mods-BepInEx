@@ -20,7 +20,7 @@ namespace GYKHelper
         {
             Log = Logger;
             Actions.WorldGameObjectInteractPrefix += Actions.WorldGameObject_Interact;
-            Actions.SpawnPlayer += Actions.CleanGerries;
+            Actions.GameStartedPlaying += Actions.CleanGerries;
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginGuid);
         }
     }

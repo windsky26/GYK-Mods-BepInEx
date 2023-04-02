@@ -42,7 +42,7 @@ namespace FasterCraftReloaded
         private void Awake()
         {
             _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 501, CustomDrawer = ToggleMod}));
-            Debug = Config.Bind("Debug Settings", "Debug", false, new ConfigDescription("Enable or disable debugging features.", null, new ConfigurationManagerAttributes {Order = 500}));
+            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 500}));
             IncreaseBuildAndDestroySpeed = Config.Bind("Speed Settings", "Increase Build And Destroy Speed", true, new ConfigDescription("Increase the speed of building and destroying.", null, new ConfigurationManagerAttributes {Order = 499}));
             CraftSpeedMultiplier = Config.Bind("Speed Settings", "Craft Speed Multiplier", 2f, new ConfigDescription("Multiplier for crafting speed.", new AcceptableValueRange<float>(1f, 50f), new ConfigurationManagerAttributes {Order = 498}));
             ModifyPlayerGardenSpeed = Config.Bind("Garden Settings", "Modify Player Garden Speed", false, new ConfigDescription("Enable or disable modification of player garden speed.", null, new ConfigurationManagerAttributes {Order = 497}));

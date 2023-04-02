@@ -25,7 +25,7 @@ namespace WheresMaVeggies
         private void Awake()
         {
             _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
-            Debug = Config.Bind("General", "Debug", false, "Enable debug logging");
+            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 498}));
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
             if (_modEnabled.Value)
