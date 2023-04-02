@@ -72,7 +72,7 @@ namespace MiscBitsAndBobs
 
             if (_modEnabled.Value)
             {
-                Actions.PlayerSpawnedIn += Helpers.ActionsOnSpawnPlayer;
+                Actions.GameStartedPlaying += Helpers.ActionsOnSpawnPlayer;
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
@@ -90,14 +90,14 @@ namespace MiscBitsAndBobs
             {
                 Log.LogWarning($"Applying patches for {PluginName}");
                 Application.runInBackground = KeepGamingRunningInBackgroundConfig.Value;
-                Actions.PlayerSpawnedIn += Helpers.ActionsOnSpawnPlayer;
+                Actions.GameStartedPlaying += Helpers.ActionsOnSpawnPlayer;
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
                 Log.LogWarning($"Removing patches for {PluginName}");
                 Application.runInBackground = false;
-                Actions.PlayerSpawnedIn -= Helpers.ActionsOnSpawnPlayer;
+                Actions.GameStartedPlaying -= Helpers.ActionsOnSpawnPlayer;
                 _harmony.UnpatchSelf();
             }
         }

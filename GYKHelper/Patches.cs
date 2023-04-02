@@ -22,13 +22,7 @@ namespace GYKHelper
             }
         }
 
-        [HarmonyPrefix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnPressedSaveAndExit))]
-        public static void InGameMenuGUI_OnPressedSaveAndExit()
-        {
-            MainGame.game_started = false;
-        }
+    
 
         [HarmonyPrefix]
         [HarmonyPriority(1)]

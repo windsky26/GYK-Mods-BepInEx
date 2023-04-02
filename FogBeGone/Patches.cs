@@ -28,10 +28,10 @@ public static class Patches
         switch (__instance.type)
         {
             case SmartWeatherState.WeatherType.Fog:
-                __instance._previously_enabled = true;
-                __instance._enabled = false;
-                __instance._cur_amount = 0;
-                __instance.value = 0;
+                __instance._previously_enabled = false;
+                __instance._enabled = true;
+                // __instance._cur_amount = 0;
+                // __instance.value = 0;
                 break;
 
             case SmartWeatherState.WeatherType.Wind:
@@ -42,7 +42,10 @@ public static class Patches
                 break;
 
             case SmartWeatherState.WeatherType.Rain:
-                __instance._previously_enabled = false;
+                __instance._previously_enabled = true;
+                __instance._enabled = false;
+                __instance._cur_amount = 0;
+                __instance.value = 0;
                 break;
 
             case SmartWeatherState.WeatherType.LUT:

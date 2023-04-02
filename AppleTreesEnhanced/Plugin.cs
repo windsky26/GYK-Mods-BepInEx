@@ -45,7 +45,7 @@ public partial class Plugin : BaseUnityPlugin
         if (_modEnabled.Value)
         {
             Log.LogWarning($"Applying patches for {PluginName}");
-            Actions.PlayerSpawnedIn += CleanUpTrees;
+            Actions.GameStartedPlaying += CleanUpTrees;
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
     }
@@ -61,13 +61,13 @@ public partial class Plugin : BaseUnityPlugin
         if (ticked)
         {
             Log.LogWarning($"Applying patches for {PluginName}");
-            Actions.PlayerSpawnedIn += CleanUpTrees;
+            Actions.GameStartedPlaying += CleanUpTrees;
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
         else
         {
             Log.LogWarning($"Removing patches for {PluginName}");
-            Actions.PlayerSpawnedIn -= CleanUpTrees;
+            Actions.GameStartedPlaying -= CleanUpTrees;
             _harmony.UnpatchSelf();
         }
     }
@@ -82,10 +82,10 @@ public partial class Plugin : BaseUnityPlugin
         Log.LogError($"Plugin {PluginName} has been disabled!");
     }
 
-    private static void CleanUpTrees()
+    private static void CleanUpTrees(MainGame mainGame)
     {
         Plugin.Log.LogWarning($"Running CleanUpTrees as Player has spawned in.");
-        if (!MainGame.game_started || !MainGame.loaded_from_scene_main) return;
+        if (!MainGame.game_started) return;
 
         var dudBees = FindObjectsOfType<WorldGameObject>(true)
             .Where(a => a.obj_id == Helpers.Constants.HarvestGrowing.BeeHouse).Where(b => b.progress <= 0)

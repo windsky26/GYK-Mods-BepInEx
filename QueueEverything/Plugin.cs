@@ -59,6 +59,7 @@ namespace QueueEverything
             _harmony = new Harmony(PluginGuid);
             if (_modEnabled.Value)
             {
+                
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
@@ -73,11 +74,13 @@ namespace QueueEverything
 
             if (ticked)
             {
+                
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
+                
                 Log.LogWarning($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }

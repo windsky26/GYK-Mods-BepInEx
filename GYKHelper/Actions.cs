@@ -6,6 +6,7 @@ using Object = UnityEngine.Object;
 namespace GYKHelper;
 
 [HarmonyPatch]
+[HarmonyPriority(1)]
 public static class Actions
 {
     internal static readonly string[] SafeGerryTags =
@@ -27,8 +28,8 @@ public static class Actions
     };
 
     //public static Action GameStatusInGame;
-    public static Action PlayerSpawnedIn;
-    public static Action GameStatusInMenu;
+    //public static Action PlayerSpawnedIn;
+    public static Action ReturnToMenu;
     public static Action GameStatusUndefined;
     public static Action<MainGame> GameStartedPlaying;
 
@@ -36,19 +37,30 @@ public static class Actions
     public static Action<WorldGameObject> WorldGameObjectInteract;
 
     public static Action<WorldGameObject, WorldGameObject> WorldGameObjectInteractPrefix;
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerComponent), nameof(PlayerComponent.SpawnPlayer), typeof(bool), typeof(Item))]
-    public static void PlayerComponent_SpawnPlayer(bool is_local_player)
+    
+    [HarmonyPrefix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnPressedSaveAndExit))]
+    public static void InGameMenuGUI_OnPressedSaveAndExit()
     {
-        if (is_local_player)
-        {
-            Plugin.Log.LogWarning("Player spawned in. Invoking PlayerSpawnedIn Action for attached mods.");
-            PlayerSpawnedIn?.Invoke();
-        }
+        MainGame.game_started = false;
+        ReturnToMenu?.Invoke();
     }
+    
+    // [HarmonyPostfix]
+    // [HarmonyPriority(1)]
+    // [HarmonyPatch(typeof(PlayerComponent), nameof(PlayerComponent.SpawnPlayer), typeof(bool), typeof(Item))]
+    // public static void PlayerComponent_SpawnPlayer(bool is_local_player)
+    // {
+    //     if (is_local_player)
+    //     {
+    //         Plugin.Log.LogWarning("Player spawned in. Invoking PlayerSpawnedIn Action for attached mods.");
+    //         PlayerSpawnedIn?.Invoke();
+    //     }
+    // }
 
     [HarmonyPostfix]
+    [HarmonyPriority(1)]
     [HarmonyPatch(typeof(GameSave), nameof(GameSave.GlobalEventsCheck))]
     public static void GameSave_GlobalEventsCheck()
     {
@@ -77,6 +89,7 @@ public static class Actions
     // }
 
     [HarmonyPostfix]
+    [HarmonyPriority(1)]
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
     private static void GameBalance_LoadGameBalance_Postfix()
     {
@@ -85,6 +98,7 @@ public static class Actions
     }
 
     [HarmonyPostfix]
+    [HarmonyPriority(1)]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
     private static void WorldGameObject_Interact_Postfix(ref WorldGameObject __instance)
     {
@@ -93,6 +107,7 @@ public static class Actions
     }
 
     [HarmonyPrefix]
+    [HarmonyPriority(1)]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
     private static void WorldGameObject_Interact_Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
     {

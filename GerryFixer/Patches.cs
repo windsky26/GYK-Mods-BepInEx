@@ -9,7 +9,7 @@ namespace GerryFixer;
 [HarmonyPatch]
 public static class Patches
 {
-    internal static void FixGerry()
+    internal static void FixGerry(MainGame mainGame)
     {
         Plugin.Log.LogWarning($"Running FixGerry as Player has spawned in.");
         if (!MainGame.game_started) return;

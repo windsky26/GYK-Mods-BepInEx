@@ -37,7 +37,7 @@ namespace GerryFixer
             _harmony = new Harmony(PluginGuid);
             if (_modEnabled.Value)
             {
-                Actions.PlayerSpawnedIn += Patches.FixGerry;
+                Actions.GameStartedPlaying += Patches.FixGerry;
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
@@ -53,13 +53,13 @@ namespace GerryFixer
         
             if (ticked)
             {
-                Actions.PlayerSpawnedIn += Patches.FixGerry;
+                Actions.GameStartedPlaying += Patches.FixGerry;
                 Log.LogWarning($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());   
             }
             else
             {
-                Actions.PlayerSpawnedIn -= Patches.FixGerry;
+                Actions.GameStartedPlaying -= Patches.FixGerry;
                 Log.LogWarning($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf(); 
             }

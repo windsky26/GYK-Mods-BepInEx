@@ -200,7 +200,7 @@ public partial class Plugin
 
         private static void MakeCraftAuto(CraftDefinition craft)
         {
-            if (!MakeEverythingAuto.Value || IsUnsafeDefinition(craft) || ShouldExcludeCraftFromAuto(craft)) return;
+            if (craft.is_auto || !MakeEverythingAuto.Value || IsUnsafeDefinition(craft) || ShouldExcludeCraftFromAuto(craft)) return;
 
             var craftEnergyTime = craft.energy.EvaluateFloat(MainGame.me.player);
             craftEnergyTime *= 1.50f;
@@ -549,4 +549,11 @@ public partial class Plugin
             Tools.ShowMessage(CrossModFields.Lang.StartsWith("en") ? message : strings.Message, Vector3.zero, sayAsPlayer: true);
         }
     }
+
+    // private static void OnReturnToMenu()
+    // {
+    //     WriteLog($"Resetting variables.");
+    //     _alreadyRun = false;
+    //     _ccAlreadyRun = false;
+    // }
 }
