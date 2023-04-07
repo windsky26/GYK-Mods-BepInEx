@@ -90,7 +90,8 @@ namespace TreesNoMore
             Log.LogWarning($"Removed {count} duplicate trees");
             var jsonString = JsonConvert.SerializeObject(Trees, new JsonSerializerSettings
             {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented
             });
 
             File.WriteAllText(_filePath, jsonString);
