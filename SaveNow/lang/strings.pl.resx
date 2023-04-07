@@ -139,7 +139,4 @@
   <data name="CantSaveHere" xml:space="preserve">
     <value>Nie mogę tu zapisać, szefie!</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Konfiguracja została ponownie załadowana!</value>
-  </data>
 </root>

@@ -64,7 +64,7 @@ public partial class Plugin
     private static void TeleportItem(BaseCharacterComponent __instance, Item item)
     {
         var pwo = MainGame.me.player;
-        var needEnergy = _disableImmersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
+        var needEnergy = !_immersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
 
         if (pwo.energy >= needEnergy)
         {
@@ -111,7 +111,7 @@ public partial class Plugin
     private static bool TryPutToInventoryAndNull(BaseCharacterComponent __instance, WorldGameObject wgo, List<Item> itemsToInsert)
     {
         var pwo = MainGame.me.player;
-        var needEnergy = _disableImmersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
+        var needEnergy = !_immersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
 
         if (pwo.energy >= needEnergy)
         {

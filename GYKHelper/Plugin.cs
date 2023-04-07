@@ -3,6 +3,7 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using FlowCanvas.Nodes;
 using HarmonyLib;
 using UnityEngine;
 
@@ -28,7 +29,7 @@ namespace GYKHelper
 
         private void InitializeDisableUnityLogging()
         {
-            DisableUnityLogging = Config.Bind("General", "Unity Logging", false, new ConfigDescription("Toggle Unity Logging", null, new ConfigurationManagerAttributes {Order = 1}));
+            DisableUnityLogging = Config.Bind("General", "Unity Logging", false, new ConfigDescription("Toggle Unity Logging", null, new ConfigurationManagerAttributes {IsAdvanced = true,Order = 1}));
             DisableUnityLogging.SettingChanged += (_, _) => Debug.unityLogger.logEnabled = DisableUnityLogging.Value;
             Debug.unityLogger.logEnabled = DisableUnityLogging.Value;
         }

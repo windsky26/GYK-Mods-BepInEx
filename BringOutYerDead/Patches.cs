@@ -16,6 +16,7 @@ public static class Patches
     private static bool _strikeDone;
     internal static LogicData Ld;
 
+    //TODO: Create an Action for this
     [HarmonyPrefix]
     [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.OnEndOfDay))]
     public static void EnvironmentEngine_OnEndOfDay(ref EnvironmentEngine __instance)

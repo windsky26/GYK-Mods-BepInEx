@@ -23,9 +23,9 @@ namespace IBuildWhereIWant
         private static Harmony _harmony;
 
         private static ConfigEntry<bool> _modEnabled;
-        private static ConfigEntry<bool> _disableGrid;
-        private static ConfigEntry<bool> _disableGreyRemoveOverlay;
-        private static ConfigEntry<bool> _disableBuildingCollision;
+        private static ConfigEntry<bool> _grid;
+        private static ConfigEntry<bool> _greyOverlay;
+        private static ConfigEntry<bool> _buildingCollision;
         private static ConfigEntry<bool> _debug;
         private static ConfigEntry<KeyboardShortcut> _menuKeyBind;
         private static ConfigEntry<string> _menuControllerButton;
@@ -43,15 +43,15 @@ namespace IBuildWhereIWant
             _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 605}));
             _modEnabled.SettingChanged += ApplyPatches;
 
-            _disableBuildingCollision = Config.Bind("2. Collision", "Building Collision", true, new ConfigDescription("Toggle collision between buildings to place them closer together (or on top of each other...)", null, new ConfigurationManagerAttributes {Order = 604}));
+            _buildingCollision = Config.Bind("2. Collision", "Building Collision", true, new ConfigDescription("Toggle collision between buildings to place them closer together (or on top of each other...)", null, new ConfigurationManagerAttributes {Order = 604}));
 
-            _disableGrid = Config.Bind("3. Display", "Grid", false, new ConfigDescription("Toggle the grid overlay from the building interface for a cleaner look.", null, new ConfigurationManagerAttributes {Order = 603}));
+            _grid = Config.Bind("3. Display", "Grid", false, new ConfigDescription("Toggle the grid overlay from the building interface for a cleaner look.", null, new ConfigurationManagerAttributes {Order = 603}));
 
-            _disableGreyRemoveOverlay = Config.Bind("3. Display", "Grey Overlay", false, new ConfigDescription("Toggle the grey overlay that appears when removing objects in the building interface.", null, new ConfigurationManagerAttributes {Order = 602}));
+            _greyOverlay = Config.Bind("3. Display", "Grey Overlay", false, new ConfigDescription("Toggle the grey overlay that appears when removing objects in the building interface.", null, new ConfigurationManagerAttributes {Order = 602}));
 
             _menuKeyBind = Config.Bind("4. Keybinds", "Menu Key Bind", new KeyboardShortcut(KeyCode.Q), new ConfigDescription("Define the key used to open the mod menu.", null, new ConfigurationManagerAttributes {Order = 601}));
 
-            _menuControllerButton = Config.Bind("5. Controller", "Menu Controller Button", Enum.GetName(typeof(GamePadButton), GamePadButton.RB), new ConfigDescription("Select the controller button used to open the mod menu.", new AcceptableValueList<string>(Enum.GetNames(typeof(GamePadButton))), new ConfigurationManagerAttributes {Order = 600}));
+            _menuControllerButton = Config.Bind("5. Controller", "Menu Controller Button", Enum.GetName(typeof(GamePadButton), GamePadButton.LB), new ConfigDescription("Select the controller button used to open the mod menu.", new AcceptableValueList<string>(Enum.GetNames(typeof(GamePadButton))), new ConfigurationManagerAttributes {Order = 600}));
 
             _debug = Config.Bind("6. Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging for troubleshooting purposes.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 599}));
         }

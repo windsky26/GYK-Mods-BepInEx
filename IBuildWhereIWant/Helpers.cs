@@ -49,7 +49,7 @@ public partial class Plugin
         WriteLog(
             _buildDesk != null
                 ? $"Found Build Desk: {_buildDesk}, Zone: {_buildDesk.GetMyWorldZone()}"
-                : "Unable to locate a build desk.",true);
+                : "Unable to locate a build desk.", _buildDesk == null);
 
         if (_buildDeskClone != null)
         {

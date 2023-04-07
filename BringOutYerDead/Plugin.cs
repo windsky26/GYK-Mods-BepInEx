@@ -26,7 +26,7 @@ namespace BringOutYerDead
         private static ConfigEntry<bool> _dayDelivery;
         private static ConfigEntry<bool> _nightDelivery;
         private static ConfigEntry<bool> _eveningDelivery;
-        internal static ConfigEntry<float> DonkeySpeed;
+        internal static ConfigEntry<int> DonkeySpeed;
 
         internal static ConfigEntry<bool> InternalMorningDelivery;
         internal static ConfigEntry<bool> InternalDayDelivery;
@@ -55,7 +55,7 @@ namespace BringOutYerDead
             _nightDelivery = Config.Bind("2. Delivery Times", "Night Delivery", false, new ConfigDescription("Enable deliveries during the nighttime hours", null, new ConfigurationManagerAttributes {Order = 4}));
             _eveningDelivery = Config.Bind("2. Delivery Times", "Evening Delivery", true, new ConfigDescription("Enable deliveries during the evening hours", null, new ConfigurationManagerAttributes {Order = 3}));
 
-            DonkeySpeed = Config.Bind("3. Donkey Settings", "Donkey Speed", 2f, new ConfigDescription("Adjust the donkey's speed for deliveries (minimum value is 2)", new AcceptableValueRange<float>(2f, 20f), new ConfigurationManagerAttributes {Order = 2}));
+            DonkeySpeed = Config.Bind("3. Donkey Settings", "Donkey Speed", 2, new ConfigDescription("Adjust the donkey's speed for deliveries (minimum value is 2)", new AcceptableValueRange<int>(2, 20), new ConfigurationManagerAttributes {Order = 2}));
             Debug = Config.Bind("4. Advanced", "Debug Logging", false, new ConfigDescription("Enable detailed logging for debugging purposes", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 1}));
         }
 

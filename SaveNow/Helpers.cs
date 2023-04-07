@@ -115,7 +115,7 @@ public partial class Plugin
         WriteSavesToFile();
 
         if (menuExit) return true;
-        if (!_turnOffSaveGameNotificationText.Value)
+        if (_saveGameNotificationText.Value)
         {
             if (!saveFile.Equals(string.Empty))
             {
@@ -150,7 +150,7 @@ public partial class Plugin
             SaveLocationsDictionary.TryGetValue(mainGame.save_slot.filename_no_extension, out var posVector3);
         var pos = foundLocation ? posVector3 : homeVector;
         mainGame.player.PlaceAtPos(pos);
-        if (!_turnOffTravelMessages.Value) Tools.ShowMessage(strings.Rush, Vector3.zero);
+        if (_travelMessages.Value) Tools.ShowMessage(strings.Rush, pos);
 
         StartTimer();
     }

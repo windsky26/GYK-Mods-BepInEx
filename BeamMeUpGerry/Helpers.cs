@@ -218,7 +218,7 @@ public static class Helpers
 
     private static void TakeMoney(Vector3 vector)
     {
-        if (Plugin.DisableCost.Value) return;
+        if (!Plugin.Cost.Value) return;
         vector.y += 125f;
         var feeToPay = GenerateFee();
         MainGame.me.player.data.money -= feeToPay;
@@ -299,9 +299,9 @@ public static class Helpers
                         CameraFader.current.FadeIn(0.15f);
                         GJTimer.AddTimer(0.20f, delegate
                         {
-                            if (!Plugin.DisableGerry.Value)
+                            if (Plugin.Gerry.Value)
                             {
-                                SpawnGerry("", Vector3.zero, !Plugin.DisableCost.Value);
+                                SpawnGerry("", Vector3.zero, Plugin.Cost.Value);
                             }
                             else
                             {
@@ -317,9 +317,9 @@ public static class Helpers
                 MainGame.me.player.PlaceAtPos(vector);
                 MainGame.me.player.components.character.control_enabled = true;
 
-                if (!Plugin.DisableGerry.Value)
+                if (Plugin.Gerry.Value)
                 {
-                    SpawnGerry("", Vector3.zero, !Plugin.DisableCost.Value);
+                    SpawnGerry("", Vector3.zero, Plugin.Cost.Value);
                 }
                 else
                 {

@@ -14,24 +14,27 @@ public partial class Plugin
     [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ShowBuildGrid))]
     public static void BuildGrid_ShowBuildGrid(ref bool show)
     {
+        if(_grid.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-        show = _disableGrid.Value;
+        show = false;
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ClearPreviousTotemRadius))]
     public static void BuildGrid_ClearPreviousTotemRadius(ref bool apply_colors)
     {
+        if(_grid.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-        apply_colors = _disableGrid.Value;
+        apply_colors = false;
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.EnterRemoveMode))]
     public static void BuildModeLogics_EnterRemoveMode(ref BuildModeLogics __instance)
     {
+        if (_greyOverlay.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-        __instance._remove_grey_spr.SetActive(_disableGreyRemoveOverlay.Value);
+        __instance._remove_grey_spr.SetActive(false);
     }
 
     [HarmonyPrefix]
@@ -102,9 +105,10 @@ public partial class Plugin
     [HarmonyPatch(typeof(FloatingWorldGameObject), nameof(FloatingWorldGameObject.RecalculateAvailability))]
     public static void FloatingWorldGameObject_RecalculateAvailability()
     {
+        if (_buildingCollision.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-
-        FloatingWorldGameObject.can_be_built = _disableBuildingCollision.Value;
+    
+        FloatingWorldGameObject.can_be_built = true;
     }
 
     [HarmonyPostfix]

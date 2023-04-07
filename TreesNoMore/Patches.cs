@@ -1,39 +1,86 @@
 ﻿using System;
+using System.Linq;
 using HarmonyLib;
+using UnityEngine;
 
 namespace TreesNoMore;
 
 [HarmonyPatch]
 public static class Patches
 {
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.InitNewObject))]
-    private static void WorldGameObject_InitNewObject(ref WorldGameObject __instance)
+    internal static void DestroyTress(MainGame mainGame)
     {
-        if (__instance == null) return;
-        if (__instance.obj_id.Contains("stump"))
+        var sw = new System.Diagnostics.Stopwatch();
+        sw.Start();
+        foreach (var tree in WorldMap.objs.Where(o => o.name.Contains("tree") && !o.name.Contains("bees") && !o.name.Contains("apple")))
         {
-            UnityEngine.Object.Destroy(__instance.gameObject);
+            var treeExists = Plugin.Trees.Any(x => Vector3.Distance(x.location, tree.pos3) <= Plugin.TreeSearchDistance.Value);
+            if (treeExists)
+            {
+                Plugin.Log.LogWarning($"Found existing tree at {tree.pos3} that should be removed.");
+                UnityEngine.Object.DestroyImmediate(tree.gameObject);
+            }
         }
-    }
 
-    [HarmonyFinalizer]
-    [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.InitNewObject))]
-    public static Exception WorldGameObject_InitNewObject_Finalizer()
-    {
-        return null;
+        sw.Stop();
+        Plugin.Log.LogWarning($"Search N Destroyed {Plugin.Trees.Count} trees in {sw.ElapsedMilliseconds}ms");
+        WorldMap.RescanWGOsList();
     }
-
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.SmartInstantiate))]
-    public static void WorldGameObject_SmartInstantiate(ref WorldObjectPart prefab)
+    public static void WorldGameObject_SmartInstantiate(ref WorldGameObject __instance, ref WorldObjectPart prefab)
     {
         if (prefab == null) return;
-        if ((!MainGame.game_started && !MainGame.game_starting) || !prefab.name.Contains("tree") || prefab.name.Contains("bees")) return;
-        if (prefab.name.Contains("apple")) return;
-        prefab = null;
+
+        var prefabName = prefab.name;
+        var instancePos = __instance.pos3;
+
+        if (prefabName.Contains("stump"))
+        {
+            HandleStump(__instance, instancePos, ref prefab);
+        }
+        else if (IsValidTree(prefabName))
+        {
+            HandleTree(__instance, instancePos, ref prefab);
+        }
     }
+
+    private static void HandleStump(WorldGameObject instance, Vector3 instancePos, ref WorldObjectPart prefab)
+    {
+        Plugin.Log.LogWarning($"Stump spawn at {instancePos}");
+
+        var tree = new Tree(instance.obj_id, instancePos);
+        Plugin.Trees.Add(tree);
+        Plugin.SaveTrees();
+
+        if (Plugin.InstantStumpRemoval.Value)
+        {
+            prefab = null;
+        }
+
+        Plugin.Log.LogWarning($"Tree at {instancePos} added to list");
+    }
+
+    private static bool IsValidTree(string prefabName)
+    {
+        return prefabName.Contains("tree") && !prefabName.Contains("bees") && !prefabName.Contains("apple");
+    }
+
+    private static void HandleTree(WorldGameObject instance, Vector3 instancePos, ref WorldObjectPart prefab)
+    {
+        var treeExists = Plugin.Trees.Any(tree => Vector3.Distance(tree.location, instancePos) <= Plugin.TreeSearchDistance.Value);
+
+        if (!treeExists && MainGame.game_started)
+        {
+            Plugin.Log.LogWarning($"Tree at {instancePos} added to list");
+            var tree = new Tree(instance.obj_id, instancePos);
+            Plugin.Trees.Add(tree);
+            Plugin.SaveTrees();
+            prefab = null;
+        }
+    }
+
 
     [HarmonyFinalizer]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.SmartInstantiate))]

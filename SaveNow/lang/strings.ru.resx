@@ -139,7 +139,4 @@
   <data name="CantSaveHere" xml:space="preserve">
     <value>Здесь нельзя сохраниться, босс!</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Настройки перезагружены!</value>
-  </data>
 </root>

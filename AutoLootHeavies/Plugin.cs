@@ -31,7 +31,7 @@ namespace AutoLootHeavies
         private static ConfigEntry<Vector3> _designatedTimberLocation;
         private static ConfigEntry<Vector3> _designatedOreLocation;
         private static ConfigEntry<Vector3> _designatedStoneLocation;
-        private static ConfigEntry<bool> _disableImmersionMode;
+        private static ConfigEntry<bool> _immersionMode;
         private static ConfigEntry<bool> _debug;
         private static ConfigEntry<KeyboardShortcut> _setTimberLocationKeybind;
         private static ConfigEntry<KeyboardShortcut> _setOreLocationKeybind;
@@ -55,7 +55,7 @@ namespace AutoLootHeavies
             _modEnabled.SettingChanged += ApplyPatches;
 
             _teleportToDumpSiteWhenAllStockPilesFull = Config.Bind("2. Features", "Teleport To Dump Site When Full", true, new ConfigDescription("Teleport resources to a designated dump site when all stockpiles are full", null, new ConfigurationManagerAttributes {Order = 9}));
-            _disableImmersionMode = Config.Bind("2. Features", "Immersive Mode", true, new ConfigDescription("Disable immersive mode to remove energy requirements for teleportation", null, new ConfigurationManagerAttributes {Order = 8}));
+            _immersionMode = Config.Bind("2. Features", "Immersive Mode", true, new ConfigDescription("Disable immersive mode to remove energy requirements for teleportation", null, new ConfigurationManagerAttributes {Order = 8}));
 
             _designatedTimberLocation = Config.Bind("3. Locations", "Designated Timber Location", new Vector3(-3712.003f, 6144f, 1294.643f), new ConfigDescription("Set the designated location for dumping excess timber", null, new ConfigurationManagerAttributes {Order = 7}));
             _designatedOreLocation = Config.Bind("3. Locations", "Designated Ore Location", new Vector3(-3712.003f, 6144f, 1294.643f), new ConfigDescription("Set the designated location for dumping excess ore", null, new ConfigurationManagerAttributes {Order = 6}));

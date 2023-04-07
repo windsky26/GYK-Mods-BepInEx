@@ -28,8 +28,8 @@ namespace BeamMeUpGerry
         internal static ConfigEntry<bool> IncreaseMenuAnimationSpeed;
         internal static ConfigEntry<bool> FadeForCustomLocations;
         internal static ConfigEntry<bool> EnableListExpansion;
-        internal static ConfigEntry<bool> DisableGerry;
-        internal static ConfigEntry<bool> DisableCost;
+        internal static ConfigEntry<bool> Gerry;
+        internal static ConfigEntry<bool> Cost;
         private static ConfigEntry<KeyboardShortcut> _teleportMenuKeyBind;
         private static ConfigEntry<string> _teleportMenuControllerButton;
 
@@ -49,8 +49,8 @@ namespace BeamMeUpGerry
             IncreaseMenuAnimationSpeed = Config.Bind("2. Features", "Increase Menu Animation Speed", true, new ConfigDescription("Toggle increased menu animation speed", null, new ConfigurationManagerAttributes {Order = 801}));
             FadeForCustomLocations = Config.Bind("2. Features", "Fade For Custom Locations", true, new ConfigDescription("Toggle fade effect for custom locations", null, new ConfigurationManagerAttributes {Order = 800}));
             EnableListExpansion = Config.Bind("2. Features", "Enable List Expansion", true, new ConfigDescription("Toggle list expansion functionality", null, new ConfigurationManagerAttributes {Order = 799}));
-            DisableGerry = Config.Bind("2. Features", "Gerry", false, new ConfigDescription("Toggle Gerry's presence", null, new ConfigurationManagerAttributes {Order = 798}));
-            DisableCost = Config.Bind("2. Features", "Gerrys Fee", false, new ConfigDescription("Toggle the cost of teleporting", null, new ConfigurationManagerAttributes {Order = 797}));
+            Gerry = Config.Bind("2. Features", "Gerry", false, new ConfigDescription("Toggle Gerry's presence", null, new ConfigurationManagerAttributes {Order = 798}));
+            Cost = Config.Bind("2. Features", "Gerrys Fee", false, new ConfigDescription("Toggle the cost of teleporting", null, new ConfigurationManagerAttributes {Order = 797}));
 
             _teleportMenuKeyBind = Config.Bind("3. Keybinds", "Teleport Menu Keybind", new KeyboardShortcut(KeyCode.Z), new ConfigDescription("Set the keybind for opening the teleport menu", null, new ConfigurationManagerAttributes {Order = 796}));
             _teleportMenuControllerButton = Config.Bind("4. Controller", "Teleport Menu Controller Button", Enum.GetName(typeof(GamePadButton), GamePadButton.RB), new ConfigDescription("Set the controller button for opening the teleport menu", new AcceptableValueList<string>(Enum.GetNames(typeof(GamePadButton))), new ConfigurationManagerAttributes {Order = 795}));
@@ -113,7 +113,7 @@ namespace BeamMeUpGerry
             }
         }
 
-        private void CloseMaGui()
+        private static void CloseMaGui()
         {
             if (Patches.MaGui != null)
             {

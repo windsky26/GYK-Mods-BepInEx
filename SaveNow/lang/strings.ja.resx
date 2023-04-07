@@ -139,7 +139,4 @@
   <data name="CantSaveHere" xml:space="preserve">
     <value>ここでは保存できません、ボス！</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>設定がリロードされました!</value>
-  </data>
 </root>

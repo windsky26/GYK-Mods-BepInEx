@@ -27,8 +27,8 @@ namespace SaveNow
         private static ConfigEntry<bool> _newFileOnAutoSave;
         private static ConfigEntry<bool> _newFileOnManualSave;
         private static ConfigEntry<bool> _backupSavesOnSave;
-        private static ConfigEntry<bool> _turnOffTravelMessages;
-        private static ConfigEntry<bool> _turnOffSaveGameNotificationText;
+        private static ConfigEntry<bool> _travelMessages;
+        private static ConfigEntry<bool> _saveGameNotificationText;
         private static ConfigEntry<bool> _exitToDesktop;
         private static ConfigEntry<bool> _disableSaveOnExit;
         private static ConfigEntry<int> _maximumSavesVisible;
@@ -65,9 +65,9 @@ namespace SaveNow
 
             _backupSavesOnSave = Config.Bind("2. Saving", "Backup Saves On Save", true, new ConfigDescription("Backup saves when saving the game.", null, new ConfigurationManagerAttributes {Order = 14}));
 
-            _turnOffTravelMessages = Config.Bind("3. Notifications", "Travel Messages", false, new ConfigDescription("Toggle travel messages.", null, new ConfigurationManagerAttributes {Order = 13}));
+            _travelMessages = Config.Bind("3. Notifications", "Travel Messages", false, new ConfigDescription("Toggle travel messages.", null, new ConfigurationManagerAttributes {Order = 13}));
 
-            _turnOffSaveGameNotificationText = Config.Bind("3. Notifications", "Turn Off Save Game Notification Text", false, new ConfigDescription("Disable save game notification text.", null, new ConfigurationManagerAttributes {Order = 12}));
+            _saveGameNotificationText = Config.Bind("3. Notifications", "Save Game Notification Text", false, new ConfigDescription("Disable save game notification text.", null, new ConfigurationManagerAttributes {Order = 12}));
 
             _exitToDesktop = Config.Bind("4. Exiting", "Exit To Desktop", false, new ConfigDescription("Enable or disable exit to desktop.", null, new ConfigurationManagerAttributes {Order = 11}));
 

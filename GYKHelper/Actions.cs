@@ -45,8 +45,24 @@ public static class Actions
     public static void InGameMenuGUI_OnPressedSaveAndExit()
     {
         MainGame.game_started = false;
-        ReturnToMenu?.Invoke();
+
+        if (ReturnToMenu?.GetInvocationList().Length > 0)
+        {
+            var delegates = ReturnToMenu.GetInvocationList();
+            Plugin.Log.LogInfo($"Player returning to main menu. Invoking ReturnToMenu Action for {delegates.Length} attached mods.");
+            foreach (var del in delegates)
+            {
+                Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
+            }
+
+            ReturnToMenu.Invoke();
+        }
+        else
+        {
+            Plugin.Log.LogInfo("Player returning to main menu. No mods attached to ReturnToMenu Action.");
+        }
     }
+
 
     // [HarmonyPostfix]
     // [HarmonyPriority(1)]
@@ -65,80 +81,65 @@ public static class Actions
     [HarmonyPatch(typeof(GameSave), nameof(GameSave.GlobalEventsCheck))]
     public static void GameSave_GlobalEventsCheck()
     {
-        Plugin.Log.LogInfo("Final load task complete. Game starting. Invoking GameStartedPlaying Action for attached mods.");
-        GameStartedPlaying?.Invoke(MainGame.me);
+        if (GameStartedPlaying?.GetInvocationList().Length > 0)
+        {
+            var delegates = GameStartedPlaying.GetInvocationList();
+            Plugin.Log.LogInfo($"Final load task complete. Game starting. Invoking GameStartedPlaying Action for {delegates.Length} attached mods.");
+            foreach (var del in delegates)
+            {
+                Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
+            }
+
+            GameStartedPlaying.Invoke(MainGame.me);
+        }
+        else
+        {
+            Plugin.Log.LogInfo("Final load task complete. Game starting. No mods attached to GameStartedPlaying Action.");
+        }
     }
-
-    // [HarmonyPostfix]
-    // [HarmonyPatch(typeof(PlatformSpecific), nameof(PlatformSpecific.SetGameStatus), typeof(GameEvents.GameStatus))]
-    // public static void PlatformSpecific_SetGameStatus(GameEvents.GameStatus status)
-    // {
-    //     switch (status)
-    //     {
-    //         case GameEvents.GameStatus.InMenu:
-    //             GameStatusInMenu?.Invoke();
-    //             break;
-    //         case GameEvents.GameStatus.InGame:
-    //             GameStatusInGame?.Invoke();
-    //             break;
-    //         case GameEvents.GameStatus.Undefined:
-    //             GameStatusUndefined?.Invoke();
-    //             break;
-    //         default:
-    //             throw new ArgumentOutOfRangeException(nameof(status), status, null);
-    //     }
-    // }
-
-    // private static ObjectDefinition[] _objsDataBackup;
-    // private static CraftDefinition[] _craftDataBackup;
-    // private static ItemDefinition[] _itemDataBackup;
-    // private static bool _backupAlreadyDone;
 
     [HarmonyPostfix]
     [HarmonyPriority(1)]
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
     private static void GameBalance_LoadGameBalance_Postfix()
     {
-        Plugin.Log.LogInfo("Game balance loaded. Invoking GameBalanceLoad Action for attached mods.");
-        // if (!_backupAlreadyDone)
-        // {
-        //     var sw = new System.Diagnostics.Stopwatch();
-        //     sw.Start();
-        //     var objsData = GameBalance.me.objs_data;
-        //     _objsDataBackup = new ObjectDefinition[objsData.Capacity];
-        //     Array.Copy(objsData.ToArray(), 0, _objsDataBackup, 0, objsData.Count);
-        //
-        //     var craftData = GameBalance.me.craft_data;
-        //     _craftDataBackup = new CraftDefinition[craftData.Capacity];
-        //     Array.Copy(craftData.ToArray(), 0, _craftDataBackup, 0, craftData.Count);
-        //
-        //     var itemData = GameBalance.me.items_data;
-        //     _itemDataBackup = new ItemDefinition[itemData.Capacity];
-        //     Array.Copy(itemData.ToArray(), 0, _itemDataBackup, 0, itemData.Count);
-        //     sw.Stop();
-        //     Plugin.Log.LogInfo($"Backup of game balance data took {sw.ElapsedMilliseconds}ms");
-        //     _backupAlreadyDone = true;
-        // }
+        if (GameBalanceLoad?.GetInvocationList().Length > 0)
+        {
+            var delegates = GameBalanceLoad.GetInvocationList();
+            Plugin.Log.LogInfo($"Game balance loaded. Invoking GameBalanceLoad Action for {delegates.Length} attached mods.");
+            foreach (var del in delegates)
+            {
+                Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
+            }
 
-        GameBalanceLoad?.Invoke(GameBalance.me);
+            GameBalanceLoad.Invoke(GameBalance.me);
+        }
+        else
+        {
+            Plugin.Log.LogInfo("Game balance loaded. No mods attached to GameStartedPlaying Action.");
+        }
     }
-
-    //
-    // public static void RestoreGameBalance()
-    // {
-    //     //restore the untouched backup
-    //     GameBalance.me.objs_data = _objsDataBackup.ToList();
-    //     GameBalance.me.craft_data = _craftDataBackup.ToList();
-    //     GameBalance.me.items_data = _itemDataBackup.ToList();
-    // }
 
     [HarmonyPostfix]
     [HarmonyPriority(1)]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
     private static void WorldGameObject_Interact_Postfix(ref WorldGameObject __instance)
     {
-        Plugin.Log.LogInfo("WGO interacted with (postfix). Invoking WorldGameObjectInteract Action for attached mods.");
-        WorldGameObjectInteract?.Invoke(__instance);
+        if (WorldGameObjectInteract?.GetInvocationList().Length > 0)
+        {
+            var delegates = WorldGameObjectInteract.GetInvocationList();
+            Plugin.Log.LogInfo($"WGO interacted with (postfix). Invoking WorldGameObjectInteract Action for {delegates.Length} attached mods.");
+            foreach (var del in delegates)
+            {
+                Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
+            }
+
+            WorldGameObjectInteract.Invoke(__instance);
+        }
+        else
+        {
+            Plugin.Log.LogInfo("WGO interacted with (postfix). No mods attached to WorldGameObjectInteract Action.");
+        }
     }
 
     [HarmonyPrefix]
@@ -146,8 +147,21 @@ public static class Actions
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
     private static void WorldGameObject_Interact_Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
     {
-        Plugin.Log.LogInfo("WGO interacted with (prefix). Invoking WorldGameObjectInteractPrefix Action for attached mods.");
-        WorldGameObjectInteractPrefix?.Invoke(__instance, other_obj);
+        if (WorldGameObjectInteractPrefix?.GetInvocationList().Length > 0)
+        {
+            var delegates = WorldGameObjectInteractPrefix.GetInvocationList();
+            Plugin.Log.LogInfo($"WGO interacted with (prefix). Invoking WorldGameObjectInteractPrefix Action for {delegates.Length} attached mods.");
+            foreach (var del in delegates)
+            {
+                Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
+            }
+
+            WorldGameObjectInteractPrefix.Invoke(__instance, other_obj);
+        }
+        else
+        {
+            Plugin.Log.LogInfo("WGO interacted with (prefix). No mods attached to WorldGameObjectInteractPrefix Action.");
+        }
     }
 
     public static void WorldGameObject_Interact(WorldGameObject instance, WorldGameObject other_obj)

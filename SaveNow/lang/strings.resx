@@ -160,7 +160,4 @@
   <data name="CantSaveHere" xml:space="preserve">
     <value>Can't save here, boss!</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Config Reloaded!</value>
-  </data>
 </root>
