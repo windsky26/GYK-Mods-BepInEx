@@ -20,7 +20,7 @@ public static class Patches
         if (!Plugin.IncreaseBuildAndDestroySpeed.Value) return;
         Helpers.Log($"[BuildModeHelpers.Logics.ProcessRemovingCraft]: WGO: {wgo.obj_id}");
 
-        delta_time *= 4f;
+        delta_time *= Plugin.BuildAndDestroySpeed.Value;
     }
 
     [HarmonyPrefix]
@@ -30,7 +30,7 @@ public static class Patches
         if (!Plugin.IncreaseBuildAndDestroySpeed.Value) return;
 
         Helpers.Log($"[WorldGameObject.DoAction]: WGO: {other_obj.obj_id}");
-        delta_time *= 4;
+        delta_time *= Plugin.BuildAndDestroySpeed.Value;
     }
 
 

@@ -20,6 +20,7 @@ namespace FasterCraftReloaded
         private static ConfigEntry<bool> _modEnabled;
         internal static ConfigEntry<bool> Debug;
         internal static ConfigEntry<bool> IncreaseBuildAndDestroySpeed;
+        internal static ConfigEntry<float> BuildAndDestroySpeed;
         internal static ConfigEntry<float> CraftSpeedMultiplier;
         internal static ConfigEntry<bool> ModifyPlayerGardenSpeed;
         internal static ConfigEntry<float> PlayerGardenSpeedMultiplier;
@@ -51,14 +52,15 @@ namespace FasterCraftReloaded
 
         private void InitConfiguration()
         {
-            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 501}));
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 502}));
             _modEnabled.SettingChanged += ApplyPatches;
 
-            Debug = Config.Bind("2. Advanced", "Debug Logging", false, new ConfigDescription("Toggle debug logging on or off.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 500}));
+            Debug = Config.Bind("2. Advanced", "Debug Logging", false, new ConfigDescription("Toggle debug logging on or off.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 501}));
 
-            CraftSpeedMultiplier = Config.Bind("3. Speed Settings", "Craft Speed Multiplier", 2f, new ConfigDescription("Set the multiplier for crafting speed.", new AcceptableValueRange<float>(1f, 50f), new ConfigurationManagerAttributes {Order = 499}));
-            IncreaseBuildAndDestroySpeed = Config.Bind("3. Speed Settings", "Increase Build And Destroy Speed", true, new ConfigDescription("Toggle faster building and destruction speed.", null, new ConfigurationManagerAttributes {Order = 498}));
-           
+            CraftSpeedMultiplier = Config.Bind("3. Speed Settings", "Craft Speed Multiplier", 2f, new ConfigDescription("Set the multiplier for crafting speed.", new AcceptableValueRange<float>(1f, 50f), new ConfigurationManagerAttributes {Order = 500}));
+            IncreaseBuildAndDestroySpeed = Config.Bind("3. Speed Settings", "Increase Build And Destroy Speed", true, new ConfigDescription("Toggle faster building and destruction speed.", null, new ConfigurationManagerAttributes {Order = 499}));
+            BuildAndDestroySpeed = Config.Bind("3. Speed Settings", "Build And Destroy Speed", 4f, new ConfigDescription("Set the multiplier for building and destruction speed.", new AcceptableValueRange<float>(2f, 10f), new ConfigurationManagerAttributes {Order = 498}));
+            
             ModifyCompostSpeed = Config.Bind("4. Composting Settings", "Modify Compost Speed", false, new ConfigDescription("Toggle composting speed modification on or off.", null, new ConfigurationManagerAttributes {Order = 497}));
             CompostSpeedMultiplier = Config.Bind("4. Composting Settings", "Compost Speed Multiplier", 2f, new ConfigDescription("Set the multiplier for composting speed.", new AcceptableValueRange<float>(1f, 50f), new ConfigurationManagerAttributes {Order = 496}));
             
