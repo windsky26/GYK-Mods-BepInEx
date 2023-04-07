@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Object = UnityEngine.Object;
@@ -37,7 +38,7 @@ public static class Actions
     public static Action<WorldGameObject> WorldGameObjectInteract;
 
     public static Action<WorldGameObject, WorldGameObject> WorldGameObjectInteractPrefix;
-    
+
     [HarmonyPrefix]
     [HarmonyPriority(1)]
     [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnPressedSaveAndExit))]
@@ -46,7 +47,7 @@ public static class Actions
         MainGame.game_started = false;
         ReturnToMenu?.Invoke();
     }
-    
+
     // [HarmonyPostfix]
     // [HarmonyPriority(1)]
     // [HarmonyPatch(typeof(PlayerComponent), nameof(PlayerComponent.SpawnPlayer), typeof(bool), typeof(Item))]
@@ -54,7 +55,7 @@ public static class Actions
     // {
     //     if (is_local_player)
     //     {
-    //         Plugin.Log.LogWarning("Player spawned in. Invoking PlayerSpawnedIn Action for attached mods.");
+    //         Plugin.Log.LogInfo("Player spawned in. Invoking PlayerSpawnedIn Action for attached mods.");
     //         PlayerSpawnedIn?.Invoke();
     //     }
     // }
@@ -64,7 +65,7 @@ public static class Actions
     [HarmonyPatch(typeof(GameSave), nameof(GameSave.GlobalEventsCheck))]
     public static void GameSave_GlobalEventsCheck()
     {
-        Plugin.Log.LogWarning("Final load task complete. Game starting. Invoking GameStartedPlaying Action for attached mods.");
+        Plugin.Log.LogInfo("Final load task complete. Game starting. Invoking GameStartedPlaying Action for attached mods.");
         GameStartedPlaying?.Invoke(MainGame.me);
     }
 
@@ -88,21 +89,55 @@ public static class Actions
     //     }
     // }
 
+    // private static ObjectDefinition[] _objsDataBackup;
+    // private static CraftDefinition[] _craftDataBackup;
+    // private static ItemDefinition[] _itemDataBackup;
+    // private static bool _backupAlreadyDone;
+
     [HarmonyPostfix]
     [HarmonyPriority(1)]
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
     private static void GameBalance_LoadGameBalance_Postfix()
     {
-        Plugin.Log.LogWarning("Game balance loaded. Invoking GameBalanceLoad Action for attached mods.");
+        Plugin.Log.LogInfo("Game balance loaded. Invoking GameBalanceLoad Action for attached mods.");
+        // if (!_backupAlreadyDone)
+        // {
+        //     var sw = new System.Diagnostics.Stopwatch();
+        //     sw.Start();
+        //     var objsData = GameBalance.me.objs_data;
+        //     _objsDataBackup = new ObjectDefinition[objsData.Capacity];
+        //     Array.Copy(objsData.ToArray(), 0, _objsDataBackup, 0, objsData.Count);
+        //
+        //     var craftData = GameBalance.me.craft_data;
+        //     _craftDataBackup = new CraftDefinition[craftData.Capacity];
+        //     Array.Copy(craftData.ToArray(), 0, _craftDataBackup, 0, craftData.Count);
+        //
+        //     var itemData = GameBalance.me.items_data;
+        //     _itemDataBackup = new ItemDefinition[itemData.Capacity];
+        //     Array.Copy(itemData.ToArray(), 0, _itemDataBackup, 0, itemData.Count);
+        //     sw.Stop();
+        //     Plugin.Log.LogInfo($"Backup of game balance data took {sw.ElapsedMilliseconds}ms");
+        //     _backupAlreadyDone = true;
+        // }
+
         GameBalanceLoad?.Invoke(GameBalance.me);
     }
+
+    //
+    // public static void RestoreGameBalance()
+    // {
+    //     //restore the untouched backup
+    //     GameBalance.me.objs_data = _objsDataBackup.ToList();
+    //     GameBalance.me.craft_data = _craftDataBackup.ToList();
+    //     GameBalance.me.items_data = _itemDataBackup.ToList();
+    // }
 
     [HarmonyPostfix]
     [HarmonyPriority(1)]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
     private static void WorldGameObject_Interact_Postfix(ref WorldGameObject __instance)
     {
-        Plugin.Log.LogWarning("WGO interacted with (postfix). Invoking WorldGameObjectInteract Action for attached mods.");
+        Plugin.Log.LogInfo("WGO interacted with (postfix). Invoking WorldGameObjectInteract Action for attached mods.");
         WorldGameObjectInteract?.Invoke(__instance);
     }
 
@@ -111,7 +146,7 @@ public static class Actions
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
     private static void WorldGameObject_Interact_Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
     {
-        Plugin.Log.LogWarning("WGO interacted with (prefix). Invoking WorldGameObjectInteractPrefix Action for attached mods.");
+        Plugin.Log.LogInfo("WGO interacted with (prefix). Invoking WorldGameObjectInteractPrefix Action for attached mods.");
         WorldGameObjectInteractPrefix?.Invoke(__instance, other_obj);
     }
 
@@ -119,7 +154,7 @@ public static class Actions
     {
         if (!MainGame.game_started || instance == null) return;
 
-        Plugin.Log.LogWarning($"Object: {instance.obj_id}, CustomTag: {instance.custom_tag}, Location: {instance.pos3}, Zone:{instance.GetMyWorldZoneId()}");
+        Plugin.Log.LogInfo($"Object: {instance.obj_id}, CustomTag: {instance.custom_tag}, Location: {instance.pos3}, Zone:{instance.GetMyWorldZoneId()}");
         //Where's Ma Storage
         CrossModFields.PreviousWgoInteraction = CrossModFields.CurrentWgoInteraction;
         CrossModFields.CurrentWgoInteraction = instance;
@@ -177,7 +212,7 @@ public static class Actions
         //log each gerry object found
         foreach (var g in otherGerrys.Where(g => g != null))
         {
-            Plugin.Log.LogWarning($"AllGerries: Gerry: {g.obj_id}, CustomTag: {g.custom_tag}, POS: {g.pos3}, Location: {g.GetMyWorldZoneId()}");
+            Plugin.Log.LogInfo($"AllGerries: Gerry: {g.obj_id}, CustomTag: {g.custom_tag}, POS: {g.pos3}, Location: {g.GetMyWorldZoneId()}");
         }
 
         //find gerrys that match any gerrys made by mods
@@ -186,14 +221,14 @@ public static class Actions
         //log each mod_gerry object found
         foreach (var g in gerrys.Where(g => g != null))
         {
-            Plugin.Log.LogWarning($"AllModGerries: Gerry: {g.obj_id}, CustomTag: {g.custom_tag}, POS: {g.pos3}, Location: {g.GetMyWorldZoneId()}");
+            Plugin.Log.LogInfo($"AllModGerries: Gerry: {g.obj_id}, CustomTag: {g.custom_tag}, POS: {g.pos3}, Location: {g.GetMyWorldZoneId()}");
         }
 
         //remove each gerry, ensuring no gerrys on the safeTag list are removed
         foreach (var gerry in gerrys.Where(gerry => gerry != null))
         {
             if (SafeGerryTags.Contains(gerry.custom_tag)) continue;
-            Plugin.Log.LogWarning($"Destroyed Gerry: {gerry.obj_id}, CustomTag: {gerry.custom_tag}, POS: {gerry.pos3}, Location: {gerry.GetMyWorldZoneId()}");
+            Plugin.Log.LogInfo($"Destroyed Gerry: {gerry.obj_id}, CustomTag: {gerry.custom_tag}, POS: {gerry.pos3}, Location: {gerry.GetMyWorldZoneId()}");
             gerry.DestroyMe();
         }
 
@@ -201,7 +236,7 @@ public static class Actions
         foreach (var gerry in otherGerrys.Where(gerry => gerry != null))
         {
             if (SafeGerryTags.Contains(gerry.custom_tag)) continue;
-            Plugin.Log.LogWarning($"Destroyed Gerry: {gerry.obj_id}, CustomTag: {gerry.custom_tag}, POS: {gerry.pos3}, Location: {gerry.GetMyWorldZoneId()}");
+            Plugin.Log.LogInfo($"Destroyed Gerry: {gerry.obj_id}, CustomTag: {gerry.custom_tag}, POS: {gerry.pos3}, Location: {gerry.GetMyWorldZoneId()}");
             gerry.DestroyMe();
         }
 

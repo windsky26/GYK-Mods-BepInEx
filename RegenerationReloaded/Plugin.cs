@@ -1,11 +1,10 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using Expressive.Functions.Mathematical;
 using GYKHelper;
 using HarmonyLib;
-using UnityEngine;
 
 namespace RegenerationReloaded
 {
@@ -15,7 +14,7 @@ namespace RegenerationReloaded
     {
         private const string PluginGuid = "p1xel8ted.gyk.regenerationreloaded";
         private const string PluginName = "Regeneration Reloaded";
-        private const string PluginVer = "1.1.4";
+        private const string PluginVer = "1.1.3";
 
         private static ManualLogSource Log { get; set; }
         private static Harmony _harmony;
@@ -25,50 +24,44 @@ namespace RegenerationReloaded
         internal static ConfigEntry<float> LifeRegen;
         internal static ConfigEntry<float> EnergyRegen;
         internal static ConfigEntry<float> RegenDelay;
-        
+
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
-            ShowRegenUpdates = Config.Bind("Regeneration", "Show Regeneration Updates", true, new ConfigDescription("Enable or disable displaying updates when life and energy regenerate", null, new ConfigurationManagerAttributes {Order = 24}));
-            LifeRegen = Config.Bind("Regeneration", "Life Regeneration Rate", 2f, new ConfigDescription("Set the rate at which life regenerates per tick.", new AcceptableValueRange<float>(1f,10f), new ConfigurationManagerAttributes {Order = 23}));
-            EnergyRegen = Config.Bind("Regeneration", "Energy Regeneration Rate", 1f, new ConfigDescription("Set the rate at which energy regenerates per tick.", new AcceptableValueRange<float>(1f,10f), new ConfigurationManagerAttributes {Order = 22}));
-            RegenDelay = Config.Bind("Regeneration", "Regeneration Delay", 5f, new ConfigDescription("Set the delay in seconds between each regeneration tick.", new AcceptableValueRange<float>(0f,10f), new ConfigurationManagerAttributes {Order = 21}));
-            Patches.Delay = RegenDelay.Value;
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
+            InitConfiguration();
+            ApplyPatches(this, null);
+        }
+
+        private void InitConfiguration()
+        {
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 5}));
+            _modEnabled.SettingChanged += ApplyPatches;
+
+            ShowRegenUpdates = Config.Bind("2. Regeneration", "Show Regeneration Updates", true, new ConfigDescription("Display updates when life and energy regenerate.", null, new ConfigurationManagerAttributes {Order = 4}));
+
+            LifeRegen = Config.Bind("2. Regeneration", "Life Regeneration Rate", 2f, new ConfigDescription("Set the rate at which life regenerates per tick.", new AcceptableValueRange<float>(1f, 10f), new ConfigurationManagerAttributes {Order = 3}));
+
+            EnergyRegen = Config.Bind("2. Regeneration", "Energy Regeneration Rate", 1f, new ConfigDescription("Set the rate at which energy regenerates per tick.", new AcceptableValueRange<float>(1f, 10f), new ConfigurationManagerAttributes {Order = 2}));
+
+            RegenDelay = Config.Bind("2. Regeneration", "Regeneration Delay", 5f, new ConfigDescription("Set the delay in seconds between each regeneration tick.", new AcceptableValueRange<float>(0f, 10f), new ConfigurationManagerAttributes {Order = 1}));
+
+            Patches.Delay = RegenDelay.Value;
+        }
+
+
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
+        {
             if (_modEnabled.Value)
             {
-                Log.LogWarning($"Applying patches for {PluginName}");
+                Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
-        }
-        private static void ToggleMod(ConfigEntryBase entry)
-        {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
-
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
-        
-            if (ticked)
-            {
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());   
             }
             else
             {
-                Log.LogWarning($"Removing patches for {PluginName}");
-                _harmony.UnpatchSelf(); 
+                Log.LogInfo($"Removing patches for {PluginName}");
+                _harmony.UnpatchSelf();
             }
-        }
-
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogWarning($"Plugin {PluginName} has been disabled!");
         }
     }
 }

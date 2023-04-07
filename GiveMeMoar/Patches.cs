@@ -62,7 +62,7 @@ public static class Patches
             return;
         }
 
-        if (drop_item.id.Contains("stick") & Plugin.DisableSticks.Value)
+        if (drop_item.id.Contains("stick") & Plugin.MultiplySticks.Value)
         {
             Helpers.Log($"Item: {drop_item.id}, Stick is disabled in config. Skipping.");
             return;

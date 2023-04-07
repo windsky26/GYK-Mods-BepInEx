@@ -15,38 +15,50 @@ public static class Patches
     [HarmonyPatch(typeof(MovementComponent), nameof(MovementComponent.UpdateMovement), typeof(Vector2), typeof(float))]
     public static void MovementComponent_UpdateMovement(ref MovementComponent __instance)
     {
-        if (__instance.wgo.is_dead || __instance.player_controlled_by_script) return;
-        //Log($"[MoveSpeed]: Instance: {__instance.wgo.obj_id}, Speed: {__instance.wgo.data.GetParam("speed")}");
+        if (IsMovementUpdateAllowed(__instance)) return;
 
-        if (__instance.wgo.is_player && !Helpers.Sprint)
+        if (__instance.wgo.is_player)
         {
-            var speed = __instance.wgo.data.GetParam("speed");
-            if (speed > 0)
-            {
-                speed = LazyConsts.PLAYER_SPEED + __instance.wgo.data.GetParam("speed_buff");
-            }
+            UpdatePlayerMovementSpeed(__instance);
+        }
+        else if (__instance.wgo.IsWorker() && Tools.WorkerHasBackpack(__instance.wgo))
+        {
+            UpdatePorterMovementSpeed(__instance);
+        }
+    }
 
-            if (Plugin.ModifyPlayerMovementSpeedConfig.Value)
-            {
-                __instance.SetSpeed(speed * Plugin.PlayerMovementSpeedConfig.Value);
-            }
-            else
-            {
-                __instance.SetSpeed(speed);
-            }
+    private static bool IsMovementUpdateAllowed(MovementComponent instance)
+    {
+        return instance.wgo.is_dead || instance.player_controlled_by_script;
+    }
+
+    private static void UpdatePlayerMovementSpeed(MovementComponent instance)
+    {
+        var speed = instance.wgo.data.GetParam("speed");
+        if (speed > 0)
+        {
+            speed = LazyConsts.PLAYER_SPEED + instance.wgo.data.GetParam("speed_buff");
         }
 
-        if (__instance.wgo.IsWorker() && Tools.WorkerHasBackpack(__instance.wgo))
+        if (Plugin.ModifyPlayerMovementSpeedConfig.Value)
         {
-            //1 and 0 = the same speed in game for zombies
-            if (Plugin.ModifyPorterMovementSpeedConfig.Value)
-            {
-                __instance.SetSpeed(Plugin.PorterMovementSpeedConfig.Value);
-            }
-            else
-            {
-                __instance.SetSpeed(0);
-            }
+            instance.SetSpeed(speed * Plugin.PlayerMovementSpeedConfig.Value);
+        }
+        else
+        {
+            instance.SetSpeed(speed);
+        }
+    }
+
+    private static void UpdatePorterMovementSpeed(MovementComponent instance)
+    {
+        if (Plugin.ModifyPorterMovementSpeedConfig.Value)
+        {
+            instance.SetSpeed(Plugin.PorterMovementSpeedConfig.Value);
+        }
+        else
+        {
+            instance.SetSpeed(0);
         }
     }
 
@@ -55,10 +67,7 @@ public static class Patches
     [HarmonyPatch(typeof(CameraTools), nameof(CameraTools.TweenLetterbox))]
     public static void CameraTools_TweenLetterbox(ref bool show)
     {
-        if (Plugin.DisableCinematicLetterboxingConfig.Value)
-        {
-            show = false;
-        }
+        show = !Plugin.CinematicLetterboxingConfig.Value;
     }
 
 
@@ -66,10 +75,7 @@ public static class Patches
     [HarmonyPatch(typeof(Intro), nameof(Intro.ShowIntro))]
     public static void Intro_ShowIntro()
     {
-        if (Plugin.SkipIntroVideoOnNewGameConfig.Value)
-        {
-            Intro.need_show_first_intro = false;
-        }
+        Intro.need_show_first_intro = !Plugin.SkipIntroVideoOnNewGameConfig.Value;
     }
 
 
@@ -91,7 +97,10 @@ public static class Patches
     [HarmonyPatch(typeof(GameGUI), nameof(GameGUI.Open))]
     public static void GameGUI_Open()
     {
-        if (Plugin.QuietMusicInGuiConfig.Value) SmartAudioEngine.me.SetDullMusicMode();
+        if (Plugin.QuietMusicInGuiConfig.Value)
+        {
+            SmartAudioEngine.me.SetDullMusicMode();
+        }
     }
 
 
@@ -120,9 +129,9 @@ public static class Patches
         Helpers.SprintHarmony = Harmony.HasAnyPatches("mugen.GraveyardKeeper.SprintReloaded");
         Helpers.Sprint = Helpers.SprintTools || Helpers.SprintHarmony;
 
-        Plugin.Log.LogWarning($"[MBB]: Sprint Detected via Tools: {Helpers.SprintTools}");
+        Plugin.Log.LogInfo($"[MBB]: Sprint Detected via Tools: {Helpers.SprintTools}");
 
-        Plugin.Log.LogWarning($"[MBB]: Sprint Detected via Harmony: {Helpers.SprintHarmony}");
+        Plugin.Log.LogInfo($"[MBB]: Sprint Detected via Harmony: {Helpers.SprintHarmony}");
     }
 
     [HarmonyFinalizer]
@@ -187,7 +196,10 @@ public static class Patches
     [HarmonyPatch(typeof(GameGUI), nameof(GameGUI.Hide))]
     public static void GameGUI_Hide()
     {
-        if (Plugin.QuietMusicInGuiConfig.Value) SmartAudioEngine.me.SetDullMusicMode(false);
+        if (Plugin.QuietMusicInGuiConfig.Value)
+        {
+            SmartAudioEngine.me.SetDullMusicMode(false);
+        }
     }
 
 

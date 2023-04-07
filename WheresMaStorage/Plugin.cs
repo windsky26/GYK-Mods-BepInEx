@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -47,6 +48,14 @@ public class Plugin : BaseUnityPlugin
 
     private void Awake()
     {
+        Log = Logger;
+        _harmony = new Harmony(PluginGuid);
+        InitConfiguration();
+        ApplyPatches(this, null);
+    }
+
+    private void InitConfiguration()
+    {
         ModifyInventorySize = Config.Bind("Inventory", "Modify Inventory Size", true, new ConfigDescription("Enable or disable modifying the inventory size", null, new ConfigurationManagerAttributes {Order = 50}));
         EnableGraveItemStacking = Config.Bind("Item Stacking", "Enable Grave Item Stacking", false, new ConfigDescription("Allow grave items to stack", null, new ConfigurationManagerAttributes {Order = 49}));
         EnablePenPaperInkStacking = Config.Bind("Item Stacking", "Enable Pen Paper Ink Stacking", false, new ConfigDescription("Allow pen, paper, and ink items to stack", null, new ConfigurationManagerAttributes {Order = 48}));
@@ -56,6 +65,8 @@ public class Plugin : BaseUnityPlugin
         ModifyStackSize = Config.Bind("Inventory", "Modify Stack Size", true, new ConfigDescription("Enable or disable modifying the stack size of items", null, new ConfigurationManagerAttributes {Order = 44}));
 
         _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 43}));
+        _modEnabled.SettingChanged += ApplyPatches;
+
         Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 498}));
         SharedInventory = Config.Bind("Inventory", "Shared Inventory", true, new ConfigDescription("Enable or disable shared inventory between players", null, new ConfigurationManagerAttributes {Order = 42}));
         DontShowEmptyRowsInInventory = Config.Bind("Inventory", "Dont Show Empty Rows In Inventory", true, new ConfigDescription("Enable or disable displaying empty rows in the inventory", null, new ConfigurationManagerAttributes {Order = 41}));
@@ -75,32 +86,26 @@ public class Plugin : BaseUnityPlugin
         HideSoulWidgets = Config.Bind("UI", "Hide Soul Widgets", true, new ConfigDescription("Enable or disable hiding soul widgets", null, new ConfigurationManagerAttributes {Order = 29}));
         HideWarehouseShopWidgets = Config.Bind("UI", "Hide Warehouse Shop Widgets", true, new ConfigDescription("Enable or disable hiding warehouse shop widgets", null, new ConfigurationManagerAttributes {Order = 28}));
         CollectDropsOnGameLoad = Config.Bind("Gameplay", "Collect Drops On Game Load", true, new ConfigDescription("Enable or disable collecting drops on game load", null, new ConfigurationManagerAttributes {Order = 27}));
-
-
+        
         Fields.GameBalanceAlreadyRun = false;
-
-
         Fields.InvSize = 20 + AdditionalInventorySpace.Value;
+    }
 
-        Log = Logger;
-        _harmony = new Harmony(PluginGuid);
+    private static void ApplyPatches(object sender, EventArgs e)
+    {
         if (_modEnabled.Value)
         {
             Actions.GameStartedPlaying += Helpers.RunWmsTasks;
             Actions.GameBalanceLoad += Helpers.GameBalanceLoad;
-            Log.LogMessage($"Applying patches for {PluginName}");
+            Log.LogInfo($"Applying patches for {PluginName}");
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
-    }
-
-
-    private void OnEnable()
-    {
-        Log.LogInfo($"Plugin {PluginName} has been enabled!");
-    }
-
-    private void OnDisable()
-    {
-        Log.LogWarning($"Plugin {PluginName} has been disabled!");
+        else
+        {
+            Actions.GameStartedPlaying -= Helpers.RunWmsTasks;
+            Actions.GameBalanceLoad -= Helpers.GameBalanceLoad;
+            Log.LogInfo($"Removing patches for {PluginName}");
+            _harmony.UnpatchSelf();
+        }
     }
 }

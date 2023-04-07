@@ -166,7 +166,7 @@ public partial class Plugin
         var oldItemLevelInt = int.Parse(oldItemLevel);
 
         float roll = Random.Range(0, 101);
-        bool downgrade = false;
+        var downgrade = false;
         if (item.id.EndsWith(":3"))
         {
             WriteLog($"Gold prayer item: 20% chance to downgrade it. Rolled {roll}/100.");

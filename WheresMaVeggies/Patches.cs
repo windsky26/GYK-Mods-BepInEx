@@ -86,7 +86,7 @@ public static class Patches
     {
         if (!Helpers.UnlockedStageOne())
         {
-            WheresMaVeggies.Plugin.Log.LogMessage($"Haven't unlocked the necessary tech yet!");
+            Plugin.Log.LogMessage($"Haven't unlocked the necessary tech yet!");
             return;
         }
         

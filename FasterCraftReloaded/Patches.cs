@@ -4,6 +4,7 @@ using HarmonyLib;
 
 namespace FasterCraftReloaded;
 
+[HarmonyBefore("p1xel8ted.gyk.queueeverything")]
 [HarmonyPatch]
 public static class Patches
 {

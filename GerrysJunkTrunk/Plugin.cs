@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
@@ -18,83 +19,73 @@ namespace GerrysJunkTrunk
         private const string PluginVer = "1.8.6";
 
 
-        
-        internal static ConfigEntry<bool> Debug;
-        internal static ManualLogSource Log { get; private set; }
+        private static ConfigEntry<bool> _debug;
+        private static ManualLogSource Log { get;  set; }
         private static Harmony _harmony;
 
         private static ConfigEntry<bool> _modEnabled;
 
-        internal static ConfigEntry<bool> ShowSoldMessagesOnPlayer;
-        internal static ConfigEntry<bool> DisableSoldMessageWhenNoSale;
-        internal static ConfigEntry<bool> EnableGerry;
-        internal static ConfigEntry<bool> ShowSummaryMessage;
-        internal static ConfigEntry<bool> ShowItemPriceTooltips;
-        internal static ConfigEntry<bool> ShowKnownVendorCount;
+        private static ConfigEntry<bool> _showSoldMessagesOnPlayer;
+        private static ConfigEntry<bool> _disableSoldMessageWhenNoSale;
+        private static ConfigEntry<bool> _enableGerry;
+        private static ConfigEntry<bool> _showSummaryMessage;
+        private static ConfigEntry<bool> _showItemPriceTooltips;
+        private static ConfigEntry<bool> _showKnownVendorCount;
 
-        internal static ConfigEntry<bool> InternalShippingBoxBuilt;
-        internal static ConfigEntry<bool> InternalShowIntroMessage;
+        private static ConfigEntry<bool> _internalShippingBoxBuilt;
+        private static ConfigEntry<bool> _internalShowIntroMessage;
 
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
-            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 498}));
-
-            InternalShippingBoxBuilt = Config.Bind("Internal (Dont Touch)", "Shipping Box Built", false, new ConfigDescription("Internal use.", null, new ConfigurationManagerAttributes {Browsable = false, HideDefaultButton = true, IsAdvanced = true, ReadOnly = true, Order = 497}));
-            InternalShowIntroMessage = Config.Bind("Internal (Dont Touch)", "Show Intro Message", false, new ConfigDescription("Internal use.", null, new ConfigurationManagerAttributes {Browsable = false, HideDefaultButton = true, IsAdvanced = true, ReadOnly = true, Order = 496}));
-
-            ShowSoldMessagesOnPlayer = Config.Bind("Messages", "Show Sold Messages On Player", true, new ConfigDescription("Display messages on the player when items are sold.", null, new ConfigurationManagerAttributes {Order = 500}));
-
-            DisableSoldMessageWhenNoSale = Config.Bind("Messages", "Disable Sold Message When No Sale", false, new ConfigDescription("Disable the sold message when there is no sale.", null, new ConfigurationManagerAttributes {Order = 499}));
-
-            EnableGerry = Config.Bind("General", "Enable Gerry", true, new ConfigDescription("Enable or disable Gerry in the game.", null, new ConfigurationManagerAttributes {Order = 498}));
-
-            ShowSummaryMessage = Config.Bind("UI", "Show Summary", true, new ConfigDescription("Show a summary of transactions and other relevant information.", null, new ConfigurationManagerAttributes {Order = 497}));
-
-            ShowItemPriceTooltips = Config.Bind("UI", "Show Item Price Tooltips", true, new ConfigDescription("Display tooltips with item prices in the user interface.", null, new ConfigurationManagerAttributes {Order = 496}));
-
-            ShowKnownVendorCount = Config.Bind("UI", "Show Known Vendor Count", true, new ConfigDescription("Show the count of known vendors in the user interface.", null, new ConfigurationManagerAttributes {Order = 495}));
-
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
+            InitInternalConfiguration();
+            InitConfiguration();
+            ApplyPatches(this, null);
+        }
+
+
+        private void InitInternalConfiguration()
+        {
+            _internalShippingBoxBuilt = Config.Bind("Internal (Dont Touch)", "Shipping Box Built", false, new ConfigDescription("Internal use.", null, new ConfigurationManagerAttributes {Browsable = false, HideDefaultButton = true, IsAdvanced = true, ReadOnly = true, Order = 497}));
+            _internalShowIntroMessage = Config.Bind("Internal (Dont Touch)", "Show Intro Message", false, new ConfigDescription("Internal use.", null, new ConfigurationManagerAttributes {Browsable = false, HideDefaultButton = true, IsAdvanced = true, ReadOnly = true, Order = 496}));
+        }
+
+        private void InitConfiguration()
+        {
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 7}));
+            _modEnabled.SettingChanged += ApplyPatches;
+
+            _enableGerry = Config.Bind("2. Gerry", "Gerry", true, new ConfigDescription("Toggle Gerry", null, new ConfigurationManagerAttributes {Order = 6}));
+
+            _showSoldMessagesOnPlayer = Config.Bind("3. Messages", "Show Sold Messages On Player", true, new ConfigDescription("Display messages on the player when items are sold", null, new ConfigurationManagerAttributes {Order = 5}));
+
+            _disableSoldMessageWhenNoSale = Config.Bind("3. Messages", "Show Sold Message When No Sale", false, new ConfigDescription("Disable the sold message when there is no sale", null, new ConfigurationManagerAttributes {Order = 4}));
+
+            _showSummaryMessage = Config.Bind("4. UI", "Show Summary", false, new ConfigDescription("Display a summary of transactions and other relevant information", null, new ConfigurationManagerAttributes {Order = 3}));
+
+            _showItemPriceTooltips = Config.Bind("4. UI", "Show Item Price Tooltips", true, new ConfigDescription("Display tooltips with item prices in the user interface", null, new ConfigurationManagerAttributes {Order = 2}));
+
+            _showKnownVendorCount = Config.Bind("4. UI", "Show Known Vendor Count", false, new ConfigDescription("Display the count of known vendors in the user interface", null, new ConfigurationManagerAttributes {Order = 1}));
+            _debug = Config.Bind("5. Advanced", "Debug Logging", false, new ConfigDescription("Toggle debug logging on or off", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 0}));
+        }
+
+
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
+        {
             if (_modEnabled.Value)
             {
                 Actions.WorldGameObjectInteractPrefix += WorldGameObject_Interact;
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
-        }
-
-        private static void ToggleMod(ConfigEntryBase entry)
-        {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
-
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
-
-            if (ticked)
-            {
-                Actions.WorldGameObjectInteractPrefix += WorldGameObject_Interact;
-                Log.LogWarning($"Applying patches for {PluginName}");
+                Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
                 Actions.WorldGameObjectInteractPrefix -= WorldGameObject_Interact;
-                Log.LogWarning($"Removing patches for {PluginName}");
+                Log.LogInfo($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }
-        }
-
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogError($"Plugin {PluginName} has been disabled!");
         }
     }
 }

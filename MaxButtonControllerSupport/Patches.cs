@@ -72,7 +72,7 @@ public partial class Plugin
     }
 
 
-    public static void WorldGameObject_Interact(WorldGameObject instance, WorldGameObject other)
+    private static void WorldGameObject_Interact(WorldGameObject instance, WorldGameObject other)
     {
         if (UnSafeCraftZones.Contains(instance.GetMyWorldZoneId()) || UnSafePartials.Any(instance.obj_id.Contains) || UnSafeCraftObjects.Contains(instance.obj_id))
         {

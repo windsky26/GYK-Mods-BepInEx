@@ -16,7 +16,7 @@ public static class Helpers
 
     internal static void ActionsOnSpawnPlayer(MainGame mainGame)
     {
-        Plugin.Log.LogWarning($"Running MiscBitsAndBobs ActionsOnSpawnPlayer as Player has spawned in.");
+        Plugin.Log.LogInfo($"Running MiscBitsAndBobs ActionsOnSpawnPlayer as Player has spawned in.");
         if (MainGame.game_started && !_sprintMsgShown && Sprint && Plugin.ModifyPlayerMovementSpeedConfig.Value)
         {
             Tools.ShowAlertDialog(GetLocalizedString(strings.Title), GetLocalizedString(strings.Content), separateWithStars: true);

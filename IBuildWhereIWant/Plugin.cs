@@ -16,58 +16,57 @@ namespace IBuildWhereIWant
     {
         private const string PluginGuid = "p1xel8ted.gyk.ibuildwhereiwant";
         private const string PluginName = "I Build Where I Want!";
-        private const string PluginVer = "1.7.4";
+        private const string PluginVer = "1.7.3";
 
-    
-        internal static ManualLogSource Log { get; private set; }
+
+        private static ManualLogSource Log { get; set; }
         private static Harmony _harmony;
 
         private static ConfigEntry<bool> _modEnabled;
-        internal static ConfigEntry<bool> DisableGrid;
-        internal static ConfigEntry<bool> DisableGreyRemoveOverlay;
-        internal static ConfigEntry<bool> DisableBuildingCollision;
-        internal static ConfigEntry<bool> Debug;
-        internal static ConfigEntry<KeyboardShortcut> MenuKeyBind;
-        internal static ConfigEntry<string> MenuControllerButton;
+        private static ConfigEntry<bool> _disableGrid;
+        private static ConfigEntry<bool> _disableGreyRemoveOverlay;
+        private static ConfigEntry<bool> _disableBuildingCollision;
+        private static ConfigEntry<bool> _debug;
+        private static ConfigEntry<KeyboardShortcut> _menuKeyBind;
+        private static ConfigEntry<string> _menuControllerButton;
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod, Order = 602}));
-            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 601}));
-
-            DisableGrid = Config.Bind("Display", "Disable Grid", true, new ConfigDescription("Disable the grid in the building interface.", null, new ConfigurationManagerAttributes {Order = 600}));
-
-            DisableGreyRemoveOverlay = Config.Bind("Display", "Disable Grey Remove Overlay", true, new ConfigDescription("Disable the grey overlay when removing objects.", null, new ConfigurationManagerAttributes {Order = 599}));
-
-            DisableBuildingCollision = Config.Bind("Collision", "Disable Building Collision", false, new ConfigDescription("Disable collision between buildings.", null, new ConfigurationManagerAttributes {Order = 598}));
-            
-            MenuKeyBind = Config.Bind("Keybinds", "Menu Key Bind", new KeyboardShortcut(KeyCode.Q), new ConfigDescription("Key bind to open the menu.", null, new ConfigurationManagerAttributes {Order = 595}));
-
-            MenuControllerButton = Config.Bind("Controller", "Menu Controller Button", Enum.GetName(typeof(GamePadButton), GamePadButton.RB), new ConfigDescription("Controller button to open the menu.", new AcceptableValueList<string>(Enum.GetNames(typeof(GamePadButton))), new ConfigurationManagerAttributes {Order = 594}));
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
-            if (_modEnabled.Value)
-            {
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
+            InitConfiguration();
+            ApplyPatches(null, null);
         }
 
-        private static void ToggleMod(ConfigEntryBase entry)
+        private void InitConfiguration()
         {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 605}));
+            _modEnabled.SettingChanged += ApplyPatches;
 
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
+            _disableBuildingCollision = Config.Bind("2. Collision", "Building Collision", true, new ConfigDescription("Toggle collision between buildings to place them closer together (or on top of each other...)", null, new ConfigurationManagerAttributes {Order = 604}));
 
-            if (ticked)
+            _disableGrid = Config.Bind("3. Display", "Grid", false, new ConfigDescription("Toggle the grid overlay from the building interface for a cleaner look.", null, new ConfigurationManagerAttributes {Order = 603}));
+
+            _disableGreyRemoveOverlay = Config.Bind("3. Display", "Grey Overlay", false, new ConfigDescription("Toggle the grey overlay that appears when removing objects in the building interface.", null, new ConfigurationManagerAttributes {Order = 602}));
+
+            _menuKeyBind = Config.Bind("4. Keybinds", "Menu Key Bind", new KeyboardShortcut(KeyCode.Q), new ConfigDescription("Define the key used to open the mod menu.", null, new ConfigurationManagerAttributes {Order = 601}));
+
+            _menuControllerButton = Config.Bind("5. Controller", "Menu Controller Button", Enum.GetName(typeof(GamePadButton), GamePadButton.RB), new ConfigDescription("Select the controller button used to open the mod menu.", new AcceptableValueList<string>(Enum.GetNames(typeof(GamePadButton))), new ConfigurationManagerAttributes {Order = 600}));
+
+            _debug = Config.Bind("6. Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging for troubleshooting purposes.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 599}));
+        }
+
+
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
+        {
+            if (_modEnabled.Value)
             {
-                Log.LogWarning($"Applying patches for {PluginName}");
+                Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
-                Log.LogWarning($"Removing patches for {PluginName}");
+                Log.LogInfo($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }
         }
@@ -76,8 +75,8 @@ namespace IBuildWhereIWant
         {
             if (!CanOpenCraftAnywhere()) return;
 
-            if ((LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(MenuControllerButton.Value)) ||
-                MenuKeyBind.Value.IsUp())
+            if ((LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(_menuControllerButton.Value)) ||
+                _menuKeyBind.Value.IsUp())
             {
                 OpenCraftAnywhere();
             }
@@ -88,16 +87,6 @@ namespace IBuildWhereIWant
             return MainGame.game_started && !MainGame.me.player.is_dead && !MainGame.me.player.IsDisabled() &&
                    !MainGame.paused && BaseGUI.all_guis_closed &&
                    !MainGame.me.player.GetMyWorldZoneId().Contains("refugee");
-        }
-
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogError($"Plugin {PluginName} has been disabled!");
         }
     }
 }

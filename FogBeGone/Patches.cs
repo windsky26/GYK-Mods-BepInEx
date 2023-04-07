@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using FlowCanvas;
+﻿using FlowCanvas;
 using HarmonyLib;
 using UnityEngine;
 
@@ -22,30 +21,24 @@ public static class Patches
     [HarmonyPatch(typeof(SmartWeatherState), nameof(SmartWeatherState.Update))]
     public static void SmartWeatherState_Update(SmartWeatherState __instance)
     {
-        if (!MainGame.game_started) return;
-        if (__instance == null) return;
-        if (_introPlaying) return;
+        if (!MainGame.game_started || __instance == null || _introPlaying) return;
         switch (__instance.type)
         {
             case SmartWeatherState.WeatherType.Fog:
-                __instance._previously_enabled = false;
-                __instance._enabled = true;
-                // __instance._cur_amount = 0;
-                // __instance.value = 0;
+                __instance._previously_enabled = true;
+                __instance._enabled = false;
+                 __instance._cur_amount = 0;
+                 __instance.value = 0;
                 break;
 
             case SmartWeatherState.WeatherType.Wind:
-                __instance._previously_enabled = true;
+                __instance._previously_enabled = false;
                 __instance._enabled = false;
-                __instance._cur_amount = 0;
-                __instance.value = 0;
                 break;
 
             case SmartWeatherState.WeatherType.Rain:
-                __instance._previously_enabled = true;
+                __instance._previously_enabled = false;
                 __instance._enabled = false;
-                __instance._cur_amount = 0;
-                __instance.value = 0;
                 break;
 
             case SmartWeatherState.WeatherType.LUT:

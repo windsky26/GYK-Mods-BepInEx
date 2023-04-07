@@ -18,7 +18,7 @@ public partial class Plugin
     public static void BuildModeLogics_CanBuild(ref bool __result, ref CraftDefinition cd)
     {
         //
-        if (InternalShippingBoxBuilt.Value && _shippingBox != null)
+        if (_internalShippingBoxBuilt.Value && _shippingBox != null)
         {
             if (cd.id.Contains(ShippingItem))
             {
@@ -121,7 +121,7 @@ public partial class Plugin
         Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
         //
         //if (!_usingShippingBox) return;
-        if (!ShowItemPriceTooltips.Value) return;
+        if (!_showItemPriceTooltips.Value) return;
         if (!UnlockedShippingBox()) return;
         if (__instance == null || item_gui == null) return;
 
@@ -165,7 +165,7 @@ public partial class Plugin
         //
         if (!UnlockedShippingBox()) return;
         Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-        if (InternalShippingBoxBuilt.Value && _shippingBox != null)
+        if (_internalShippingBoxBuilt.Value && _shippingBox != null)
         {
             foreach (var item in _shippingBox.data.inventory)
             {
@@ -187,7 +187,7 @@ public partial class Plugin
 
             Vector3 position;
             float time;
-            if (ShowSoldMessagesOnPlayer.Value)
+            if (_showSoldMessagesOnPlayer.Value)
             {
                 position = MainGame.me.player_pos;
                 position.y += 125f;
@@ -200,7 +200,7 @@ public partial class Plugin
                 time = 7f;
             }
 
-            if (EnableGerry.Value)
+            if (_enableGerry.Value)
             {
                 StartGerryRoutine(earnings);
             }
@@ -209,14 +209,14 @@ public partial class Plugin
                 Sounds.PlaySound("coins_sound", position, true);
                 _shippingBox.data.inventory.Clear();
 
-                if (DisableSoldMessageWhenNoSale.Value) return;
+                if (_disableSoldMessageWhenNoSale.Value) return;
 
                 EffectBubblesManager.ShowImmediately(position, $"{money}",
                     earnings > 0 ? EffectBubblesManager.BubbleColor.Green : EffectBubblesManager.BubbleColor.Red,
                     true, time);
             }
 
-            if (ShowSummaryMessage.Value && !EnableGerry.Value && earnings > 0)
+            if (_showSummaryMessage.Value && !_enableGerry.Value && earnings > 0)
             {
                 ShowSummary(money);
             }
@@ -335,7 +335,7 @@ public partial class Plugin
                     1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendor}",
                     _ => $"{strings.Header} (T{tier})"
                 };
-                inventoryWidget.header_label.text = ShowKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
+                inventoryWidget.header_label.text = _showKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
                 inventoryWidget.dont_show_empty_rows = true;
                 inventoryWidget.SetInactiveStateToEmptyCells();
             }
@@ -366,7 +366,7 @@ public partial class Plugin
                     1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendor}",
                     _ => $"{strings.Header} (T{tier})"
                 };
-                inventoryWidget.header_label.text = ShowKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
+                inventoryWidget.header_label.text = _showKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
                 inventoryWidget.dont_show_empty_rows = true;
                 inventoryWidget.SetInactiveStateToEmptyCells();
             }
@@ -471,7 +471,7 @@ public partial class Plugin
         {
             WriteLog($"Removed Shipping Box!");
             _shippingBox = null;
-            InternalShippingBoxBuilt.Value = false;
+            _internalShippingBoxBuilt.Value = false;
             var sbCraft = GameBalance.me.GetData<ObjectCraftDefinition>(ShippingBoxId);
             sbCraft.hidden = false;
         }
@@ -507,7 +507,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
     public static void WorldGameObject_ReplaceWithObject(ref WorldGameObject __instance, ref string new_obj_id)
     {
-        if (!UnlockedShippingBox() || __instance == null || InternalShippingBoxBuilt.Value && _shippingBox != null) return;
+        if (!UnlockedShippingBox() || __instance == null || _internalShippingBoxBuilt.Value && _shippingBox != null) return;
 
         if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
         {
@@ -519,7 +519,7 @@ public partial class Plugin
             _shippingBuild = false;
             _shippingBox = __instance;
 
-            InternalShippingBoxBuilt.Value = true;
+            _internalShippingBoxBuilt.Value = true;
 
             UpdateShippingBox(sbCraft, __instance);
         }

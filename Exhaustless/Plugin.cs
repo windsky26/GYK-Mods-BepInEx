@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -12,7 +13,7 @@ namespace Exhaustless
     [BepInDependency("p1xel8ted.gyk.gykhelper")]
     public class Plugin : BaseUnityPlugin
     {
-        private const string PluginGuid = "p1xel8ted.gyk.Exhaustless";
+        private const string PluginGuid = "p1xel8ted.gyk.exhaustless";
         private const string PluginName = "Exhaust-less!";
         private const string PluginVer = "3.4.4";
 
@@ -24,7 +25,6 @@ namespace Exhaustless
         internal static ConfigEntry<bool> AutoWakeFromMeditation;
         internal static ConfigEntry<bool> SpendHalfSanity;
         internal static ConfigEntry<bool> SpeedUpMeditation;
-        internal static ConfigEntry<bool> YawnMessage;
         internal static ConfigEntry<bool> SpendHalfEnergy;
         internal static ConfigEntry<int> EnergySpendBeforeSleepDebuff;
 
@@ -34,55 +34,46 @@ namespace Exhaustless
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
-            MakeToolsLastLonger = Config.Bind("Tools", "Make Tools Last Longer", true, new ConfigDescription("Enable or disable making tools last longer", null, new ConfigurationManagerAttributes {Order = 11}));
-            SpendHalfGratitude = Config.Bind("Gameplay", "Spend Half Gratitude", true, new ConfigDescription("Enable or disable spending half gratitude", null, new ConfigurationManagerAttributes {Order = 10}));
-            AutoEquipNewTool = Config.Bind("Tools", "Auto Equip New Tool", true, new ConfigDescription("Enable or disable auto equipping new tools", null, new ConfigurationManagerAttributes {Order = 9}));
-            SpeedUpSleep = Config.Bind("Sleep", "Speed Up Sleep", true, new ConfigDescription("Enable or disable speeding up sleep", null, new ConfigurationManagerAttributes {Order = 8}));
-            AutoWakeFromMeditation = Config.Bind("Meditation", "Auto Wake From Meditation", true, new ConfigDescription("Enable or disable auto waking from meditation", null, new ConfigurationManagerAttributes {Order = 7}));
-            SpendHalfSanity = Config.Bind("Gameplay", "Spend Half Sanity", true, new ConfigDescription("Enable or disable spending half sanity", null, new ConfigurationManagerAttributes {Order = 6}));
-            SpeedUpMeditation = Config.Bind("Meditation", "Speed Up Meditation", true, new ConfigDescription("Enable or disable speeding up meditation", null, new ConfigurationManagerAttributes {Order = 5}));
-            YawnMessage = Config.Bind("Sleep", "Yawn Message", true, new ConfigDescription("Enable or disable yawn messages", null, new ConfigurationManagerAttributes {Order = 4}));
-            SpendHalfEnergy = Config.Bind("Gameplay", "Spend Half Energy", true, new ConfigDescription("Enable or disable spending half energy", null, new ConfigurationManagerAttributes {Order = 3}));
-            EnergySpendBeforeSleepDebuff = Config.Bind("Sleep", "Energy Spend Before Sleep Debuff", 1200, new ConfigDescription("Set the amount of energy spent before sleep debuff", new AcceptableValueRange<int>(350,50000), new ConfigurationManagerAttributes {Order = 2}));
-           
-            
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
-            if (_modEnabled.Value)
-            {
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
+            InitConfiguration();
+            ApplyPatches(this, null);
         }
 
-        private static void ToggleMod(ConfigEntryBase entry)
+        private void InitConfiguration()
         {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 11}));
+            _modEnabled.SettingChanged += ApplyPatches;
 
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
+            AutoEquipNewTool = Config.Bind("2. Tools", "Auto Equip New Tool", true, new ConfigDescription("Automatically equip a new tool if the current one breaks", null, new ConfigurationManagerAttributes {Order = 10}));
+            MakeToolsLastLonger = Config.Bind("2. Tools", "Make Tools Last Longer", true, new ConfigDescription("Increase the durability of tools", null, new ConfigurationManagerAttributes {Order = 9}));
 
-            if (ticked)
+            AutoWakeFromMeditation = Config.Bind("3. Meditation", "Auto Wake From Meditation", true, new ConfigDescription("Automatically wake up when meditation is complete", null, new ConfigurationManagerAttributes {Order = 8}));
+            SpeedUpMeditation = Config.Bind("3. Meditation", "Speed Up Meditation", true, new ConfigDescription("Reduce the time needed for meditation", null, new ConfigurationManagerAttributes {Order = 7}));
+
+            EnergySpendBeforeSleepDebuff = Config.Bind("4. Sleep", "Energy Spend Before Sleep Debuff", 1200, new ConfigDescription("Set the energy threshold before sleep debuff is applied", new AcceptableValueRange<int>(350, 50000), new ConfigurationManagerAttributes {Order = 6}));
+            SpeedUpSleep = Config.Bind("4. Sleep", "Speed Up Sleep", true, new ConfigDescription("Decrease the time needed for sleep", null, new ConfigurationManagerAttributes {Order = 5}));
+
+            SpendHalfEnergy = Config.Bind("5. Gameplay", "Spend Half Energy", true, new ConfigDescription("Reduce energy consumption by half", null, new ConfigurationManagerAttributes {Order = 3}));
+            SpendHalfGratitude = Config.Bind("5. Gameplay", "Spend Half Gratitude", true, new ConfigDescription("Reduce gratitude consumption by half", null, new ConfigurationManagerAttributes {Order = 2}));
+            SpendHalfSanity = Config.Bind("5. Gameplay", "Spend Half Sanity", true, new ConfigDescription("Reduce sanity consumption by half", null, new ConfigurationManagerAttributes {Order = 1}));
+        }
+
+
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
+        {
+            if (_modEnabled.Value)
             {
-                Log.LogWarning($"Applying patches for {PluginName}");
+                Actions.GameBalanceLoad += Patches.GameBalance_LoadGameBalance;
+                Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
-                Log.LogWarning($"Removing patches for {PluginName}");
+                Actions.GameBalanceLoad -= Patches.GameBalance_LoadGameBalance;
+                Log.LogInfo($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }
-        }
-
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogError($"Plugin {PluginName} has been disabled!");
         }
     }
 }

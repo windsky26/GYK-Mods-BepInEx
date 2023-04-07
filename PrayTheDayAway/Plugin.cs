@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -30,55 +31,43 @@ namespace PrayTheDayAway
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod, Order = 602}));
-            _debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 601}));
-
-            _everydayIsSermonDay = Config.Bind("General", "Everyday Is Sermon Day", true, new ConfigDescription("Enable or disable sermons every day.", null, new ConfigurationManagerAttributes { Order = 600 }));
-
-            _sermonOverAndOver = Config.Bind("General", "Sermon Over And Over", false, new ConfigDescription("Enable or disable repeating sermons.", null, new ConfigurationManagerAttributes { Order = 599 }));
-
-            _notifyOnPrayerLoss = Config.Bind("Notifications", "Notify On Prayer Loss", true, new ConfigDescription("Enable or disable notifications for prayer loss.", null, new ConfigurationManagerAttributes { Order = 598 }));
-
-            _alternateMode = Config.Bind("Mode", "Alternate Mode", true, new ConfigDescription("Enable or disable alternate mode.", null, new ConfigurationManagerAttributes { Order = 597 }));
-
-            _randomlyUpgradeBasicPrayer = Config.Bind("Upgrades", "Randomly Upgrade Basic Prayer", true, new ConfigDescription("Enable or disable random upgrades for basic prayers.", null, new ConfigurationManagerAttributes { Order = 596 }));
-            
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
-            if (_modEnabled.Value)
-            {
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
+            InitConfiguration();
+            ApplyPatches(this, null);
         }
 
-        private static void ToggleMod(ConfigEntryBase entry)
+        private void InitConfiguration()
         {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 606}));
+            _modEnabled.SettingChanged += ApplyPatches;
 
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
-        
-            if (ticked)
+            _everydayIsSermonDay = Config.Bind("1. General", "Everyday Is Sermon Day", true, new ConfigDescription("Allow sermons to be held every day.", null, new ConfigurationManagerAttributes {Order = 605}));
+
+            _sermonOverAndOver = Config.Bind("1. General", "Sermon Over And Over", false, new ConfigDescription("Allow sermons to be repeated without limitation.", null, new ConfigurationManagerAttributes {Order = 604}));
+
+            _alternateMode = Config.Bind("2. Mode", "Alternate Mode", true, new ConfigDescription("Chance to lower item level instead of chance to lose it on prayer.", null, new ConfigurationManagerAttributes {Order = 603}));
+
+            _notifyOnPrayerLoss = Config.Bind("3. Notifications", "Notify On Prayer Loss", true, new ConfigDescription("Display notifications when prayer items are lost.", null, new ConfigurationManagerAttributes {Order = 602}));
+
+            _randomlyUpgradeBasicPrayer = Config.Bind("4. Upgrades", "Randomly Upgrade Basic Prayer", true, new ConfigDescription("Allow basic prayers to be randomly upgraded (to a known starred prayer).", null, new ConfigurationManagerAttributes {Order = 601}));
+
+            _debug = Config.Bind("5. Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 600}));
+        }
+
+
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
+        {
+            if (_modEnabled.Value)
             {
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());   
+                Log.LogInfo($"Applying patches for {PluginName}");
+                _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
-                Log.LogWarning($"Removing patches for {PluginName}");
-                _harmony.UnpatchSelf(); 
+                Log.LogInfo($"Removing patches for {PluginName}");
+                _harmony.UnpatchSelf();
             }
-            
-        }
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogError($"Plugin {PluginName} has been disabled!");
         }
     }
 }

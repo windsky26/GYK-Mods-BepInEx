@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using BepInEx;
 using BepInEx.Configuration;
@@ -14,7 +15,7 @@ namespace INeedSticks
     {
         private const string PluginGuid = "p1xel8ted.gyk.ineedsticks";
         private const string PluginName = "I Neeeed Sticks!";
-        private const string PluginVer = "1.6.1";
+        private const string PluginVer = "1.6.2";
         private static CraftDefinition _newItem;
         private const string WoodenStick = "wooden_stick";
         private static ManualLogSource Log { get; set; }
@@ -22,13 +23,10 @@ namespace INeedSticks
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
+            _modEnabled = Config.Bind("General", "Enabled", true, $"Toggle {PluginName}");
+            _modEnabled.SettingChanged += ApplyPatches;
             Log = Logger;
-            if (_modEnabled.Value)
-            {
-                Actions.GameBalanceLoad += AddStick;
-                Log.LogWarning($"Applying changes for {PluginName}");
-            }
+            ApplyPatches(this,null);
         }
 
         private static void RemoveStick()
@@ -37,23 +35,23 @@ namespace INeedSticks
             {
                 GameBalance.me.craft_data.Remove(_newItem);
                 GameBalance.me.craft_data.RemoveAll(a => a.id == WoodenStick);
-                Log.LogWarning($"Removing {WoodenStick} from game balance.");
+                Log.LogInfo($"Removed {WoodenStick} from game balance.");
             }
         }
 
         private static void AddStick(GameBalance obj)
         {
-            if (GameBalance.me.craft_data.Exists(a => a == _newItem)) return;
+            if (obj.craft_data.Exists(a => a == _newItem)) return;
             if (_newItem != null)
             {
-                GameBalance.me.craft_data.Add(_newItem);
-                GameBalance.me.AddDataUniversal(_newItem);
-                GameBalance.me.AddData(_newItem);
-                Log.LogWarning($"Added {WoodenStick} to game balance.");
+                obj.craft_data.Add(_newItem);
+                obj.AddDataUniversal(_newItem);
+                obj.AddData(_newItem);
+                Log.LogInfo($"Added {WoodenStick} to game balance.");
             }
 
             var newCd = new CraftDefinition();
-            var cd = GameBalance.me.GetData<CraftDefinition>("wood1_2");
+            var cd = obj.GetData<CraftDefinition>("wood1_2");
             var output = new List<Item>
             {
                 new("stick", 1),
@@ -133,40 +131,25 @@ namespace INeedSticks
             newCd.id = WoodenStick;
             _newItem = newCd;
 
-            GameBalance.me.craft_data.Add(_newItem);
-            GameBalance.me.AddDataUniversal(_newItem);
-            GameBalance.me.AddData(_newItem);
-            Log.LogWarning($"Added {WoodenStick} to game balance.");
+            obj.craft_data.Add(_newItem);
+            obj.AddDataUniversal(_newItem);
+            obj.AddData(_newItem);
+            Log.LogInfo($"Added {WoodenStick} to game balance.");
         }
 
-        private static void ToggleMod(ConfigEntryBase entry)
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
         {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
-
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
-
-            if (ticked)
+            if (_modEnabled.Value)
             {
-                Log.LogWarning($"Applying changes for {PluginName}");
+                Log.LogInfo($"Applying changes for {PluginName}");
                 Actions.GameBalanceLoad += AddStick;
             }
             else
             {
-                Log.LogWarning($"Removing changes for {PluginName}");
+                Log.LogInfo($"Removing changes for {PluginName}");
                 Actions.GameBalanceLoad -= AddStick;
                 RemoveStick();
             }
-        }
-
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogError($"Plugin {PluginName} has been disabled!");
         }
     }
 }

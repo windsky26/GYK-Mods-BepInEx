@@ -171,17 +171,6 @@ namespace GYKHelper
             return CrossModFields.PlayerFollowingTarget || CrossModFields.PlayerIsControlled || CrossModFields.PlayerIsDead;
         }
 
-        public static void Log(string caller, string message, bool error = false)
-        {
-            if (error)
-            {
-                Debug.LogError($"[{caller}][ERROR]: {message}");
-                return;
-            }
-
-            Debug.LogWarning($"[{caller}]: {message}");
-        }
-
         public static bool RefugeeGardenCraft(string craftId)
         {
             return craftId.StartsWith("refugee_garden");

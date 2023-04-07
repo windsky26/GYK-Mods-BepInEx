@@ -13,24 +13,34 @@ namespace GYKHelper
     {
         private const string PluginGuid = "p1xel8ted.gyk.gykhelper";
         private const string PluginName = "GYK Helper Library";
-        private const string PluginVer = "2.1";
+        private const string PluginVer = "3.0";
 
         internal static ManualLogSource Log { get; private set; }
         private static ConfigEntry<bool> DisableUnityLogging { get; set; }
 
         private void Awake()
         {
-            DisableUnityLogging = Config.Bind("General", "Unity Logging", false, new ConfigDescription("Toggle Unity Logging", null, new ConfigurationManagerAttributes {Order = 1}));
-            DisableUnityLogging.SettingChanged += (_, args) =>
-            {
-                var eventArgs = (SettingChangedEventArgs) args;
-                var setting = Convert.ToBoolean(eventArgs.ChangedSetting.GetSerializedValue());
-                Debug.unityLogger.logEnabled = setting;
-            };
-            Debug.unityLogger.logEnabled = DisableUnityLogging.Value;
+            InitializeDisableUnityLogging();
             Log = Logger;
+            RegisterEventHandlers();
+            PatchWithHarmony();
+        }
+
+        private void InitializeDisableUnityLogging()
+        {
+            DisableUnityLogging = Config.Bind("General", "Unity Logging", false, new ConfigDescription("Toggle Unity Logging", null, new ConfigurationManagerAttributes {Order = 1}));
+            DisableUnityLogging.SettingChanged += (_, _) => Debug.unityLogger.logEnabled = DisableUnityLogging.Value;
+            Debug.unityLogger.logEnabled = DisableUnityLogging.Value;
+        }
+
+        private static void RegisterEventHandlers()
+        {
             Actions.WorldGameObjectInteractPrefix += Actions.WorldGameObject_Interact;
             Actions.GameStartedPlaying += Actions.CleanGerries;
+        }
+
+        private static void PatchWithHarmony()
+        {
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginGuid);
         }
     }

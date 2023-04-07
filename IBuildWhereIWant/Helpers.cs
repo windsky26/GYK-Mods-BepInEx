@@ -42,7 +42,7 @@ public partial class Plugin
 
         if (_buildDesk == null)
         {
-            _buildDesk = Object.FindObjectsOfType<WorldGameObject>(true)
+            _buildDesk = FindObjectsOfType<WorldGameObject>(true)
                 .FirstOrDefault(x => string.Equals(x.obj_id, "mf_wood_builddesk"));
         }
 
@@ -53,10 +53,10 @@ public partial class Plugin
 
         if (_buildDeskClone != null)
         {
-            Object.Destroy(_buildDeskClone);
+            Destroy(_buildDeskClone);
         }
 
-        _buildDeskClone = GameObject.Instantiate(_buildDesk);
+        _buildDeskClone = Instantiate(_buildDesk);
 
         _buildDeskClone.name = BuildDesk;
 
@@ -101,13 +101,13 @@ public partial class Plugin
     {
         if (error)
         {
-            Plugin.Log.LogError($"{message}");
+            Log.LogError($"{message}");
         }
         else
         {
-            if (Plugin.Debug.Value)
+            if (_debug.Value)
             {
-                Plugin.Log.LogInfo($"{message}");
+                Log.LogInfo($"{message}");
             }
         }
     }

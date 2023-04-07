@@ -1,49 +1,46 @@
 ﻿using AutoLootHeavies.lang;
+using BepInEx;
 using GYKHelper;
 
-namespace AutoLootHeavies;
 
-public partial class Plugin
+namespace AutoLootHeavies
 {
-    private static bool _initialFullUpdate;
-    
-    private void Update()
+    public partial class Plugin
     {
-        if (!MainGame.game_started) return;
+        private static bool _initialFullUpdate;
 
-        if (!_initialFullUpdate)
+        private void Update()
         {
-            _initialFullUpdate = true;
-            MainGame.me.StartCoroutine(RunFullUpdate());
+            if (!MainGame.game_started) return;
+
+            if (!_initialFullUpdate)
+            {
+                _initialFullUpdate = true;
+                MainGame.me.StartCoroutine(RunFullUpdate());
+            }
+
+            CheckKeybinds();
         }
 
-        CheckKeybinds();
-    }
-    
-    private static void CheckKeybinds()
-    {
-        if (ToggleTeleportToDumpSiteKeybind.Value.IsUp())
+        private static void CheckKeybinds()
         {
-            TeleportToDumpSiteWhenAllStockPilesFull.Value = !TeleportToDumpSiteWhenAllStockPilesFull.Value;
-            Tools.ShowMessage(TeleportToDumpSiteWhenAllStockPilesFull.Value ? strings.TeleOn : strings.TeleOff, MainGame.me.player_pos);
-        }
+            if (_setTimberLocationKeybind.Value.IsUp())
+            {
+                _designatedTimberLocation.Value = MainGame.me.player_pos;
+                Tools.ShowMessage(strings.DumpTimber, _designatedTimberLocation.Value);
+            }
 
-        if (SetTimberLocationKeybind.Value.IsUp())
-        {
-            DesignatedTimberLocation.Value = MainGame.me.player_pos;
-            Tools.ShowMessage(strings.DumpTimber, DesignatedTimberLocation.Value);
-        }
+            if (_setOreLocationKeybind.Value.IsUp())
+            {
+                _designatedOreLocation.Value = MainGame.me.player_pos;
+                Tools.ShowMessage(strings.DumpOre, _designatedOreLocation.Value);
+            }
 
-        if (SetOreLocationKeybind.Value.IsUp())
-        {
-            DesignatedOreLocation.Value = MainGame.me.player_pos;
-            Tools.ShowMessage(strings.DumpOre, DesignatedOreLocation.Value);
-        }
-
-        if (SetStoneLocationKeybind.Value.IsUp())
-        {
-            DesignatedStoneLocation.Value = MainGame.me.player_pos;
-            Tools.ShowMessage(strings.DumpStone, DesignatedStoneLocation.Value);
+            if (_setStoneLocationKeybind.Value.IsUp())
+            {
+                _designatedStoneLocation.Value = MainGame.me.player_pos;
+                Tools.ShowMessage(strings.DumpStone, _designatedStoneLocation.Value);
+            }
         }
     }
 }

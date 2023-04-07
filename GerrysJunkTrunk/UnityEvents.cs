@@ -31,7 +31,7 @@ public partial class Plugin
 
     private static void ShowIntroMessageIfNeeded()
     {
-        if (InternalShowIntroMessage.Value)
+        if (_internalShowIntroMessage.Value)
         {
             ShowIntroMessage();
         }
@@ -39,7 +39,7 @@ public partial class Plugin
 
     private static void UpdateShippingBox(CraftDefinition sbCraft, WorldGameObject shippingBoxInstance = null)
     {
-        if (InternalShippingBoxBuilt.Value && _shippingBox == null)
+        if (_internalShippingBoxBuilt.Value && _shippingBox == null)
         {
             _shippingBox = shippingBoxInstance ? shippingBoxInstance : FindObjectsOfType<WorldGameObject>(true)
                 .FirstOrDefault(x => string.Equals(x.custom_tag, ShippingBoxTag));
@@ -47,13 +47,13 @@ public partial class Plugin
             if (_shippingBox == null)
             {
                 WriteLog("No Shipping Box Found!");
-                InternalShippingBoxBuilt.Value = false;
+                _internalShippingBoxBuilt.Value = false;
                 sbCraft.hidden = false;
             }
             else
             {
                 WriteLog($"Found Shipping Box at {_shippingBox.pos3}");
-                InternalShippingBoxBuilt.Value = true;
+                _internalShippingBoxBuilt.Value = true;
                 _shippingBox.data.drop_zone_id = ShippingBoxTag;
 
                 var invSize = UnlockedShippingBoxExpansion() ? LargeInvSize : SmallInvSize;

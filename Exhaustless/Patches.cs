@@ -15,19 +15,7 @@ public static class Patches
         ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor,
         ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword,
     };
-
     
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(BuffsLogics), nameof(BuffsLogics.AddBuff))]
-    public static void BuffsLogics_AddBuff(ref string buff_id)
-    {
-        if (!Plugin.YawnMessage.Value) return;
-        if (buff_id.Equals("buff_tired"))
-            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-        MainGame.me.player.Say(strings.Yawn, null, null,
-            SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
-    }
-
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.TrySpendPlayerGratitudePoints))]
@@ -36,13 +24,10 @@ public static class Patches
         if (Plugin.SpendHalfGratitude.Value) value /= 2f;
     }
 
-    //TODO: Attach this to the Action
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
-    public static void GameBalance_LoadGameBalance()
+    public static void GameBalance_LoadGameBalance(GameBalance gameBalance)
     {
         if (!Plugin.MakeToolsLastLonger.Value) return;
-        foreach (var itemDef in GameBalance.me.items_data.Where(a => ToolItems.Contains(a.type)))
+        foreach (var itemDef in gameBalance.items_data.Where(a => ToolItems.Contains(a.type)))
         {
             if (itemDef.durability_decrease_on_use)
             {

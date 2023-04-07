@@ -123,10 +123,4 @@
   <data name="LuckyHadAnotherPartTwo" xml:space="preserve">
     <value>¡sobre mí!</value>
   </data>
-  <data name="Yawn" xml:space="preserve">
-    <value>Bostezo... *se frota los ojos*...</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>¡Configuración recargada!</value>
-  </data>
 </root>

@@ -15,14 +15,11 @@ public partial class Plugin
     {
         if (error)
         {
-            Log.LogError($"{message}");
+            Log.LogError(message);
         }
-        else
+        else if (_debug.Value)
         {
-            if (Debug.Value)
-            {
-                Log.LogInfo($"{message}");
-            }
+            Log.LogInfo(message);
         }
     }
 
@@ -44,13 +41,17 @@ public partial class Plugin
         var tupleList = new List<(int, int)>(horizontal * vertical);
 
         for (var x = 0; x < vertical; ++x)
-        for (var y = 0; y < horizontal; ++y)
-            tupleList.Add((x, y));
+        {
+            for (var y = 0; y < horizontal; ++y)
+            {
+                tupleList.Add((x, y));
+            }
+        }
 
         var spot = tupleList.RandomElement();
-        tupleList.Remove(spot);
         return spot;
     }
+
 
     private static void ShowLootAddedIcon(Item item)
     {
@@ -63,10 +64,7 @@ public partial class Plugin
     private static void TeleportItem(BaseCharacterComponent __instance, Item item)
     {
         var pwo = MainGame.me.player;
-        var needEnergy = EnergyRequirement;
-        if (Plugin.DisableImmersionMode.Value) needEnergy = 0f;
-
-        if (pwo.IsPlayerInvulnerable()) needEnergy = 0f;
+        var needEnergy = _disableImmersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
 
         if (pwo.energy >= needEnergy)
         {
@@ -74,16 +72,11 @@ public partial class Plugin
             EffectBubblesManager.ShowStackedEnergy(pwo, -needEnergy);
 
             var loc = GetGridLocation();
+            float xAdjustment = loc.Item1 * 75;
 
-            _xAdjustment = loc.Item1 * 75;
-
-            var timber = Plugin.DesignatedTimberLocation.Value;
-            var ore = Plugin.DesignatedOreLocation.Value;
-            var stone = Plugin.DesignatedStoneLocation.Value;
-
-            timber.x += _xAdjustment;
-            ore.x += _xAdjustment;
-            stone.x += _xAdjustment;
+            var timber = _designatedTimberLocation.Value + new Vector3(xAdjustment, 0, 0);
+            var ore = _designatedOreLocation.Value + new Vector3(xAdjustment, 0, 0);
+            var stone = _designatedStoneLocation.Value + new Vector3(xAdjustment, 0, 0);
 
             var location = item.id switch
             {
@@ -102,43 +95,36 @@ public partial class Plugin
         {
             DropObjectAndNull(__instance, item);
 
-            if (Time.time - _lastBubbleTime < 0.5f) return;
+            if (Time.time - _lastBubbleTime >= 0.5f)
+            {
+                _lastBubbleTime = Time.time;
 
-            _lastBubbleTime = Time.time;
-
-            EffectBubblesManager.ShowImmediately(pwo.bubble_pos,
-                GJL.L("not_enough_something", $"(en)"),
-                EffectBubblesManager.BubbleColor.Energy, true, 1f);
-            WriteLog($"Not enough energy to teleport. Dropping.");
+                EffectBubblesManager.ShowImmediately(pwo.bubble_pos,
+                    GJL.L("not_enough_something", $"(en)"),
+                    EffectBubblesManager.BubbleColor.Energy, true, 1f);
+                WriteLog($"Not enough energy to teleport. Dropping.");
+            }
         }
     }
 
-    private static bool TryPutToInventoryAndNull(BaseCharacterComponent __instance, WorldGameObject wgo,
-        List<Item> itemsToInsert)
-    {
-        List<Item> failed = new();
-        failed.Clear();
-        var pwo = MainGame.me.player;
-        var needEnergy = EnergyRequirement;
-        if (Plugin.DisableImmersionMode.Value) needEnergy = 0f;
 
-        if (pwo.IsPlayerInvulnerable()) needEnergy = 0f;
+    private static bool TryPutToInventoryAndNull(BaseCharacterComponent __instance, WorldGameObject wgo, List<Item> itemsToInsert)
+    {
+        var pwo = MainGame.me.player;
+        var needEnergy = _disableImmersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
 
         if (pwo.energy >= needEnergy)
         {
-            wgo.TryPutToInventory(itemsToInsert, out failed);
-            if (failed.Count <= 0)
+            wgo.TryPutToInventory(itemsToInsert, out var failed);
+            if (failed.Count == 0)
             {
                 pwo.energy -= needEnergy;
                 EffectBubblesManager.ShowStackedEnergy(pwo, -needEnergy);
                 __instance.SetOverheadItem(null);
                 return true;
             }
-
-            return false;
         }
-
-        if (Time.time - _lastBubbleTime > 0.5f)
+        else if (Time.time - _lastBubbleTime > 0.5f)
         {
             _lastBubbleTime = Time.time;
             EffectBubblesManager.ShowImmediately(pwo.bubble_pos,
@@ -148,6 +134,7 @@ public partial class Plugin
 
         return false;
     }
+
 
     private struct Constants
     {
@@ -170,17 +157,18 @@ public partial class Plugin
     // ReSharper disable once SuggestBaseTypeForParameter
     private static void RemoveStockpile(WorldGameObject wgo)
     {
-        var stockpile = SortedStockpiles.Find(a => a.GetStockpileObject() == wgo);
+        var stockpile = SortedStockpiles.Find(a => a.Wgo == wgo);
         if (stockpile != null)
         {
-            WriteLog($"Removed stockpile: location: {stockpile.GetLocation()}, type: {stockpile.GetStockpileType()}, distance: {stockpile.GetDistanceFromPlayer()}");
+            WriteLog($"Removed stockpile: location: {stockpile.Location}, type: {stockpile.Type}, distance: {stockpile.DistanceFromPlayer}");
             SortedStockpiles.Remove(stockpile);
         }
         else
         {
-            WriteLog($"Error removing stockpile (null??).");
+            WriteLog($"Error removing stockpile (null??).", error: true);
         }
     }
+
 
     private static Vector3 GetLocation(WorldGameObject wgo)
     {
@@ -195,43 +183,32 @@ public partial class Plugin
 
     private static Stockpile.StockpileType GetStockpileType(WorldGameObject wgo)
     {
-        Stockpile.StockpileType type;
-        if (wgo.obj_id.Contains(Constants.ItemObjectId.Ore))
+        return wgo.obj_id switch
         {
-            type = Stockpile.StockpileType.Ore;
-        }
-        else if (wgo.obj_id.Contains(Constants.ItemObjectId.Stone))
-        {
-            type = Stockpile.StockpileType.Stone;
-        }
-        else if (wgo.obj_id.Contains(Constants.ItemObjectId.Timber))
-        {
-            type = Stockpile.StockpileType.Timber;
-        }
-        else
-        {
-            type = Stockpile.StockpileType.Unknown;
-        }
-
-        return type;
+            { } id when id.Contains(Constants.ItemObjectId.Ore) => Stockpile.StockpileType.Ore,
+            { } id when id.Contains(Constants.ItemObjectId.Stone) => Stockpile.StockpileType.Stone,
+            { } id when id.Contains(Constants.ItemObjectId.Timber) => Stockpile.StockpileType.Timber,
+            _ => Stockpile.StockpileType.Unknown,
+        };
     }
+
 
     private static bool AddStockpile(WorldGameObject stockpile)
     {
-        var exists = SortedStockpiles.Find(a => a.GetStockpileObject() == stockpile);
+        var exists = SortedStockpiles.Find(a => a.Wgo == stockpile);
         if (exists != null)
         {
-            exists.SetDistanceFromPlayer(GetDistance(stockpile));
+            exists.DistanceFromPlayer = GetDistance(stockpile);
             return false;
         }
 
-        var location = GetLocation(stockpile);
-
-        var distance = GetDistance(stockpile);
-
-        var type = GetStockpileType(stockpile);
-
-        var newStockpile = new Stockpile(location, type, distance, stockpile);
+        var newStockpile = new Stockpile
+        (
+            GetLocation(stockpile),
+            GetStockpileType(stockpile),
+            GetDistance(stockpile),
+            stockpile
+        );
 
         SortedStockpiles.Add(newStockpile);
 
@@ -242,22 +219,19 @@ public partial class Plugin
 
     private static bool OverheadItemIsHeavy(Item item)
     {
-        return item.id.Contains(Constants.ItemDefinitionId.Wood) ||
-               item.id.Contains(Constants.ItemDefinitionId.Ore) ||
-               item.id.Contains(Constants.ItemDefinitionId.Stone) ||
-               item.id.Contains(Constants.ItemDefinitionId.Marble);
+        return item.id is Constants.ItemDefinitionId.Wood or
+            Constants.ItemDefinitionId.Ore or
+            Constants.ItemDefinitionId.Stone or
+            Constants.ItemDefinitionId.Marble;
     }
 
 
     private static IEnumerator RunFullUpdate()
     {
         if (!MainGame.game_started) yield break;
-        // if (_needScanning)
-        // {
+
         var sw = new Stopwatch();
         sw.Start();
-
-        //scan stockpiles
 
         var allObjects = CrossModFields.WorldObjects;
         _objects = allObjects!
@@ -268,24 +242,25 @@ public partial class Plugin
 
         WriteLog($"[ALH]: Scanning world for stockpiles.");
         _objects.RemoveAll(a => a.obj_id.Contains("decor"));
+
         foreach (var obj in _objects)
         {
             WriteLog($"Found stockpile: location: {GetLocation(obj)}, type: {GetStockpileType(obj)}, distance: {GetDistance(obj)}");
         }
 
-        //update stockpiles
         WriteLog($"[ALH]: Updating stockpiles distance, type etc and sorting by distance to player.");
+
         foreach (var stockpile in _objects.Where(a => a != null))
         {
             WriteLog(AddStockpile(stockpile) ? $"Added stockpile: location: {GetLocation(stockpile)}, type: {GetStockpileType(stockpile)}, distance: {GetDistance(stockpile)}" : $"Stockpile already exists in list - updating distance from player.");
         }
 
-        //sort them by distance from player
-        SortedStockpiles.Sort((x, y) => x.GetDistanceFromPlayer().CompareTo(y.GetDistanceFromPlayer()));
+        SortedStockpiles.Sort((x, y) => x.DistanceFromPlayer.CompareTo(y.DistanceFromPlayer));
 
         sw.Stop();
         WriteLog($"Scanning, updating, and sorting stockpiles took {sw.ElapsedMilliseconds}ms");
     }
+
 
     private static void WorldGameObjectInteract(WorldGameObject obj)
     {

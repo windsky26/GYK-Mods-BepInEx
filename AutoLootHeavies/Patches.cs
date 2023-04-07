@@ -14,50 +14,36 @@ public partial class Plugin
     [HarmonyPriority(1)]
     [HarmonyPatch(typeof(BaseCharacterComponent), nameof(BaseCharacterComponent.DropOverheadItem))]
     public static bool BaseCharacterComponent_DropOverheadItem_Postfix(ref BaseCharacterComponent __instance)
-      //  ref bool __state)
     {
-        if (!__instance.wgo.is_player) return true;
-        if (!OverheadItemIsHeavy(__instance.overhead_item)) return true;
-        //if (!__state) return;
+        if (!__instance.wgo.is_player || !OverheadItemIsHeavy(__instance.overhead_item))
+            return true;
 
-        List<Item> insert = new();
-        var item = __instance.overhead_item;
+        List<Item> insert = new() { __instance.overhead_item };
         var itemId = __instance.overhead_item.id;
-        insert.Clear();
 
-        insert.Add(__instance.overhead_item);
-
-        WriteLog(
-            $"Refreshing and re-sorting stockpile distances.");
+        WriteLog($"Refreshing and re-sorting stockpile distances.");
         foreach (var pile in SortedStockpiles)
-        {
-            var distance = Vector3.Distance(MainGame.me.player_pos, pile.GetStockpileObject().pos3);
-            pile.SetDistanceFromPlayer(distance);
-        }
+            pile.DistanceFromPlayer = Vector3.Distance(MainGame.me.player_pos, pile.Wgo.pos3);
 
-        SortedStockpiles.Sort((x, y) => x.GetDistanceFromPlayer().CompareTo(y.GetDistanceFromPlayer()));
-
+        SortedStockpiles.Sort((x, y) => x.DistanceFromPlayer.CompareTo(y.DistanceFromPlayer));
 
         foreach (var stockpile in SortedStockpiles)
         {
-            WriteLog(
-                $"Trying to insert {itemId} into {stockpile.GetStockpileObject()}, {stockpile.GetDistanceFromPlayer()} units away.");
-            var success = TryPutToInventoryAndNull(__instance, stockpile.GetStockpileObject(), insert);
+            WriteLog($"Trying to insert {itemId} into {stockpile.Wgo}, {stockpile.DistanceFromPlayer} units away.");
+            var success = TryPutToInventoryAndNull(__instance, stockpile.Wgo, insert);
             if (success)
             {
-                WriteLog(
-                    $"Successfully inserted {itemId} into {stockpile.GetStockpileObject()}, {stockpile.GetDistanceFromPlayer()} units away.");
-                ShowLootAddedIcon(item);
+                WriteLog($"Successfully inserted {itemId} into {stockpile.Wgo}, {stockpile.DistanceFromPlayer} units away.");
+                ShowLootAddedIcon(__instance.overhead_item);
                 break;
             }
 
-            WriteLog(
-                $"Failed to insert {itemId} into {stockpile.GetStockpileObject()}, {stockpile.GetDistanceFromPlayer()} units away.");
+            WriteLog($"Failed to insert {itemId} into {stockpile.Wgo}, {stockpile.DistanceFromPlayer} units away.");
         }
 
         if (__instance.overhead_item != null)
         {
-            if (Plugin.TeleportToDumpSiteWhenAllStockPilesFull.Value)
+            if (_teleportToDumpSiteWhenAllStockPilesFull.Value)
             {
                 TeleportItem(__instance, __instance.overhead_item);
                 //WriteLog($"Teleporting {itemId} to dump site.");

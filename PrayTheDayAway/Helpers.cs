@@ -14,13 +14,13 @@ public partial class Plugin
     {
         if (error)
         {
-            Plugin.Log.LogError($"{message}");
+            Log.LogError($"{message}");
         }
         else
         {
-            if (Plugin._debug.Value)
+            if (_debug.Value)
             {
-                Plugin.Log.LogInfo($"{message}");
+                Log.LogInfo($"{message}");
             }
         }
     }

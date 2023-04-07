@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -14,7 +15,7 @@ namespace WheresMaVeggies
     {
         private const string PluginGuid = "p1xel8ted.gyk.wheresmaveggies";
         private const string PluginName = "Where's Ma' Veggies!";
-        private const string PluginVer = "0.1.0";
+        private const string PluginVer = "0.1.1";
 
         internal static ConfigEntry<bool> Debug;
         internal static ManualLogSource Log { get; private set; }
@@ -24,44 +25,29 @@ namespace WheresMaVeggies
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
-            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 498}));
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
-            if (_modEnabled.Value)
-            {
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
+            
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order=2}));
+            _modEnabled.SettingChanged += ApplyPatches;
+            Debug = Config.Bind("2. Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 1}));
+            ApplyPatches(this, null);
         }
 
-        private static void ToggleMod(ConfigEntryBase entry)
+        private static void ApplyPatches(object sender, EventArgs e)
         {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
-
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
         
-            if (ticked)
+            if ( _modEnabled.Value)
             {
-                Log.LogWarning($"Applying patches for {PluginName}");
+                Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());   
             }
             else
             {
-                Log.LogWarning($"Removing patches for {PluginName}");
+                Log.LogInfo($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf(); 
             }
             
-        }
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogError($"Plugin {PluginName} has been disabled!");
         }
     }
 }

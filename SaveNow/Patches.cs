@@ -36,9 +36,9 @@ public partial class Plugin
 
         _sortedTrimmedSaveGames = SortSaveGames();
 
-        if (_sortedTrimmedSaveGames.Count > MaximumSavesVisible.Value)
+        if (_sortedTrimmedSaveGames.Count > _maximumSavesVisible.Value)
         {
-            Resize(_sortedTrimmedSaveGames, MaximumSavesVisible.Value);
+            Resize(_sortedTrimmedSaveGames, _maximumSavesVisible.Value);
         }
 
         slot_datas = _sortedTrimmedSaveGames;
@@ -61,11 +61,11 @@ public partial class Plugin
 
     private static List<SaveSlotData> SortSaveGames()
     {
-        return SortByRealTime.Value
-            ? (AscendingSort.Value
+        return _sortByRealTime.Value
+            ? (_ascendingSort.Value
                 ? AllSaveGames.OrderBy(o => o.real_time).ToList()
                 : AllSaveGames.OrderByDescending(o => o.real_time).ToList())
-            : (AscendingSort.Value
+            : (_ascendingSort.Value
                 ? AllSaveGames.OrderBy(o => o.game_time).ToList()
                 : AllSaveGames.OrderByDescending(o => o.game_time).ToList());
     }
@@ -90,15 +90,15 @@ public partial class Plugin
 
         string CreateMessageText()
         {
-            var baseMessage = ExitToDesktop.Value ? strings.SaveAreYouSureDesktop : strings.SaveAreYouSureMenu;
-            var progressMessage = DisableSaveOnExit.Value || CrossModFields.IsInDungeon ? strings.SaveProgressNotSaved : strings.SaveProgressSaved;
+            var baseMessage = _exitToDesktop.Value ? strings.SaveAreYouSureDesktop : strings.SaveAreYouSureMenu;
+            var progressMessage = _disableSaveOnExit.Value || CrossModFields.IsInDungeon ? strings.SaveProgressNotSaved : strings.SaveProgressSaved;
 
             return $"{baseMessage}?\n\n{progressMessage}.";
         }
 
         void SaveAndExit()
         {
-            if (DisableSaveOnExit.Value || CrossModFields.IsInDungeon)
+            if (_disableSaveOnExit.Value || CrossModFields.IsInDungeon)
             {
                 PerformExit();
             }
@@ -113,7 +113,7 @@ public partial class Plugin
 
         void PerformExit()
         {
-            if (ExitToDesktop.Value)
+            if (_exitToDesktop.Value)
             {
                 GC.Collect();
                 Resources.UnloadUnusedAssets();
@@ -140,7 +140,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.Open))]
     public static void InGameMenuGUI_Open(ref InGameMenuGUI __instance)
     {
-        if (__instance == null || !ExitToDesktop.Value) return;
+        if (__instance == null || !_exitToDesktop.Value) return;
 
         var exitButtons = __instance.GetComponentsInChildren<UIButton>()
             .Where(x => x.name.Contains("exit"));

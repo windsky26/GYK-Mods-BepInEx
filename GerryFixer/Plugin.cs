@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -27,52 +28,41 @@ namespace GerryFixer
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 12,CustomDrawer = ToggleMod}));
-            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 11}));
-            AttemptToFixCutsceneGerrys = Config.Bind("Gerry", "Attempt To Fix Cutscene Gerrys", false, new ConfigDescription("Enable or disable attempts to fix cutscene Gerrys", null, new ConfigurationManagerAttributes {Order = 10}));
-            SpawnTavernCellarGerry = Config.Bind("Gerry", "Spawn Tavern Cellar Gerry", false, new ConfigDescription("Enable or disable spawning Gerry in the tavern cellar", null, new ConfigurationManagerAttributes {Order = 9}));
-            SpawnTavernMorgueGerry = Config.Bind("Gerry", "Spawn Tavern Morgue Gerry", false, new ConfigDescription("Enable or disable spawning Gerry in the tavern morgue", null, new ConfigurationManagerAttributes {Order = 8}));
-           
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
+            InitConfiguration();
+            ApplyPatches(this, null);
+        }
+
+        private void InitConfiguration()
+        {
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 5}));
+            _modEnabled.SettingChanged += ApplyPatches;
+    
+            Debug = Config.Bind("2. Advanced", "Debug Logging", false, new ConfigDescription("Toggle debug logging on or off", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 4}));
+
+            AttemptToFixCutsceneGerrys = Config.Bind("3. Gerry", "Attempt To Fix Cutscene Gerrys", false, new ConfigDescription("Attempt to fix cutscene freezes/crashes due to Gerry not appearing", null, new ConfigurationManagerAttributes {Order = 3}));
+    
+            SpawnTavernCellarGerry = Config.Bind("3. Gerry", "Spawn Tavern Cellar Gerry", false, new ConfigDescription("Choose whether to spawn Gerry in the tavern cellar (if he does not exist)", null, new ConfigurationManagerAttributes {Order = 2}));
+    
+            SpawnTavernMorgueGerry = Config.Bind("3. Gerry", "Spawn Tavern Morgue Gerry", false, new ConfigDescription("Choose whether to spawn Gerry in the tavern morgue (if he does not exist)", null, new ConfigurationManagerAttributes {Order = 1}));
+        }
+
+        
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
+        {
             if (_modEnabled.Value)
             {
                 Actions.GameStartedPlaying += Patches.FixGerry;
-                Log.LogWarning($"Applying patches for {PluginName}");
+                Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
-        }
-        
-
-        private static void ToggleMod(ConfigEntryBase entry)
-        {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
-
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
-        
-            if (ticked)
-            {
-                Actions.GameStartedPlaying += Patches.FixGerry;
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());   
             }
             else
             {
                 Actions.GameStartedPlaying -= Patches.FixGerry;
-                Log.LogWarning($"Removing patches for {PluginName}");
-                _harmony.UnpatchSelf(); 
+                Log.LogInfo($"Removing patches for {PluginName}");
+                _harmony.UnpatchSelf();
             }
-            
-        }
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogError($"Plugin {PluginName} has been disabled!");
         }
     }
 }

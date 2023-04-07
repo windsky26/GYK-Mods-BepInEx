@@ -12,7 +12,7 @@ public static class Helpers
         {
             if (Plugin.Debug.Value)
             {
-                Plugin.Log.LogWarning($"{message}");
+                Plugin.Log.LogInfo($"{message}");
             }
         }
     }

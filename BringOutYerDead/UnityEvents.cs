@@ -50,10 +50,10 @@ public partial class Plugin
 
             _strikeDone = _donkey.GetParam("strike_completed") > 0f;
 
-            if (dataGetParam < Plugin.DonkeySpeed.Value || getParam < Plugin.DonkeySpeed.Value)
+            if (dataGetParam < DonkeySpeed.Value || getParam < DonkeySpeed.Value)
             {
                 Helpers.Log($"TDU: Donkey old speeds: DataGetParam: {dataGetParam}, GetParam: {getParam}");
-                _donkey.components.character.SetSpeed(Plugin.DonkeySpeed.Value);
+                _donkey.components.character.SetSpeed(DonkeySpeed.Value);
                 Helpers.Log($"TDU: Donkey new speeds: DataGetParam: {dataGetParam}, GetParam: {getParam}");
             }
 
@@ -85,7 +85,7 @@ public partial class Plugin
         switch (TimeOfDay.me.time_of_day_enum)
         {
             case TimeOfDay.TimeOfDayEnum.Night:
-                if (!Plugin._nightDelivery.Value)
+                if (!_nightDelivery.Value)
                 {
                     Helpers.Log("Night delivery is disabled in config!");
                     break;
@@ -109,7 +109,7 @@ public partial class Plugin
 
                 break;
             case TimeOfDay.TimeOfDayEnum.Morning:
-                if (!Plugin._morningDelivery.Value)
+                if (!_morningDelivery.Value)
                 {
                     Helpers.Log("Morning delivery is disabled in config!");
                     break;
@@ -132,7 +132,7 @@ public partial class Plugin
 
                 break;
             case TimeOfDay.TimeOfDayEnum.Day:
-                if (!Plugin._dayDelivery.Value)
+                if (!_dayDelivery.Value)
                 {
                     Helpers.Log("Day delivery is disabled in config!");
                     return;
@@ -155,7 +155,7 @@ public partial class Plugin
 
                 break;
             case TimeOfDay.TimeOfDayEnum.Evening:
-                if (!Plugin._eveningDelivery.Value)
+                if (!_eveningDelivery.Value)
                 {
                     Helpers.Log("Evening delivery is disabled in config!");
                     return;

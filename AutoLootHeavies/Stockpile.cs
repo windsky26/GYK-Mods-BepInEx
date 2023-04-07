@@ -1,52 +1,28 @@
 ﻿using UnityEngine;
 
-namespace AutoLootHeavies;
-
-public class Stockpile
+namespace AutoLootHeavies
 {
-    private readonly Vector3 _location;
-    private readonly StockpileType _type;
-    private float _distanceFromPlayer;
-    private readonly WorldGameObject _wgo;
-
-    internal Stockpile(Vector3 location, StockpileType type, float distanceFromPlayer, WorldGameObject wgo)
+    public class Stockpile
     {
-        _location = location;
-        _type = type;
-        _distanceFromPlayer = distanceFromPlayer;
-        _wgo = wgo;
-    }
+        public Vector3 Location { get; }
+        public StockpileType Type { get; }
+        public float DistanceFromPlayer { get; set; }
+        public WorldGameObject Wgo { get; }
 
-    internal enum StockpileType
-    {
-        Timber,
-        Ore,
-        Stone,
-        Unknown
-    }
+        public Stockpile(Vector3 location, StockpileType type, float distanceFromPlayer, WorldGameObject wgo)
+        {
+            Location = location;
+            Type = type;
+            DistanceFromPlayer = distanceFromPlayer;
+            Wgo = wgo;
+        }
 
-    public WorldGameObject GetStockpileObject()
-    {
-        return _wgo;
-    }
-
-    public Vector3 GetLocation()
-    {
-        return _location;
-    }
-
-    internal StockpileType GetStockpileType()
-    {
-        return _type;
-    }
-
-    public float GetDistanceFromPlayer()
-    {
-        return _distanceFromPlayer;
-    }
-
-    public void SetDistanceFromPlayer(float distance)
-    {
-        _distanceFromPlayer = distance;
+        public enum StockpileType
+        {
+            Timber,
+            Ore,
+            Stone,
+            Unknown
+        }
     }
 }

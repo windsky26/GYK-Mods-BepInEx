@@ -123,10 +123,4 @@
   <data name="LuckyHadAnotherPartTwo" xml:space="preserve">
     <value>나에!</value>
   </data>
-  <data name="Yawn" xml:space="preserve">
-    <value>하품...*눈 비비다*..</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>구성이 다시 로드되었습니다!</value>
-  </data>
 </root>

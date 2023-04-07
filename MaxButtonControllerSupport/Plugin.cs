@@ -8,7 +8,6 @@ using GYKHelper;
 using HarmonyLib;
 using MaxButton;
 using Rewired;
-using UnityEngine;
 
 namespace MaxButtonControllerSupport;
 
@@ -18,8 +17,8 @@ public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.maxbuttoncontrollersupport";
     private const string PluginName = "Max Button Controller Support";
-    private const string PluginVer = "1.3.1";
-    
+    private const string PluginVer = "1.3.2";
+
     private static ManualLogSource Log { get; set; }
     private static Harmony _harmony;
 
@@ -27,98 +26,96 @@ public partial class Plugin : BaseUnityPlugin
 
     private void Awake()
     {
-        _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
-        
         Log = Logger;
         _harmony = new Harmony(PluginGuid);
+        _modEnabled = Config.Bind("General", "Enabled", true, $"Toggle {PluginName}");
+        _modEnabled.SettingChanged += ApplyPatches;
+        ApplyPatches(this, null);
+    }
+
+    private static void ApplyPatches(object sender, EventArgs eventArgs)
+    {
         if (_modEnabled.Value)
         {
             Actions.WorldGameObjectInteractPrefix += WorldGameObject_Interact;
-            Log.LogWarning($"Applying patches for {PluginName}");
-            _harmony.PatchAll(Assembly.GetExecutingAssembly());
-        }
-    }
-
-    private static void ToggleMod(ConfigEntryBase entry)
-    {
-        var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
-
-        if (ticked == _modEnabled.Value) return;
-        _modEnabled.Value = ticked;
-
-        if (ticked)
-        {
-            Actions.WorldGameObjectInteractPrefix += WorldGameObject_Interact;
-            Log.LogWarning($"Applying patches for {PluginName}");
+            Log.LogInfo($"Applying patches for {PluginName}");
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
         else
         {
             Actions.WorldGameObjectInteractPrefix -= WorldGameObject_Interact;
-            Log.LogWarning($"Removing patches for {PluginName}");
+            Log.LogInfo($"Removing patches for {PluginName}");
             _harmony.UnpatchSelf();
         }
     }
 
-    private void OnEnable()
-    {
-        Log.LogInfo($"Plugin {PluginName} has been enabled!");
-    }
-
-    private void OnDisable()
-    {
-        Log.LogError($"Plugin {PluginName} has been disabled!");
-    }
-
     private void Update()
     {
-        if (!MainGame.game_started || MainGame.me.player.is_dead || MainGame.me.player.IsDisabled()) return;
-        if (FloatingWorldGameObject.cur_floating != null) return;
+        if (!IsUpdateConditionsMet()) return;
 
-        //RT = 19
-        if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(19) && _itemCountGuiOpen)
+        HandleGamepadInput();
+    }
+
+    private static bool IsUpdateConditionsMet()
+    {
+        return MainGame.game_started && !MainGame.me.player.is_dead && !MainGame.me.player.IsDisabled() && FloatingWorldGameObject.cur_floating == null;
+    }
+
+    private static void HandleGamepadInput()
+    {
+        if (!LazyInput.gamepad_active) return;
+        
+        var player = ReInput.players.GetPlayer(0);
+        if (_itemCountGuiOpen)
         {
-            typeof(MaxButtonVendor).GetMethod("SetMaxPrice", AccessTools.all)
-                ?.Invoke(typeof(MaxButtonVendor), new object[]
-                {
-                    _slider
-                });
+            HandleItemCountGuiInput(player);
+        }
+        else if (_craftGuiOpen && !_unsafeInteraction)
+        {
+            HandleCraftGuiInput(player);
+        }
+    }
+
+    private static void HandleItemCountGuiInput(Player player)
+    {
+        if (player.GetButtonDown(19))
+        {
+            InvokeMaxButtonVendorMethod("SetMaxPrice", new object[] {_slider});
         }
 
-        //LT = 20
-        if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(20) && _itemCountGuiOpen)
+        if (player.GetButtonDown(20))
         {
-            typeof(MaxButtonVendor).GetMethod("SetSliderValue", AccessTools.all)
-                ?.Invoke(typeof(MaxButtonVendor), new object[]
-                {
-                    _slider,
-                    1
-                });
+            InvokeMaxButtonVendorMethod("SetSliderValue", new object[] {_slider, 1});
+        }
+    }
+
+    private static void HandleCraftGuiInput(Player player)
+    {
+        if (IsCraftGuiInputValid()) return;
+
+        if (player.GetButtonDown(19))
+        {
+            InvokeMaxButtonCraftingMethod("SetMaximumAmount", new object[] {_craftItemGui, _crafteryWgo});
         }
 
-        //RT = 19
-        if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(19) && _craftGuiOpen && !_unsafeInteraction)
+        if (player.GetButtonDown(20))
         {
-            if (_craftItemGui.current_craft.needs.Any(need => need.is_multiquality)) return;
-            if (_craftItemGui.current_craft.one_time_craft) return;
-            typeof(MaxButtonCrafting).GetMethod("SetMaximumAmount", AccessTools.all)
-                ?.Invoke(typeof(MaxButtonCrafting), new object[]
-                {
-                    _craftItemGui,
-                    _crafteryWgo
-                });
+            InvokeMaxButtonCraftingMethod("SetMinimumAmount", new object[] {_craftItemGui});
         }
+    }
 
-        //LT = 20
-        if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(20) && _craftGuiOpen && !_unsafeInteraction)
-        {
-            if (_craftItemGui.current_craft.needs.Any(need => need.is_multiquality)) return;
-            if (_craftItemGui.current_craft.one_time_craft) return;
-            typeof(MaxButtonCrafting).GetMethod("SetMinimumAmount", AccessTools.all)
-                ?.Invoke(typeof(MaxButtonCrafting), new object[]
-                {
-                    _craftItemGui
-                });
-        }
+    private static bool IsCraftGuiInputValid()
+    {
+        return _craftItemGui.current_craft.needs.Any(need => need.is_multiquality) || _craftItemGui.current_craft.one_time_craft;
+    }
+
+    private static void InvokeMaxButtonVendorMethod(string methodName, object[] parameters)
+    {
+        AccessTools.Method(typeof(MaxButtonVendor), methodName)?.Invoke(typeof(MaxButtonVendor), parameters);
+    }
+
+    private static void InvokeMaxButtonCraftingMethod(string methodName, object[] parameters)
+    {
+        AccessTools.Method(typeof(MaxButtonCrafting), methodName)?.Invoke(typeof(MaxButtonCrafting), parameters);
     }
 }

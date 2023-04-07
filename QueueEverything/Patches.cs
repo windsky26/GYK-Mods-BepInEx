@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Threading;
+using BepInEx;
+using BepInEx.Configuration;
 using GYKHelper;
 using HarmonyLib;
-using QueueEverything.lang;
 using UnityEngine;
 
 namespace QueueEverything;
@@ -13,33 +14,25 @@ namespace QueueEverything;
 [HarmonyPatch]
 public partial class Plugin
 {
-    [HarmonyAfter("p1xel8ted.gyk.gykhelper")]
+    [HarmonyAfter("p1xel8ted.gyk.gykhelper", "p1xel8ted.gyk.fastercraftreloaded")]
     [HarmonyPostfix, HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
     public static void MainMenuGUI_Open()
     {
         _fasterCraftEnabled = false;
         _fasterCraftReloaded = false;
-        _originalFasterCraft = false;
+        //  _originalFasterCraft = false;
         _exhaustlessEnabled = false;
 
-        _fasterCraftReloaded = Tools.ModLoaded("FasterCraftReloaded", "FasterCraftReloaded.dll", "FasterCraft Reloaded!") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.FasterCraftReloaded");
-        _originalFasterCraft = Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod");
-        _exhaustlessEnabled = Tools.ModLoaded("Exhaustless", "Exhaust-less.dll", "Exhaust-less") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less");
+        _fasterCraftReloaded = Harmony.HasAnyPatches("p1xel8ted.gyk.fastercraftreloaded");
 
-        //dont remove these comments
-        // if (_fasterCraftReloaded)
-        // {
-        //     _fasterCfg = FcConfig.GetOptions();
-        //     _timeAdjustment = _fasterCfg.craftSpeedMultiplier;
-        //     _fasterCraftEnabled = true;
-        //     WriteLog($"FasterCraft Reloaded! detected, using its config.");
-        // }
-        // else if (_originalFasterCraft)
-        // {
-        //     _fasterCraftEnabled = true;
-        //     WriteLog($"OG FasterCraft detected, using its config.");
-        //     LoadFasterCraftConfig();
-        // }
+        _exhaustlessEnabled = Tools.ModLoaded("Exhaustless", "Exhaust-less.dll", "Exhaust-less") || Harmony.HasAnyPatches("p1xel8ted.gyk.exhaust-less");
+        
+        if (_fasterCraftReloaded)
+        {
+            _timeAdjustment = _fcTimeAdjustment.Value;
+            _fasterCraftEnabled = true;
+            WriteLog($"FasterCraft Reloaded! detected, using its config.");
+        }
 
         if (_exhaustlessEnabled)
         {
@@ -78,12 +71,12 @@ public partial class Plugin
 
         var craftInfo = GetCraftInfo(__instance, multiInventory);
 
-        if (AutoMaxMultiQualCrafts.Value && craftInfo.IsMultiQualCraft)
+        if (_autoMaxMultiQualCrafts.Value && craftInfo.IsMultiQualCraft)
         {
             __instance._amount = craftInfo.Min;
         }
 
-        if (AutoMaxNormalCrafts.Value && !craftInfo.IsMultiQualCraft && craftInfo.NotCraftable.Count == 0)
+        if (_autoMaxNormalCrafts.Value && !craftInfo.IsMultiQualCraft && craftInfo.NotCraftable.Count == 0)
         {
             __instance._amount = craftInfo.Min;
         }
@@ -135,7 +128,7 @@ public partial class Plugin
                 }
 
                 if (bCraftable + sCraftable + gCraftable > 0)
-                    if (AutoSelectHighestQualRecipe.Value)
+                    if (_autoSelectHighestQualRecipe.Value)
                     {
                         if (gCraftable > 0)
                             __instance._multiquality_ids[i] = itemID + ":3";
@@ -182,7 +175,7 @@ public partial class Plugin
 
         private static void AdjustFireRequirements(CraftDefinition craft)
         {
-            if (!HalfFireRequirements.Value) return;
+            if (!_halfFireRequirements.Value) return;
 
             foreach (var item in craft.needs_from_wgo.Where(item => item.id == "fire"))
             {
@@ -192,7 +185,7 @@ public partial class Plugin
 
         private static void ApplyForcedMultiCraft(CraftDefinition craft)
         {
-            if (!ForceMultiCraft.Value || craft.is_auto || IsUnsafeDefinition(craft)) return;
+            if (!_forceMultiCraft.Value || craft.is_auto || IsUnsafeDefinition(craft)) return;
 
             craft.force_multi_craft = true;
             craft.disable_multi_craft = false;
@@ -200,7 +193,7 @@ public partial class Plugin
 
         private static void MakeCraftAuto(CraftDefinition craft)
         {
-            if (craft.is_auto || !MakeEverythingAuto.Value || IsUnsafeDefinition(craft) || ShouldExcludeCraftFromAuto(craft)) return;
+            if (craft.is_auto || !_makeEverythingAuto.Value || IsUnsafeDefinition(craft) || ShouldExcludeCraftFromAuto(craft)) return;
 
             var craftEnergyTime = craft.energy.EvaluateFloat(MainGame.me.player);
             craftEnergyTime *= 1.50f;
@@ -216,7 +209,7 @@ public partial class Plugin
 
         private static bool ShouldExcludeCraftFromAuto(CraftDefinition craft)
         {
-            if (!MakeHandTasksAuto.Value)
+            if (!_makeHandTasksAuto.Value)
             {
                 return craft.craft_in.Any(craftIn =>
                     craftIn.Contains("grave") ||
@@ -240,7 +233,7 @@ public partial class Plugin
         [HarmonyPrefix, HarmonyPatch(nameof(CraftComponent.CraftReally))]
         public static void CraftReally_Prefix()
         {
-            if (!MainGame.game_started || !MakeEverythingAuto.Value) return;
+            if (!MainGame.game_started || !_makeEverythingAuto.Value) return;
 
             foreach (var wgo in currentlyCrafting.Where(wgo => wgo != null && wgo.components.craft.is_crafting && !wgo.has_linked_worker))
             {
@@ -256,7 +249,7 @@ public partial class Plugin
         [HarmonyPostfix, HarmonyPatch(nameof(CraftDefinition.CanCraftMultiple))]
         public static void CraftDefinition_CanCraftMultiple(ref CraftDefinition __instance, ref bool __result)
         {
-            if (!ForceMultiCraft.Value || IsUnsafeDefinition(__instance))
+            if (!_forceMultiCraft.Value || IsUnsafeDefinition(__instance))
             {
                 WriteLog($"[Unsafe]: {__instance.id}, CraftTimeZero: {__instance.craft_time_is_zero}");
                 __result = false;
@@ -458,7 +451,7 @@ public partial class Plugin
         public static void ExpandItem_Postfix(ref CraftGUI __instance, ref CraftItemGUI craft_item_gui)
         {
             if (IsUnsafeDefinition(craft_item_gui.craft_definition)) return;
-            if (AutoSelectCraftButtonWithController.Value && LazyInput.gamepad_active)
+            if (_autoSelectCraftButtonWithController.Value && LazyInput.gamepad_active)
             {
                 foreach (var uiButton in craft_item_gui.GetComponentsInChildren<UIButton>().Where(button => button.name.Contains("craft")))
                 {
@@ -501,7 +494,7 @@ public partial class Plugin
         [HarmonyPostfix, HarmonyPatch(nameof(CraftItemGUI.OnCraftPressed))]
         public static void OnCraftPressed_Postfix(WorldGameObject __state)
         {
-            if (!MakeEverythingAuto.Value || __state == null || __state.linked_worker != null || __state.has_linked_worker) return;
+            if (!_makeEverythingAuto.Value || __state == null || __state.linked_worker != null || __state.has_linked_worker) return;
 
             currentlyCrafting.Add(__state);
             __state.OnWorkAction();
@@ -519,13 +512,13 @@ public partial class Plugin
             var time = __instance.craft_definition.craft_time.EvaluateFloat(crafteryWgo);
             ApplyFasterCraft(ref time);
 
-            time = Mathf.CeilToInt(time);
-            time *= __instance._amount;
-
-            if (time >= 300 && !DisableComeBackLaterThoughts.Value)
-            {
-                ShowComeBackLaterMessage(time);
-            }
+            // time = Mathf.CeilToInt(time);
+            // time *= __instance._amount;
+            //
+            // if (time >= 300 && !_disableComeBackLaterThoughts.Value)
+            // {
+            //     ShowComeBackLaterMessage(time);
+            // }
         }
 
         private static void ApplyFasterCraft(ref float time)
@@ -538,16 +531,16 @@ public partial class Plugin
                 time *= _timeAdjustment;
         }
 
-        private static void ShowComeBackLaterMessage(float time)
-        {
-            var endTime = time / 60;
-            var message = endTime % 1 == 0
-                ? $"Hmmm guess I'll come back in {time / 60:0} minutes..."
-                : $"Hmmm guess I'll come back in roughly {time / 60:0} minutes...";
-
-            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-            Tools.ShowMessage(CrossModFields.Lang.StartsWith("en") ? message : strings.Message, Vector3.zero, sayAsPlayer: true);
-        }
+        // private static void ShowComeBackLaterMessage(float time)
+        // {
+        //     var endTime = time / 60;
+        //     var message = endTime % 1 == 0
+        //         ? $"Hmmm guess I'll come back in {time / 60:0} minutes..."
+        //         : $"Hmmm guess I'll come back in roughly {time / 60:0} minutes...";
+        //
+        //     Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+        //     Tools.ShowMessage(CrossModFields.Lang.StartsWith("en") ? message : strings.Message, Vector3.zero, sayAsPlayer: true);
+        // }
     }
 
     // private static void OnReturnToMenu()

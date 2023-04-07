@@ -28,7 +28,7 @@ public partial class Plugin
         }
         else
         {
-            if (Debug.Value)
+            if (_debug.Value)
             {
                 Log.LogInfo($"{message}");
             }
@@ -45,7 +45,7 @@ public partial class Plugin
             file.WriteLine("{0}={1}", entry.Key, result);
         }
 
-        if (BackupSavesOnSave.Value)
+        if (_backupSavesOnSave.Value)
         {
             MainGame.me.StartCoroutine(BackUpSaveDirectory());
         }
@@ -115,11 +115,11 @@ public partial class Plugin
         WriteSavesToFile();
 
         if (menuExit) return true;
-        if (!TurnOffSaveGameNotificationText.Value)
+        if (!_turnOffSaveGameNotificationText.Value)
         {
             if (!saveFile.Equals(string.Empty))
             {
-                if (NewFileOnAutoSave.Value)
+                if (_newFileOnAutoSave.Value)
                     Tools.ShowMessage(strings.AutoSave + ": " + saveFile, Vector3.zero);
                 else
                     Tools.ShowMessage(strings.AutoSave + "!", Vector3.zero);
@@ -150,16 +150,16 @@ public partial class Plugin
             SaveLocationsDictionary.TryGetValue(mainGame.save_slot.filename_no_extension, out var posVector3);
         var pos = foundLocation ? posVector3 : homeVector;
         mainGame.player.PlaceAtPos(pos);
-        if (!TurnOffTravelMessages.Value) Tools.ShowMessage(strings.Rush, Vector3.zero);
+        if (!_turnOffTravelMessages.Value) Tools.ShowMessage(strings.Rush, Vector3.zero);
 
         StartTimer();
     }
 
     private static void StartTimer()
     {
-        if (AutoSaveConfig.Value)
+        if (_autoSaveConfig.Value)
         {
-            GJTimer.AddTimer(SaveInterval.Value, AutoSave);
+            GJTimer.AddTimer(_saveInterval.Value, AutoSave);
         }
     }
 
@@ -169,7 +169,7 @@ public partial class Plugin
         if (EnvironmentEngine.me.IsTimeStopped()) return;
         if (!Application.isFocused) return;
         if (!_canSave) return;
-        if (!NewFileOnAutoSave.Value)
+        if (!_newFileOnAutoSave.Value)
         {
             PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
                 delegate { SaveLocation(false, MainGame.me.save_slot.filename_no_extension); });

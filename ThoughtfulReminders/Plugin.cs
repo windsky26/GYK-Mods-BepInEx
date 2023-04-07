@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Threading;
 using BepInEx;
 using BepInEx.Configuration;
@@ -29,45 +30,30 @@ namespace ThoughtfulReminders
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 3, CustomDrawer = ToggleMod}));
-            SpeechBubblesConfig = Config.Bind("General", "Speech Bubbles", true, new ConfigDescription("Enable or disable speech bubbles", null, new ConfigurationManagerAttributes {Order = 2}));
-            _daysOnlyConfig = Config.Bind("General", "Days Only", false, new ConfigDescription("Enable or disable days only mode", null, new ConfigurationManagerAttributes {Order = 1}));
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
-            if (_modEnabled.Value)
-            {
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
+
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 3}));
+            _modEnabled.SettingChanged += ApplyPatches;
+
+            SpeechBubblesConfig = Config.Bind("1. General", "Speech Bubbles", true, new ConfigDescription("Enable or disable speech bubbles", null, new ConfigurationManagerAttributes {Order = 2}));
+            _daysOnlyConfig = Config.Bind("1. General", "Days Only", false, new ConfigDescription("Enable or disable days only mode", null, new ConfigurationManagerAttributes {Order = 1}));
+
+            ApplyPatches(this, null);
         }
 
-        private static void ToggleMod(ConfigEntryBase entry)
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
         {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
-
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
-
-            if (ticked)
+            if (_modEnabled.Value)
             {
-                Log.LogWarning($"Applying patches for {PluginName}");
+                Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
-                Log.LogWarning($"Removing patches for {PluginName}");
+                Log.LogInfo($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }
-        }
-
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogWarning($"Plugin {PluginName} has been disabled!");
         }
 
         private void Update()

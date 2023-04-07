@@ -11,7 +11,7 @@ public static class Patches
 {
     internal static void FixGerry(MainGame mainGame)
     {
-        Plugin.Log.LogWarning($"Running FixGerry as Player has spawned in.");
+        Plugin.Log.LogInfo($"Running FixGerry as Player has spawned in.");
         if (!MainGame.game_started) return;
         
         if (Plugin.Debug.Value)
@@ -79,7 +79,7 @@ public static class Patches
         if (!custom_tag.Contains("skull")) return;
         if (__result != null) return;
 
-        Plugin.Log.LogWarning($"Object: {custom_tag} not found. Trying to spawn one. This may or may not work.");
+        Plugin.Log.LogInfo($"Object: {custom_tag} not found. Trying to spawn one. This may or may not work.");
         var a = MainGame.me.player_pos;
         var newLoc = new Vector3(a.x, a.y + 100f, a.z);
         __result = WorldMap.SpawnWGO(MainGame.me.world_root, custom_tag, newLoc, custom_tag);

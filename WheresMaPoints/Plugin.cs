@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -14,7 +15,7 @@ namespace WheresMaPoints
     {
         private const string PluginGuid = "p1xel8ted.gyk.wheresmapoints";
         private const string PluginName = "Where's Ma' Points!";
-        private const string PluginVer = "0.2.4";
+        private const string PluginVer = "0.2.5";
 
         internal static ConfigEntry<bool> ShowPointGainAboveKeeper;
         internal static ConfigEntry<bool> StillPlayCollectAudio;
@@ -29,51 +30,42 @@ namespace WheresMaPoints
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod,Order = 5}));
-            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 4}));
-
-            ShowPointGainAboveKeeper = Config.Bind("Visual Feedback", "Show Point Gain Above Keeper", true, new ConfigDescription("Show the point gain above the keeper's head when points are earned.", null, new ConfigurationManagerAttributes {Order = 3}));
-            StillPlayCollectAudio = Config.Bind("Audio Feedback", "Still Play Collect Audio", false, new ConfigDescription("Play the collect audio even when the point gain is displayed above the keeper's head.", null, new ConfigurationManagerAttributes {Order = 2}));
-            AlwaysShowXpBar = Config.Bind("User Interface", "Always Show Xp Bar", true, new ConfigDescription("Always show the experience bar, even if the player is not gaining experience.", null, new ConfigurationManagerAttributes {Order = 1}));
-
+            
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
 
-            if (_modEnabled.Value)
-            {
-               Log.LogWarning($"Applying patches for {PluginName}!");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
+            
+            InitConfiguration();
+
+            ApplyPatches(this, null);
         }
 
-        private static void ToggleMod(ConfigEntryBase entry)
+        private void InitConfiguration()
         {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
+            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 0}));
+            _modEnabled.SettingChanged += ApplyPatches;
 
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
-        
-            if (ticked)
+            AlwaysShowXpBar = Config.Bind("User Interface", "Always Show XP Bar", true, new ConfigDescription("Display the experience bar constantly, even without active experience gain.", null, new ConfigurationManagerAttributes {Order = 6}));
+            ShowPointGainAboveKeeper = Config.Bind("Visual Feedback", "Show Point Gain Above Keeper", true, new ConfigDescription("Display the points earned above the keeper's head.", null, new ConfigurationManagerAttributes {Order = 5}));
+            StillPlayCollectAudio = Config.Bind("Audio Feedback", "Still Play Collect Audio", false, new ConfigDescription("Keep playing the collect audio when point gain is displayed above the keeper's head.", null, new ConfigurationManagerAttributes {Order = 4}));
+
+            Debug = Config.Bind("Advanced", "Debug Logging", false, new ConfigDescription("Toggle debug logging on or off.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 1}));
+
+        }
+
+
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
+        {
+            if (_modEnabled.Value)
             {
-                Log.LogWarning($"Applying patches for {PluginName}");
+                Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());   
             }
             else
             {
-                Log.LogWarning($"Removing patches for {PluginName}");
+                Log.LogInfo($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf(); 
             }
-        }
-
-
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogError($"Plugin {PluginName} has been disabled!");
         }
     }
 }

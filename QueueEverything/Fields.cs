@@ -37,9 +37,9 @@ public partial class Plugin
 
     private static bool _fasterCraftEnabled;
     private static bool _fasterCraftReloaded;
-    private static bool _originalFasterCraft;
+    //private static bool _originalFasterCraft;
 
-    private static float _timeAdjustment;
+private static float _timeAdjustment;
     
     
 }

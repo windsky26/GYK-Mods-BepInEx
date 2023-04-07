@@ -46,7 +46,7 @@ public static class Helpers
             }
             else
             {
-                Plugin.Log.LogWarning($"Did not find corresponding craft, setting min_value of {output.id} to 4.");
+                Plugin.Log.LogInfo($"Did not find corresponding craft, setting min_value of {output.id} to 4.");
                 output.min_value = SmartExpression.ParseExpression(4.ToString(CultureInfo.InvariantCulture));
             }
 
@@ -73,7 +73,7 @@ public static class Helpers
     {
         if (_alreadyRun) return;
         _alreadyRun = true;
-        Plugin.Log.LogWarning($"Running SeedEqualizer GameBalanceLoad as GameBalance has been loaded.");
+        Plugin.Log.LogInfo($"Running SeedEqualizer GameBalanceLoad as GameBalance has been loaded.");
         foreach (var craft in GameBalance.me.objs_data.Where(a => a.drop_items.Count > 0 && a.drop_items.Exists(b => b.id.Contains("seed"))))
         {
             if (Plugin.ModifyPlayerGardens.Value && craft.id.StartsWith("garden") && craft.id.EndsWith("ready"))

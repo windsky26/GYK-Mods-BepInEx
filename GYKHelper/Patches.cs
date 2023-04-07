@@ -22,7 +22,6 @@ namespace GYKHelper
             }
         }
 
-    
 
         [HarmonyPrefix]
         [HarmonyPriority(1)]
@@ -110,6 +109,5 @@ namespace GYKHelper
             if (!MainGame.game_started) return;
             CrossModFields.TalkingToNpc(false);
         }
-
     }
 }

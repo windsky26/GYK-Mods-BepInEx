@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -30,16 +31,16 @@ namespace LongerDays
 
         private void Awake()
         {
-            _modEnabled = Config.Bind("General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {CustomDrawer = ToggleMod}));
-            _dayLength = Config.Bind("General", "Day Length", 675f, new ConfigDescription($"Set the length of a day", new AcceptableValueList<float>(675f, 900f, 1125f, 1350f), new ConfigurationManagerAttributes {CustomDrawer = LengthSlider}));
-            Seconds = _dayLength.Value;
             Log = Logger;
             _harmony = new Harmony(PluginGuid);
-            if (_modEnabled.Value)
-            {
-                Log.LogWarning($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
+
+            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 2}));
+            _modEnabled.SettingChanged += ApplyPatches;
+
+            _dayLength = Config.Bind("2. Day Length", "Day Length", 675f, new ConfigDescription($"Set the length of a day", new AcceptableValueList<float>(675f, 900f, 1125f, 1350f), new ConfigurationManagerAttributes {Order = 1, CustomDrawer = LengthSlider}));
+            Seconds = _dayLength.Value;
+
+            ApplyPatches(this, null);
         }
 
         private static void LengthSlider(ConfigEntryBase entry)
@@ -47,39 +48,24 @@ namespace LongerDays
             GUILayout.Label($"{Patches.GetTimeMulti()}x", GUILayout.Width(60));
             float[] steps = {675f, 900f, 1125f, 1350f};
             var selectedIndex = Mathf.RoundToInt((_dayLength.Value - steps[0]) / (steps[steps.Length - 1] - steps[0]) * (steps.Length - 1));
-            var newSelectedIndex = Mathf.RoundToInt(GUILayout.HorizontalSlider(selectedIndex, 0, steps.Length - 1,GUILayout.ExpandWidth(true)));
+            var newSelectedIndex = Mathf.RoundToInt(GUILayout.HorizontalSlider(selectedIndex, 0, steps.Length - 1, GUILayout.ExpandWidth(true)));
             if (newSelectedIndex == selectedIndex) return;
             _dayLength.Value = steps[newSelectedIndex];
             Seconds = _dayLength.Value;
         }
 
-        private static void ToggleMod(ConfigEntryBase entry)
+        private static void ApplyPatches(object sender, EventArgs eventArgs)
         {
-            var ticked = GUILayout.Toggle(_modEnabled.Value, "Enabled");
-
-            if (ticked == _modEnabled.Value) return;
-            _modEnabled.Value = ticked;
-
-            if (ticked)
+            if (_modEnabled.Value)
             {
-                Log.LogWarning($"Applying patches for {PluginName}");
+                Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
-                Log.LogWarning($"Removing patches for {PluginName}");
+                Log.LogInfo($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }
-        }
-
-        private void OnEnable()
-        {
-            Log.LogInfo($"Plugin {PluginName} has been enabled!");
-        }
-
-        private void OnDisable()
-        {
-            Log.LogWarning($"Plugin {PluginName} has been disabled!");
         }
     }
 }

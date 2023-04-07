@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Threading;
 using GYKHelper;
 using HarmonyLib;
 using IBuildWhereIWant.lang;
@@ -15,28 +14,24 @@ public partial class Plugin
     [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ShowBuildGrid))]
     public static void BuildGrid_ShowBuildGrid(ref bool show)
     {
-        if (!DisableGrid.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-        show = false;
+        show = _disableGrid.Value;
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ClearPreviousTotemRadius))]
     public static void BuildGrid_ClearPreviousTotemRadius(ref bool apply_colors)
     {
-        if (!DisableGrid.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-        apply_colors = false;
+        apply_colors = _disableGrid.Value;
     }
-
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.EnterRemoveMode))]
     public static void BuildModeLogics_EnterRemoveMode(ref BuildModeLogics __instance)
     {
-        if (!DisableGreyRemoveOverlay.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-        __instance._remove_grey_spr.SetActive(false);
+        __instance._remove_grey_spr.SetActive(_disableGreyRemoveOverlay.Value);
     }
 
     [HarmonyPrefix]
@@ -81,7 +76,7 @@ public partial class Plugin
     private static void BuildModeLogics_GetObjectRemoveCraftDefinition(string obj_id, ref ObjectCraftDefinition __result)
     {
         if (!CrossModFields.CraftAnywhere || MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-    
+
         WriteLog($"[Remove]{obj_id}", true);
 
         __result = GameBalance.me.craft_obj_data
@@ -108,10 +103,8 @@ public partial class Plugin
     public static void FloatingWorldGameObject_RecalculateAvailability()
     {
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-        if (DisableBuildingCollision.Value)
-        {
-            FloatingWorldGameObject.can_be_built = true;
-        }
+
+        FloatingWorldGameObject.can_be_built = _disableBuildingCollision.Value;
     }
 
     [HarmonyPostfix]
@@ -138,8 +131,7 @@ public partial class Plugin
         if (_buildDeskClone == null) return;
         if (__instance != _buildDeskClone) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-        __result.header = strings.Header;
-        __result.descr = strings.Description;
+        __result.header = GetLocalizedString(strings.Header);
+        __result.descr = GetLocalizedString(strings.Description);
     }
 }

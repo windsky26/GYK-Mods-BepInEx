@@ -9,7 +9,7 @@ public static class Helpers
 {
     internal static void RunWmsTasks(MainGame mainGame)
     {
-        Plugin.Log.LogWarning($"Running WMS Tasks as the Player has spawned in.");
+        Plugin.Log.LogInfo($"Running WMS Tasks as the Player has spawned in.");
         if (!MainGame.game_started) return;
 
         if (Plugin.Debug.Value & !Fields.DebugMessageShown)
@@ -33,7 +33,7 @@ public static class Helpers
     {
         if (Fields.GameBalanceAlreadyRun) return;
         Fields.GameBalanceAlreadyRun = true;
-        Plugin.Log.LogWarning($"Running WMS GameBalanceLoad as GameBalance has been loaded.");
+        Plugin.Log.LogInfo($"Running WMS GameBalanceLoad as GameBalance has been loaded.");
         var watch = Stopwatch.StartNew();
 
         if (Plugin.AllowHandToolDestroy.Value)
@@ -98,7 +98,7 @@ public static class Helpers
         }
 
         watch.Stop();
-        Helpers.Log($"WMS Modifications Loaded! Completed in {watch.ElapsedMilliseconds}ms");
+        Log($"WMS Modifications Loaded! Completed in {watch.ElapsedMilliseconds}ms");
     }
 
 
@@ -145,7 +145,7 @@ public static class Helpers
         {
             if (Plugin.Debug.Value)
             {
-                Plugin.Log.LogWarning($"{message}");
+                Plugin.Log.LogInfo($"{message}");
             }
         }
     }

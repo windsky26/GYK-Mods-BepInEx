@@ -6,11 +6,11 @@ namespace QueueEverything;
 
 public partial class Plugin
 {
-    private static string GetLocalizedString(string content)
-    {
-        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-        return content;
-    }
+    // private static string GetLocalizedString(string content)
+    // {
+    //     Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+    //     return content;
+    // }
     
     private static bool IsUnsafeDefinition(CraftDefinition _craftDefinition)
     {
@@ -32,13 +32,13 @@ public partial class Plugin
     {
         if (error)
         {
-            Plugin.Log.LogError($"{message}");
+            Log.LogError($"{message}");
         }
         else
         {
-            if (Plugin.Debug.Value)
+            if (_debug.Value)
             {
-                Plugin.Log.LogInfo($"{message}");
+                Log.LogInfo($"{message}");
             }
         }
     }

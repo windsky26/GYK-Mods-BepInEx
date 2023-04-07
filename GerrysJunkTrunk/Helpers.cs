@@ -35,7 +35,7 @@ public partial class Plugin
         }
         else
         {
-            if (Debug.Value)
+            if (_debug.Value)
             {
                 Log.LogInfo($"{message}");
             }
@@ -213,7 +213,7 @@ public partial class Plugin
                 gerry2.Say($"{money}", delegate
                     {
                         _shippingBox.data.inventory.Clear();
-                        if (ShowSoldMessagesOnPlayer.Value)
+                        if (_showSoldMessagesOnPlayer.Value)
                         {
                             Sounds.PlaySound("coins_sound", MainGame.me.player_pos, true);
                             var pos = MainGame.me.player_pos;
