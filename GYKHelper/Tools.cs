@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using BepInEx.Configuration;
 using UnityEngine;
 
 namespace GYKHelper
@@ -21,7 +22,7 @@ namespace GYKHelper
         {
             return workerWgo.data.inventory.Any(backpack => backpack.id == "porter_backpack");
         }
-        
+
         public static void ResumeControl()
         {
             // BaseMenuGUI.SetControllsActive(true);
@@ -35,6 +36,26 @@ namespace GYKHelper
             GUIElements.me.overhead_panel.gameObject.SetActive(true);
             GUIElements.me.relation.ChangeHUDAlpha(true, true);
             GUIElements.me.relation.Update();
+        }
+
+
+        public static void DisplayConfirmationDialog(string message, Action yesAction, Action noAction, string yes = null, string no = null)
+        {
+            GUILayout.Label(message);
+
+            GUILayout.BeginHorizontal();
+            {
+                if (GUILayout.Button(yes ?? "Yes", GUILayout.ExpandWidth(true)))
+                {
+                    yesAction?.Invoke();
+                }
+
+                if (GUILayout.Button(no ??"No", GUILayout.ExpandWidth(true)))
+                {
+                    noAction?.Invoke();
+                }
+            }
+            GUILayout.EndHorizontal();
         }
 
 
@@ -245,7 +266,7 @@ namespace GYKHelper
             CrossModFields.IsMoneyLender = false;
             CrossModFields.TalkingToNpc(false);
         }
-        
+
         private static WorldGameObject _gerry;
         private static bool _gerryRunning;
 

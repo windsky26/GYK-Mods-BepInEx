@@ -56,7 +56,14 @@ namespace TreesNoMore
         {
             if (_showConfirmationDialog)
             {
-                DisplayConfirmationDialog(entry);
+                Tools.DisplayConfirmationDialog("Are you sure you want to reset all trees?", () =>
+                {
+                    Log.LogWarning("All felled trees will be restored on restart.");
+                    Trees.Clear();
+                    File.Delete(_filePath);
+                    _showConfirmationDialog = false;
+                }, () => _showConfirmationDialog = false);
+                
             }
             else
             {
@@ -67,30 +74,7 @@ namespace TreesNoMore
                 }
             }
         }
-
-        private static void DisplayConfirmationDialog(ConfigEntryBase entry)
-        {
-            GUILayout.Label("Are you sure you want to reset all trees?");
-
-            GUILayout.BeginHorizontal();
-            {
-                if (GUILayout.Button("Yes", GUILayout.ExpandWidth(true)))
-                {
-                    Log.LogWarning("All felled trees will be restored on restart.");
-                    Trees.Clear();
-                    File.Delete(_filePath);
-                    _showConfirmationDialog = false;
-                }
-
-                if (GUILayout.Button("No", GUILayout.ExpandWidth(true)))
-                {
-                    _showConfirmationDialog = false;
-                }
-            }
-            GUILayout.EndHorizontal();
-        }
-
-
+        
         private static void LoadTrees()
         {
             if (!File.Exists(_filePath)) return;
