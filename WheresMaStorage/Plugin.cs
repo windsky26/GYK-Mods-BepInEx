@@ -57,10 +57,10 @@ public class Plugin : BaseUnityPlugin
     private void InitConfiguration()
     {
         ModifyInventorySize = Config.Bind("Inventory", "Modify Inventory Size", true, new ConfigDescription("Enable or disable modifying the inventory size", null, new ConfigurationManagerAttributes {Order = 50}));
-        EnableGraveItemStacking = Config.Bind("Item Stacking", "Enable Grave Item Stacking", false, new ConfigDescription("Allow grave items to stack", null, new ConfigurationManagerAttributes {Order = 49}));
-        EnablePenPaperInkStacking = Config.Bind("Item Stacking", "Enable Pen Paper Ink Stacking", false, new ConfigDescription("Allow pen, paper, and ink items to stack", null, new ConfigurationManagerAttributes {Order = 48}));
-        EnableChiselStacking = Config.Bind("Item Stacking", "Enable Chisel Stacking", false, new ConfigDescription("Allow chisel items to stack", null, new ConfigurationManagerAttributes {Order = 47}));
-        EnableToolAndPrayerStacking = Config.Bind("Item Stacking", "Enable Tool And Prayer Stacking", true, new ConfigDescription("Allow tool and prayer items to stack", null, new ConfigurationManagerAttributes {Order = 46}));
+        EnableGraveItemStacking = Config.Bind("Item Stacking", "Grave Item Stacking", false, new ConfigDescription("Allow grave items to stack", null, new ConfigurationManagerAttributes {Order = 49}));
+        EnablePenPaperInkStacking = Config.Bind("Item Stacking", "Pen Paper Ink Stacking", false, new ConfigDescription("Allow pen, paper, and ink items to stack", null, new ConfigurationManagerAttributes {Order = 48}));
+        EnableChiselStacking = Config.Bind("Item Stacking", "Chisel Stacking", false, new ConfigDescription("Allow chisel items to stack", null, new ConfigurationManagerAttributes {Order = 47}));
+        EnableToolAndPrayerStacking = Config.Bind("Item Stacking", "Tool And Prayer Stacking", true, new ConfigDescription("Allow tool and prayer items to stack", null, new ConfigurationManagerAttributes {Order = 46}));
         AllowHandToolDestroy = Config.Bind("Gameplay", "Allow Hand Tool Destroy", true, new ConfigDescription("Enable or disable destroying objects with hand tools", null, new ConfigurationManagerAttributes {Order = 45}));
         ModifyStackSize = Config.Bind("Inventory", "Modify Stack Size", true, new ConfigDescription("Enable or disable modifying the stack size of items", null, new ConfigurationManagerAttributes {Order = 44}));
 
@@ -71,7 +71,7 @@ public class Plugin : BaseUnityPlugin
         SharedInventory = Config.Bind("Inventory", "Shared Inventory", true, new ConfigDescription("Enable or disable shared inventory between players", null, new ConfigurationManagerAttributes {Order = 42}));
         DontShowEmptyRowsInInventory = Config.Bind("Inventory", "Dont Show Empty Rows In Inventory", true, new ConfigDescription("Enable or disable displaying empty rows in the inventory", null, new ConfigurationManagerAttributes {Order = 41}));
         ShowUsedSpaceInTitles = Config.Bind("Inventory", "Show Used Space In Titles", true, new ConfigDescription("Enable or disable showing used space in inventory titles", null, new ConfigurationManagerAttributes {Order = 40}));
-        DisableInventoryDimming = Config.Bind("Inventory", "Disable Inventory Dimming", true, new ConfigDescription("Enable or disable inventory dimming", null, new ConfigurationManagerAttributes {Order = 39}));
+        DisableInventoryDimming = Config.Bind("Inventory", "Inventory Dimming", true, new ConfigDescription("Enable or disable inventory dimming", null, new ConfigurationManagerAttributes {Order = 39}));
         ShowWorldZoneInTitles = Config.Bind("Inventory", "Show World Zone In Titles", true, new ConfigDescription("Enable or disable showing world zone information in inventory titles", null, new ConfigurationManagerAttributes {Order = 38}));
         HideInvalidSelections = Config.Bind("Inventory", "Hide Invalid Selections", true, new ConfigDescription("Enable or disable hiding invalid item selections in the inventory", null, new ConfigurationManagerAttributes {Order = 37}));
 
