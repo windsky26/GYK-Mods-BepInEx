@@ -22,7 +22,7 @@ namespace Exhaustless
         internal static ConfigEntry<bool> SpendHalfGratitude;
         internal static ConfigEntry<bool> AutoEquipNewTool;
         internal static ConfigEntry<bool> SpeedUpSleep;
-        internal static ConfigEntry<bool> AutoWakeFromMeditation;
+        internal static ConfigEntry<bool> AutoWakeFromMeditationWhenStatsFull;
         internal static ConfigEntry<bool> SpendHalfSanity;
         internal static ConfigEntry<bool> SpeedUpMeditation;
         internal static ConfigEntry<bool> SpendHalfEnergy;
@@ -48,10 +48,10 @@ namespace Exhaustless
             AutoEquipNewTool = Config.Bind("2. Tools", "Auto Equip New Tool", true, new ConfigDescription("Automatically equip a new tool if the current one breaks", null, new ConfigurationManagerAttributes {Order = 10}));
             MakeToolsLastLonger = Config.Bind("2. Tools", "Make Tools Last Longer", true, new ConfigDescription("Increase the durability of tools", null, new ConfigurationManagerAttributes {Order = 9}));
 
-            AutoWakeFromMeditation = Config.Bind("3. Meditation", "Auto Wake From Meditation", true, new ConfigDescription("Automatically wake up when meditation is complete", null, new ConfigurationManagerAttributes {Order = 8}));
+            AutoWakeFromMeditationWhenStatsFull = Config.Bind("3. Meditation", "Auto Wake From Meditation When Stats Full", true, new ConfigDescription("Automatically wake up when meditation is complete", null, new ConfigurationManagerAttributes {Order = 8}));
             SpeedUpMeditation = Config.Bind("3. Meditation", "Speed Up Meditation", true, new ConfigDescription("Reduce the time needed for meditation", null, new ConfigurationManagerAttributes {Order = 7}));
 
-            EnergySpendBeforeSleepDebuff = Config.Bind("4. Sleep", "Energy Spend Before Sleep Debuff", 1200, new ConfigDescription("Set the energy threshold before sleep debuff is applied", new AcceptableValueRange<int>(350, 50000), new ConfigurationManagerAttributes {Order = 6}));
+            EnergySpendBeforeSleepDebuff = Config.Bind("4. Sleep", "Energy Spend Before Sleep Debuff", 1200, new ConfigDescription("Set the total energy spent in a day required (game's default is 300) before sleep debuff is applied", new AcceptableValueRange<int>(350, 50000), new ConfigurationManagerAttributes {Order = 6}));
             SpeedUpSleep = Config.Bind("4. Sleep", "Speed Up Sleep", true, new ConfigDescription("Decrease the time needed for sleep", null, new ConfigurationManagerAttributes {Order = 5}));
 
             SpendHalfEnergy = Config.Bind("5. Gameplay", "Spend Half Energy", true, new ConfigDescription("Reduce energy consumption by half", null, new ConfigurationManagerAttributes {Order = 3}));
