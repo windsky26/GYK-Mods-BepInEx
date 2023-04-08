@@ -16,13 +16,12 @@ namespace EconomyReloaded
         private const string PluginName = "Economy Reloaded";
         private const string PluginVer = "1.3.3";
 
-        private static ManualLogSource Log { get; set; }
+        internal static ManualLogSource Log { get; set; }
         private static Harmony _harmony;
 
         private static ConfigEntry<bool> _modEnabled;
-        internal static ConfigEntry<bool> OldSchoolModeConfig;
-        internal static ConfigEntry<bool> DisableInflationConfig;
-        internal static ConfigEntry<bool> DisableDeflationConfig;
+        internal static ConfigEntry<bool> Inflation;
+        internal static ConfigEntry<bool> Deflation;
 
         private void Awake()
         {
@@ -37,13 +36,10 @@ namespace EconomyReloaded
             _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 4}));
             _modEnabled.SettingChanged += ApplyPatches;
 
-            OldSchoolModeConfig = Config.Bind("2. Gameplay", "Old School Mode", false, new ConfigDescription("Activate Old School Mode to replicate the original mod", null, new ConfigurationManagerAttributes {Order = 3}));
-
-            DisableInflationConfig = Config.Bind("3. Economy", "Inflation", true, new ConfigDescription("Control whether your trades experiences inflation", null, new ConfigurationManagerAttributes {Order = 2}));
-            DisableDeflationConfig = Config.Bind("3. Economy", "Deflation", true, new ConfigDescription("Control whether your trades experiences deflation", null, new ConfigurationManagerAttributes {Order = 1}));
+            Inflation = Config.Bind("2. Economy", "Inflation", true, new ConfigDescription("Control whether your trades experiences inflation (the more you buy, the more it cost's per unit.", null, new ConfigurationManagerAttributes {Order = 2}));
+            Deflation = Config.Bind("2. Economy", "Deflation", true, new ConfigDescription("Control whether your trades experiences deflation (the more you sell, the less you get per unit.", null, new ConfigurationManagerAttributes {Order = 1}));
         }
-
-
+        
         private static void ApplyPatches(object sender, EventArgs eventArgs)
         {
             if (_modEnabled.Value)
@@ -51,13 +47,14 @@ namespace EconomyReloaded
                 Actions.GameBalanceLoad += Patches.GameBalance_LoadGameBalance;
                 Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
+                Patches.MakeIsStaticCost();
             }
             else
             {
                 Actions.GameBalanceLoad -= Patches.GameBalance_LoadGameBalance;
-                Patches.RestoreIsStaticCost();
                 Log.LogInfo($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
+                Patches.RestoreIsStaticCost();
             }
         }
     }
