@@ -27,30 +27,33 @@ public static class Patches
     public static void GameBalance_LoadGameBalance(GameBalance gameBalance)
     {
         if (!Plugin.MakeToolsLastLonger.Value) return;
-        foreach (var itemDef in gameBalance.items_data.Where(a => ToolItems.Contains(a.type)))
+
+        var itemsToUpdate = gameBalance.items_data
+            .Where(itemDef => ToolItems.Contains(itemDef.type) && itemDef.durability_decrease_on_use);
+
+        foreach (var itemDef in itemsToUpdate)
         {
-            if (itemDef.durability_decrease_on_use)
-            {
-                itemDef.durability_decrease_on_use_speed = 0.005f;
-            }
+            itemDef.durability_decrease_on_use_speed = 0.005f;
         }
     }
-
+    
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(MainGame), nameof(MainGame.OnEquippedToolBroken))]
     public static void MainGame_OnEquippedToolBroken()
     {
         if (!Plugin.AutoEquipNewTool.Value) return;
+
         var equippedTool = MainGame.me.player.GetEquippedTool();
         var save = MainGame.me.save;
         var playerInv = save.GetSavedPlayerInventory();
 
-        foreach (var item in playerInv.inventory.Where(item =>
-                     item.definition.type == equippedTool.definition.type))
+        var matchingItems = playerInv.inventory
+            .Where(item => item.definition.type == equippedTool.definition.type &&
+                           (item.durability_state == Item.DurabilityState.Full || item.durability_state == Item.DurabilityState.Used));
+
+        foreach (var item in matchingItems)
         {
-            if (item.durability_state is not (Item.DurabilityState.Full or Item.DurabilityState.Used))
-                continue;
             MainGame.me.player.EquipItem(item, -1, playerInv.is_bag ? playerInv : null);
             MainGame.me.player.Say(
                 $"{strings.LuckyHadAnotherPartOne} {item.definition.GetItemName()} {strings.LuckyHadAnotherPartTwo}",
@@ -59,6 +62,7 @@ public static class Patches
                 SmartSpeechEngine.VoiceID.None, true);
         }
     }
+
 
 
     [HarmonyPrefix]
@@ -82,29 +86,40 @@ public static class Patches
     public static void SleepGUI_Update()
     {
         if (!Plugin.SpeedUpSleep.Value) return;
+
         MainGame.me.player.energy += 0.25f;
         MainGame.me.player.hp += 0.25f;
     }
+
 
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(WaitingGUI), nameof(WaitingGUI.Update))]
     public static void WaitingGUI_Update_Postfix(WaitingGUI __instance)
     {
-        if (!Plugin.AutoWakeFromMeditation.Value) return;
-        var save = MainGame.me.save;
-        if (MainGame.me.player.energy.EqualsOrMore(save.max_hp) &&
-            MainGame.me.player.hp.EqualsOrMore(save.max_energy))
+        if (!Plugin.AutoWakeFromMeditationWhenStatsFull.Value)
+        {
+            return;
+        }
+
+        var gameSave = MainGame.me.save;
+        if (MainGame.me.player.energy.EqualsOrMore(gameSave.max_hp) &&
+            MainGame.me.player.hp.EqualsOrMore(gameSave.max_energy))
+        {
             __instance.StopWaiting();
-            // typeof(WaitingGUI).GetMethod("StopWaiting", AccessTools.all)
-            //     ?.Invoke(__instance, null);
+        }
     }
+
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(WaitingGUI), nameof(WaitingGUI.Update))]
     public static void WaitingGUI_Update_Prefix()
     {
-        if (!Plugin.SpeedUpMeditation.Value) return;
+        if (!Plugin.SpeedUpMeditation.Value)
+        {
+            return;
+        }
+
         MainGame.me.player.energy += 0.25f;
         MainGame.me.player.hp += 0.25f;
     }
@@ -112,10 +127,18 @@ public static class Patches
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.EquipItem))]
-    public static void WorldGameObject_EquipItem(ref Item item)
+    public static void WorldGameObject_EquipItem_Postfix(ref Item item)
     {
-        if (!Plugin.MakeToolsLastLonger.Value) return;
-        if (! ToolItems.Contains(item.definition.type)) return;
+        if (!Plugin.MakeToolsLastLonger.Value)
+        {
+            return;
+        }
+
+        if (!ToolItems.Contains(item.definition.type))
+        {
+            return;
+        }
+
         if (item.definition.durability_decrease_on_use)
         {
             item.definition.durability_decrease_on_use_speed = 0.005f;
@@ -125,13 +148,17 @@ public static class Patches
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetParam))]
-    private static void WorldGameObject_GetParam(ref WorldGameObject __instance, ref string param_name,
+    private static void WorldGameObject_GetParam_Postfix(ref WorldGameObject __instance, ref string paramName,
         ref float __result)
     {
-        if (!param_name.Contains("tiredness")) return;
-        var tiredness = __instance._data.GetParam("tiredness");
+        if (!paramName.Contains("tiredness"))
+        {
+            return;
+        }
 
-        var newTirednessLimit = (float) Plugin.EnergySpendBeforeSleepDebuff.Value;
+        var tiredness = __instance._data.GetParam("tiredness");
+        var newTirednessLimit = (float)Plugin.EnergySpendBeforeSleepDebuff.Value;
         __result = tiredness < newTirednessLimit ? 250 : 350;
     }
+
 }
