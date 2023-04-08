@@ -17,7 +17,8 @@ namespace GYKHelper
         private const string PluginVer = "3.0";
 
         internal static ManualLogSource Log { get; private set; }
-        private static ConfigEntry<bool> DisableUnityLogging { get; set; }
+        private static ConfigEntry<bool> UnityLogging { get; set; }
+        internal static ConfigEntry<bool> DisplayDuplicateHarmonyPatches { get; set; }
 
         private void Awake()
         {
@@ -29,9 +30,10 @@ namespace GYKHelper
 
         private void InitializeDisableUnityLogging()
         {
-            DisableUnityLogging = Config.Bind("General", "Unity Logging", false, new ConfigDescription("Toggle Unity Logging", null, new ConfigurationManagerAttributes {IsAdvanced = true,Order = 1}));
-            DisableUnityLogging.SettingChanged += (_, _) => Debug.unityLogger.logEnabled = DisableUnityLogging.Value;
-            Debug.unityLogger.logEnabled = DisableUnityLogging.Value;
+            UnityLogging = Config.Bind("1. General", "Unity Logging", false, new ConfigDescription("Toggle Unity Logging", null, new ConfigurationManagerAttributes {IsAdvanced = true,Order = 2}));
+            UnityLogging.SettingChanged += (_, _) => Debug.unityLogger.logEnabled = UnityLogging.Value;
+            DisplayDuplicateHarmonyPatches = Config.Bind("1. General", "Display Duplicate Harmony Patches", false, new ConfigDescription("Output duplicate harmony patches to log when clicking on Start Game", null, new ConfigurationManagerAttributes {IsAdvanced = true,Order = 1}));
+            Debug.unityLogger.logEnabled = UnityLogging.Value;
         }
 
         private static void RegisterEventHandlers()
