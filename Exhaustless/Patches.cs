@@ -148,10 +148,10 @@ public static class Patches
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetParam))]
-    private static void WorldGameObject_GetParam_Postfix(ref WorldGameObject __instance, ref string paramName,
+    private static void WorldGameObject_GetParam_Postfix(ref WorldGameObject __instance, ref string param_name,
         ref float __result)
     {
-        if (!paramName.Contains("tiredness"))
+        if (!param_name.Contains("tiredness"))
         {
             return;
         }
