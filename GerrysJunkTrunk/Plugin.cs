@@ -7,6 +7,7 @@ using BepInEx.Logging;
 using GYKHelper;
 using HarmonyLib;
 using UnityEngine;
+using Patches = GYKHelper.Patches;
 
 namespace GerrysJunkTrunk
 {
@@ -26,7 +27,7 @@ namespace GerrysJunkTrunk
         private static ConfigEntry<bool> _modEnabled;
 
         private static ConfigEntry<bool> _showSoldMessagesOnPlayer;
-        private static ConfigEntry<bool> _disableSoldMessageWhenNoSale;
+        private static ConfigEntry<bool> _showSoldMessageWhenNoSale;
         private static ConfigEntry<bool> _enableGerry;
         private static ConfigEntry<bool> _showSummaryMessage;
         private static ConfigEntry<bool> _showItemPriceTooltips;
@@ -61,7 +62,7 @@ namespace GerrysJunkTrunk
 
             _showSoldMessagesOnPlayer = Config.Bind("3. Messages", "Show Sold Messages On Player", true, new ConfigDescription("Display messages on the player when items are sold", null, new ConfigurationManagerAttributes {Order = 5}));
 
-            _disableSoldMessageWhenNoSale = Config.Bind("3. Messages", "Show Sold Message When No Sale", false, new ConfigDescription("Disable the sold message when there is no sale", null, new ConfigurationManagerAttributes {Order = 4}));
+            _showSoldMessageWhenNoSale = Config.Bind("3. Messages", "Show Sold Message When No Sale", false, new ConfigDescription("Disable the sold message when there is no sale", null, new ConfigurationManagerAttributes {Order = 4}));
 
             _showSummaryMessage = Config.Bind("4. UI", "Show Summary", false, new ConfigDescription("Display a summary of transactions and other relevant information", null, new ConfigurationManagerAttributes {Order = 3}));
 
@@ -77,12 +78,14 @@ namespace GerrysJunkTrunk
             if (_modEnabled.Value)
             {
                 Actions.WorldGameObjectInteractPrefix += WorldGameObject_Interact;
+                Actions.GameBalanceLoad += GameBalance_LoadGameBalance;
                 Log.LogInfo($"Applying patches for {PluginName}");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
                 Actions.WorldGameObjectInteractPrefix -= WorldGameObject_Interact;
+                Actions.GameBalanceLoad -= GameBalance_LoadGameBalance;
                 Log.LogInfo($"Removing patches for {PluginName}");
                 _harmony.UnpatchSelf();
             }

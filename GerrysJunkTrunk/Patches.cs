@@ -61,7 +61,8 @@ public partial class Plugin
 
     [HarmonyPostfix]
     [HarmonyAfter("p1xel8ted.gyk.miscbitsandbobs", "p1xel8ted.gyk.wheresmastorage")]
-    [HarmonyPatch(typeof(ChestGUI), nameof(ChestGUI.MoveItem), typeof(Item), typeof(int), typeof(bool), typeof(Item), typeof(bool))]
+    [HarmonyPatch(typeof(ChestGUI), nameof(ChestGUI.MoveItem), typeof(Item), typeof(int), typeof(bool), typeof(Item),
+        typeof(bool))]
     public static void ChestGUI_MoveItem(ref ChestGUI __instance)
     {
         //
@@ -85,73 +86,56 @@ public partial class Plugin
     [HarmonyPatch(typeof(ChestGUI), nameof(ChestGUI.Open))]
     public static void ChestGUI_Open(ref ChestGUI __instance)
     {
-        //
-
         if (__instance == null || !_usingShippingBox) return;
 
-        var maxItemCount = SmallMaxItemCount;
+        var maxItemCount = UnlockedFullPrice() ? LargeMaxItemCount : SmallMaxItemCount;
 
-        if (UnlockedFullPrice())
+        // Combined loops for player_panel and chest_panel
+        foreach (var panel in new[] {__instance.player_panel, __instance.chest_panel})
         {
-            maxItemCount = LargeMaxItemCount;
-        }
-
-        foreach (var item in __instance.player_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
-        {
-            TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
-
-            item.definition.stack_count = maxItemCount;
-        }
-
-        foreach (var item in __instance.chest_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
-        {
-            TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
-
-            item.definition.stack_count = maxItemCount;
+            foreach (var item in panel.multi_inventory.all[0].data.inventory
+                         .Where(item => item.definition.stack_count > 1))
+            {
+                TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
+                item.definition.stack_count = maxItemCount;
+            }
         }
 
         UpdateItemStates(ref __instance);
     }
 
+
     [HarmonyPrefix]
     [HarmonyAfter("p1xel8ted.gyk.miscbitsandbobs", "p1xel8ted.gyk.wheresmastorage")]
-    [HarmonyPatch(typeof(InventoryPanelGUI), nameof(ChestGUI.OnItemOver), typeof(InventoryWidget), typeof(BaseItemCellGUI))]
-    public static void InventoryPanelGUI_OnItemOver_Prefix(ref InventoryPanelGUI __instance, ref BaseItemCellGUI item_gui)
+    [HarmonyPatch(typeof(InventoryPanelGUI), nameof(ChestGUI.OnItemOver), typeof(InventoryWidget),
+        typeof(BaseItemCellGUI))]
+    public static void InventoryPanelGUI_OnItemOver_Prefix(ref InventoryPanelGUI __instance,
+        ref BaseItemCellGUI item_gui)
     {
         Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-        //
-        //if (!_usingShippingBox) return;
-        if (!_showItemPriceTooltips.Value) return;
-        if (!UnlockedShippingBox()) return;
-        if (__instance == null || item_gui == null) return;
 
-        //Log($"[ItemGUI]: {item_gui.item.id}");
+        if (!_showItemPriceTooltips.Value || !UnlockedShippingBox() || __instance == null || item_gui == null ||
+            AlreadyDone.Contains(item_gui) || item_gui.id_empty)
+            return;
 
-        if (AlreadyDone.Contains(item_gui)) return;
-
-        if (item_gui.id_empty) return;
-
-        if (item_gui.x1 != null && item_gui.x1.tooltip != null && item_gui.x1.tooltip.has_info)
+        foreach (var tooltip in new[] {item_gui.x1, item_gui.x2})
         {
-            item_gui.x1.tooltip.AddData(new BubbleWidgetSeparatorData());
-            item_gui.x1.tooltip.AddData(new BubbleWidgetTextData(
-                $"{strings.GerrysPrice} {Trading.FormatMoney(GetItemEarnings(item_gui.item), true)}",
-                UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
-            AlreadyDone.Add(item_gui);
+            if (tooltip != null && tooltip.tooltip != null && tooltip.tooltip.has_info)
+            {
+                tooltip.tooltip.AddData(new BubbleWidgetSeparatorData());
+                tooltip.tooltip.AddData(new BubbleWidgetTextData(
+                    $"{strings.GerrysPrice} {Trading.FormatMoney(GetItemEarnings(item_gui.item), true)}",
+                    UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+            }
         }
 
-        if (item_gui.x2 != null && item_gui.x2.tooltip != null && item_gui.x2.tooltip.has_info)
-        {
-            item_gui.x2.tooltip.AddData(new BubbleWidgetSeparatorData());
-            item_gui.x2.tooltip.AddData(new BubbleWidgetTextData(
-                $"{strings.GerrysPrice} {Trading.FormatMoney(GetItemEarnings(item_gui.item), true)}",
-                UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
-            AlreadyDone.Add(item_gui);
-        }
+        AlreadyDone.Add(item_gui);
     }
 
+
     [HarmonyFinalizer]
-    [HarmonyPatch(typeof(InventoryPanelGUI), nameof(ChestGUI.OnItemOver), typeof(InventoryWidget), typeof(BaseItemCellGUI))]
+    [HarmonyPatch(typeof(InventoryPanelGUI), nameof(ChestGUI.OnItemOver), typeof(InventoryWidget),
+        typeof(BaseItemCellGUI))]
     private static Exception InventoryPanelGUI_OnItemOver_Finalizer()
     {
         return null;
@@ -162,78 +146,63 @@ public partial class Plugin
     [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.OnEndOfDay))]
     public static void EnvironmentEngine_OnEndOfDay()
     {
-        //
-        if (!UnlockedShippingBox()) return;
         Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-        if (_internalShippingBoxBuilt.Value && _shippingBox != null)
+
+        if (!UnlockedShippingBox() || !_internalShippingBoxBuilt.Value || _shippingBox == null) return;
+
+        foreach (var item in _shippingBox.data.inventory)
         {
-            foreach (var item in _shippingBox.data.inventory)
+            for (var i = 0; i < item.value; i++)
             {
-                for (var i = 0; i < item.value; i++)
-                {
-                    item.OnTraded();
-                }
+                item.OnTraded();
             }
+        }
 
-            var earnings = GetBoxEarnings(_shippingBox);
+        var earnings = GetBoxEarnings(_shippingBox);
 
-            if (earnings > 0)
+        if (earnings > 0)
+        {
+            Stats.PlayerAddMoney(earnings, strings.Header);
+        }
+
+        MainGame.me.player.data.money += earnings;
+        var money = Trading.FormatMoney(earnings, true);
+
+        var position = _showSoldMessagesOnPlayer.Value
+            ? MainGame.me.player_pos + new Vector3(0, 125f, 0)
+            : _shippingBox.pos3 + new Vector3(0, 100f, 0);
+        var time = _showSoldMessagesOnPlayer.Value ? 4f : 7f;
+
+        if (_enableGerry.Value)
+        {
+            StartGerryRoutine(earnings);
+        }
+        else
+        {
+            Sounds.PlaySound("coins_sound", position, true);
+            _shippingBox.data.inventory.Clear();
+
+            if (_showSoldMessageWhenNoSale.Value)
             {
-                Stats.PlayerAddMoney(earnings, strings.Header);
-            }
-
-            MainGame.me.player.data.money += earnings;
-            var money = Trading.FormatMoney(earnings, true);
-
-            Vector3 position;
-            float time;
-            if (_showSoldMessagesOnPlayer.Value)
-            {
-                position = MainGame.me.player_pos;
-                position.y += 125f;
-                time = 4f;
-            }
-            else
-            {
-                position = _shippingBox.pos3;
-                position.y += 100f;
-                time = 7f;
-            }
-
-            if (_enableGerry.Value)
-            {
-                StartGerryRoutine(earnings);
-            }
-            else
-            {
-                Sounds.PlaySound("coins_sound", position, true);
-                _shippingBox.data.inventory.Clear();
-
-                if (_disableSoldMessageWhenNoSale.Value) return;
-
                 EffectBubblesManager.ShowImmediately(position, $"{money}",
                     earnings > 0 ? EffectBubblesManager.BubbleColor.Green : EffectBubblesManager.BubbleColor.Red,
                     true, time);
             }
+        }
 
-            if (_showSummaryMessage.Value && !_enableGerry.Value && earnings > 0)
-            {
-                ShowSummary(money);
-            }
+        if (_showSummaryMessage.Value && !_enableGerry.Value && earnings > 0)
+        {
+            ShowSummary(money);
         }
     }
 
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
-    [HarmonyBefore("p1xel8ted.gyk.queueeverything")]
-    public static void GameBalance_LoadGameBalance()
+    public static void GameBalance_LoadGameBalance(GameBalance gameBalance)
     {
-        if (GameBalance.me.craft_data.Exists(a => a == _newItem)) return;
+        // if (gameBalance.craft_data.Exists(a => a == _newItem)) return;
 
         //Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
         var newCd = new ObjectCraftDefinition();
-        var cd = GameBalance.me.GetData<ObjectCraftDefinition>("mf_wood_builddesk:p:mf_box_stuff_place");
+        var cd = gameBalance.GetData<ObjectCraftDefinition>("mf_wood_builddesk:p:mf_box_stuff_place");
         newCd.craft_in = cd.craft_in;
         newCd.builder_ids = cd.builder_ids;
         newCd.out_obj = "mf_shipping_box_place";
@@ -305,10 +274,10 @@ public partial class Plugin
 
         _newItem = newCd;
 
-        GameBalance.me.craft_data.Add(_newItem);
-        GameBalance.me.craft_obj_data.Add(_newItem);
-        GameBalance.me.AddDataUniversal(_newItem);
-        GameBalance.me.AddData(_newItem);
+        gameBalance.craft_data.Add(_newItem);
+        gameBalance.craft_obj_data.Add(_newItem);
+        gameBalance.AddDataUniversal(_newItem);
+        gameBalance.AddData(_newItem);
     }
 
 
@@ -335,7 +304,8 @@ public partial class Plugin
                     1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendor}",
                     _ => $"{strings.Header} (T{tier})"
                 };
-                inventoryWidget.header_label.text = _showKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
+                inventoryWidget.header_label.text =
+                    _showKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
                 inventoryWidget.dont_show_empty_rows = true;
                 inventoryWidget.SetInactiveStateToEmptyCells();
             }
@@ -366,7 +336,8 @@ public partial class Plugin
                     1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendor}",
                     _ => $"{strings.Header} (T{tier})"
                 };
-                inventoryWidget.header_label.text = _showKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
+                inventoryWidget.header_label.text =
+                    _showKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
                 inventoryWidget.dont_show_empty_rows = true;
                 inventoryWidget.SetInactiveStateToEmptyCells();
             }
@@ -391,21 +362,24 @@ public partial class Plugin
             {
                 component.AddData(new BubbleWidgetSeparatorData());
                 component.AddData(new BubbleWidgetTextData(strings.Stage1Header, UITextStyles.TextStyle.HintTitle));
-                component.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                component.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription,
+                    NGUIText.Alignment.Left));
             }
 
             if (__instance.tech_id.ToLowerInvariant().Contains("Engineer".ToLowerInvariant()))
             {
                 component.AddData(new BubbleWidgetSeparatorData());
                 component.AddData(new BubbleWidgetTextData(strings.Stage2Header, UITextStyles.TextStyle.HintTitle));
-                component.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                component.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription,
+                    NGUIText.Alignment.Left));
             }
 
             if (__instance.tech_id.ToLowerInvariant().Contains("Best friend".ToLowerInvariant()))
             {
                 component.AddData(new BubbleWidgetSeparatorData());
                 component.AddData(new BubbleWidgetTextData(strings.Stage3Header, UITextStyles.TextStyle.HintTitle));
-                component.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                component.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription,
+                    NGUIText.Alignment.Left));
             }
         }
     }
@@ -425,22 +399,28 @@ public partial class Plugin
             if (name.ToLowerInvariant().Contains("Wooden plank".ToLowerInvariant()))
             {
                 tooltip.AddData(new BubbleWidgetBlankSeparatorData());
-                tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
-                tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Header, UITextStyles.TextStyle.HintTitle,
+                    NGUIText.Alignment.Left));
+                tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription,
+                    NGUIText.Alignment.Left));
             }
 
             if (name.ToLowerInvariant().Contains("Engineer".ToLowerInvariant()))
             {
                 tooltip.AddData(new BubbleWidgetBlankSeparatorData());
-                tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
-                tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Header, UITextStyles.TextStyle.HintTitle,
+                    NGUIText.Alignment.Left));
+                tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription,
+                    NGUIText.Alignment.Left));
             }
 
             if (name.ToLowerInvariant().Contains("Jeweler".ToLowerInvariant()))
             {
                 tooltip.AddData(new BubbleWidgetBlankSeparatorData());
-                tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
-                tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Header, UITextStyles.TextStyle.HintTitle,
+                    NGUIText.Alignment.Left));
+                tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription,
+                    NGUIText.Alignment.Left));
             }
         }
     }
@@ -479,7 +459,8 @@ public partial class Plugin
 
     private static void WorldGameObject_Interact(WorldGameObject __instance, WorldGameObject other_obj)
     {
-        if (!UnlockedShippingBox() || __instance == null || !string.Equals(__instance.custom_tag, ShippingBoxTag)) return;
+        if (!UnlockedShippingBox() || __instance == null ||
+            !string.Equals(__instance.custom_tag, ShippingBoxTag)) return;
 
         WriteLog($"Found Shipping Box! {__instance.data.drop_zone_id}, Other: {other_obj.obj_id}");
 
@@ -507,7 +488,8 @@ public partial class Plugin
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
     public static void WorldGameObject_ReplaceWithObject(ref WorldGameObject __instance, ref string new_obj_id)
     {
-        if (!UnlockedShippingBox() || __instance == null || _internalShippingBoxBuilt.Value && _shippingBox != null) return;
+        if (!UnlockedShippingBox() || __instance == null ||
+            _internalShippingBoxBuilt.Value && _shippingBox != null) return;
 
         if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
         {
@@ -547,7 +529,8 @@ public partial class Plugin
     public static void WorldZone_GetZoneWGOs(ref List<WorldGameObject> __result)
     {
         if (__result == null) return;
-        if (_interactedObject != null && _interactedObject.obj_def.interaction_type == ObjectDefinition.InteractionType.Builder) return;
+        if (_interactedObject != null &&
+            _interactedObject.obj_def.interaction_type == ObjectDefinition.InteractionType.Builder) return;
 
         var count = __result.RemoveAll(a => a.custom_tag == ShippingBoxTag || a.data.drop_zone_id == ShippingBoxTag);
         if (count > 0)
