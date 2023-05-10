@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FlowCanvas.Nodes;
 using GerrysJunkTrunk.lang;
 using GYKHelper;
 using UnityEngine;
@@ -272,6 +273,9 @@ public partial class Plugin
 
     private static bool UnlockedFullPrice()
     {
+        
+        MainGame.me.save.unlocked_techs.Add("my perk");
+        
         return UnlockedShippingBoxExpansion() &&
                MainGame.me.save.unlocked_techs.Exists(
                    a => a.ToLowerInvariant().Equals("Best friend".ToLowerInvariant()));
