@@ -38,8 +38,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxButtonControllerSupport"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiscBitsAndBobs", "MiscBitsAndBobs\MiscBitsAndBobs.csproj", "{9CDDFFBA-7D6F-424C-BCE4-46829B6A4641}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamelessFasterTimeMod", "NamelessFasterTimeMod\NamelessFasterTimeMod.csproj", "{11164246-A4BA-4750-B5B5-C4C455228708}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewGameAtBottom", "NewGameAtBottom\NewGameAtBottom.csproj", "{8FECC18F-A13E-4D49-882D-EAC4A51AD195}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoIntros", "NoIntros\NoIntros.csproj", "{EDB5B80C-0B57-4AAB-ACFF-1DB381AAA4A2}"
@@ -148,10 +146,6 @@ Global
 		{9CDDFFBA-7D6F-424C-BCE4-46829B6A4641}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CDDFFBA-7D6F-424C-BCE4-46829B6A4641}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CDDFFBA-7D6F-424C-BCE4-46829B6A4641}.Release|Any CPU.Build.0 = Release|Any CPU
-		{11164246-A4BA-4750-B5B5-C4C455228708}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{11164246-A4BA-4750-B5B5-C4C455228708}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{11164246-A4BA-4750-B5B5-C4C455228708}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{11164246-A4BA-4750-B5B5-C4C455228708}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8FECC18F-A13E-4D49-882D-EAC4A51AD195}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8FECC18F-A13E-4D49-882D-EAC4A51AD195}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FECC18F-A13E-4D49-882D-EAC4A51AD195}.Release|Any CPU.ActiveCfg = Release|Any CPU

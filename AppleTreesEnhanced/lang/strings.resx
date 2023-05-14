@@ -126,7 +126,4 @@
   <data name="HoneyReady" xml:space="preserve">
     <value>Honey harvest ready!</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Config Reloaded!</value>
-  </data>
 </root>

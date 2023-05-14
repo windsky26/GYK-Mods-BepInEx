@@ -123,21 +123,6 @@
   <data name="Rush" xml:space="preserve">
     <value>What a rush! Gets me every time!</value>
   </data>
-  <data name="InfoAutoSave" xml:space="preserve">
-    <value>AutoSave</value>
-  </data>
-  <data name="InfoPeriod" xml:space="preserve">
-    <value>Period</value>
-  </data>
-  <data name="InfoMinutes" xml:space="preserve">
-    <value>minute</value>
-  </data>
-  <data name="InfoNewSaveOnAutoSave" xml:space="preserve">
-    <value>New Save on Auto Save</value>
-  </data>
-  <data name="InfoSavesToKeep" xml:space="preserve">
-    <value>Saves to keep</value>
-  </data>
   <data name="SaveAreYouSureMenu" xml:space="preserve">
     <value>Are you sure you want to return to the main menu</value>
   </data>

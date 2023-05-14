@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NotReady" xml:space="preserve">
-		<value>Это пока нельзя использовать!</value>
-	</data>
-  <data name="Ready" xml:space="preserve">
-		<value>Камень телепортации готов!</value>
-	</data>
   <data name="WhereIsIt" xml:space="preserve">
 		<value>Где же я оставил этот камень?</value>
 	</data>
@@ -176,9 +170,6 @@
   </data>
   <data name="Coal" xml:space="preserve">
     <value>Угольная жила</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Настройки перезагружены!</value>
   </data>
   <data name="CantUseHere" xml:space="preserve">
     <value>Я не могу использовать это здесь, босс!</value>

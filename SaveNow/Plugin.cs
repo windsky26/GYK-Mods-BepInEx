@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using BepInEx;
@@ -11,152 +10,151 @@ using Rewired;
 using SaveNow.lang;
 using UnityEngine;
 
-namespace SaveNow
+namespace SaveNow;
+
+[BepInPlugin(PluginGuid, PluginName, PluginVer)]
+[BepInDependency("p1xel8ted.gyk.gykhelper", BepInDependency.DependencyFlags.SoftDependency)]
+public partial class Plugin : BaseUnityPlugin
 {
-    [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-    [BepInDependency("p1xel8ted.gyk.gykhelper", BepInDependency.DependencyFlags.SoftDependency)]
-    public partial class Plugin : BaseUnityPlugin
+    private const string PluginGuid = "p1xel8ted.gyk.savenow";
+    private const string PluginName = "Save Now!";
+    private const string PluginVer = "2.4.8";
+
+    private static ConfigEntry<bool> Debug { get; set; }
+    private static ConfigEntry<int> SaveInterval { get; set; }
+    private static ConfigEntry<bool> AutoSaveConfig { get; set; }
+    private static ConfigEntry<bool> NewFileOnAutoSave { get; set; }
+    private static ConfigEntry<bool> NewFileOnManualSave { get; set; }
+    private static ConfigEntry<bool> BackupSavesOnSave { get; set; }
+    private static ConfigEntry<bool> TravelMessages { get; set; }
+    private static ConfigEntry<bool> SaveGameNotificationText { get; set; }
+    private static ConfigEntry<bool> ExitToDesktop { get; set; }
+    private static ConfigEntry<bool> DisableSaveOnExit { get; set; }
+    private static ConfigEntry<int> MaximumSavesVisible { get; set; }
+    private static ConfigEntry<bool> SortByRealTime { get; set; }
+    private static ConfigEntry<bool> AscendingSort { get; set; }
+    private static ConfigEntry<bool> EnableManualSaveControllerButton { get; set; }
+    private static ConfigEntry<KeyboardShortcut> ManualSaveKeyBind { get; set; }
+    private static ConfigEntry<string> ManualSaveControllerButton { get; set; }
+    private static ManualLogSource Log { get; set; }
+    private static Harmony Harmony { get; set; }
+
+    private static ConfigEntry<bool> ModEnabled { get; set; }
+
+    private void Awake()
     {
-        private const string PluginGuid = "p1xel8ted.gyk.savenow";
-        private const string PluginName = "Save Now!";
-        private const string PluginVer = "2.4.8";
+        Log = Logger;
+        Harmony = new Harmony(PluginGuid);
+        InitConfiguration();
+        ApplyPatches(this, null);
+    }
 
-        private static ConfigEntry<bool> _debug;
-        private static ConfigEntry<int> _saveInterval;
-        private static ConfigEntry<bool> _autoSaveConfig;
-        private static ConfigEntry<bool> _newFileOnAutoSave;
-        private static ConfigEntry<bool> _newFileOnManualSave;
-        private static ConfigEntry<bool> _backupSavesOnSave;
-        private static ConfigEntry<bool> _travelMessages;
-        private static ConfigEntry<bool> _saveGameNotificationText;
-        private static ConfigEntry<bool> _exitToDesktop;
-        private static ConfigEntry<bool> _disableSaveOnExit;
-        private static ConfigEntry<int> _maximumSavesVisible;
-        private static ConfigEntry<bool> _sortByRealTime;
-        private static ConfigEntry<bool> _ascendingSort;
-        private static ConfigEntry<bool> _enableManualSaveControllerButton;
-        private static ConfigEntry<KeyboardShortcut> _manualSaveKeyBind;
-        private static ConfigEntry<string> _manualSaveControllerButton;
-        private static ManualLogSource Log { get; set; }
-        private static Harmony _harmony;
+    private void InitConfiguration()
+    {
+        ModEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 19}));
+        ModEnabled.SettingChanged += ApplyPatches;
 
-        private static ConfigEntry<bool> _modEnabled;
+        SaveInterval = Config.Bind("2. Saving", "Save Interval", 600, new ConfigDescription("Interval between automatic saves in seconds.", null, new ConfigurationManagerAttributes {Order = 18}));
 
-        private void Awake()
-        {
-            Log = Logger;
-            _harmony = new Harmony(PluginGuid);
-            InitConfiguration();
-            ApplyPatches(this, null);
-        }
+        AutoSaveConfig = Config.Bind("2. Saving", "Auto Save", true, new ConfigDescription("Enable or disable automatic saving.", null, new ConfigurationManagerAttributes {Order = 17}));
 
-        private void InitConfiguration()
-        {
-            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 19}));
-            _modEnabled.SettingChanged += ApplyPatches;
+        NewFileOnAutoSave = Config.Bind("2. Saving", "New File On Auto Save", true, new ConfigDescription("Create a new save file for each auto save.", null, new ConfigurationManagerAttributes {Order = 16}));
 
-            _saveInterval = Config.Bind("2. Saving", "Save Interval", 600, new ConfigDescription("Interval between automatic saves in seconds.", null, new ConfigurationManagerAttributes {Order = 18}));
+        NewFileOnManualSave = Config.Bind("2. Saving", "New File On Manual Save", true, new ConfigDescription("Create a new save file for each manual save.", null, new ConfigurationManagerAttributes {Order = 15}));
 
-            _autoSaveConfig = Config.Bind("2. Saving", "Auto Save", true, new ConfigDescription("Enable or disable automatic saving.", null, new ConfigurationManagerAttributes {Order = 17}));
+        BackupSavesOnSave = Config.Bind("2. Saving", "Backup Saves On Save", true, new ConfigDescription("Backup saves when saving the game.", null, new ConfigurationManagerAttributes {Order = 14}));
 
-            _newFileOnAutoSave = Config.Bind("2. Saving", "New File On Auto Save", true, new ConfigDescription("Create a new save file for each auto save.", null, new ConfigurationManagerAttributes {Order = 16}));
+        TravelMessages = Config.Bind("3. Notifications", "Travel Messages", false, new ConfigDescription("Toggle travel messages.", null, new ConfigurationManagerAttributes {Order = 13}));
 
-            _newFileOnManualSave = Config.Bind("2. Saving", "New File On Manual Save", true, new ConfigDescription("Create a new save file for each manual save.", null, new ConfigurationManagerAttributes {Order = 15}));
+        SaveGameNotificationText = Config.Bind("3. Notifications", "Save Game Notification Text", false, new ConfigDescription("Disable save game notification text.", null, new ConfigurationManagerAttributes {Order = 12}));
 
-            _backupSavesOnSave = Config.Bind("2. Saving", "Backup Saves On Save", true, new ConfigDescription("Backup saves when saving the game.", null, new ConfigurationManagerAttributes {Order = 14}));
+        ExitToDesktop = Config.Bind("4. Exiting", "Exit To Desktop", false, new ConfigDescription("Enable or disable exit to desktop.", null, new ConfigurationManagerAttributes {Order = 11}));
 
-            _travelMessages = Config.Bind("3. Notifications", "Travel Messages", false, new ConfigDescription("Toggle travel messages.", null, new ConfigurationManagerAttributes {Order = 13}));
+        DisableSaveOnExit = Config.Bind("4. Exiting", "Save On Exit", true, new ConfigDescription("Disable saving the game when exiting.", null, new ConfigurationManagerAttributes {Order = 10}));
 
-            _saveGameNotificationText = Config.Bind("3. Notifications", "Save Game Notification Text", false, new ConfigDescription("Disable save game notification text.", null, new ConfigurationManagerAttributes {Order = 12}));
+        MaximumSavesVisible = Config.Bind("5. UI", "Maximum Saves Visible", 3, new ConfigDescription("Maximum number of save files visible in the UI.", null, new ConfigurationManagerAttributes {Order = 9}));
 
-            _exitToDesktop = Config.Bind("4. Exiting", "Exit To Desktop", false, new ConfigDescription("Enable or disable exit to desktop.", null, new ConfigurationManagerAttributes {Order = 11}));
+        SortByRealTime = Config.Bind("5. UI", "Sort By Real Time", false, new ConfigDescription("Sort save files by real time instead of in-game time.", null, new ConfigurationManagerAttributes {Order = 8}));
 
-            _disableSaveOnExit = Config.Bind("4. Exiting", "Save On Exit", true, new ConfigDescription("Disable saving the game when exiting.", null, new ConfigurationManagerAttributes {Order = 10}));
-
-            _maximumSavesVisible = Config.Bind("5. UI", "Maximum Saves Visible", 3, new ConfigDescription("Maximum number of save files visible in the UI.", null, new ConfigurationManagerAttributes {Order = 9}));
-
-            _sortByRealTime = Config.Bind("5. UI", "Sort By Real Time", false, new ConfigDescription("Sort save files by real time instead of in-game time.", null, new ConfigurationManagerAttributes {Order = 8}));
-
-            _ascendingSort = Config.Bind("5. UI", "Ascending Sort", false, new ConfigDescription("Sort save files in ascending order.", null, new ConfigurationManagerAttributes {Order = 7}));
+        AscendingSort = Config.Bind("5. UI", "Ascending Sort", false, new ConfigDescription("Sort save files in ascending order.", null, new ConfigurationManagerAttributes {Order = 7}));
             
-            _manualSaveKeyBind = Config.Bind("6. Controls", "Manual Save Key Bind", new KeyboardShortcut(KeyCode.K), new ConfigDescription("Key bind for manually saving the game.", null, new ConfigurationManagerAttributes {Order = 6}));
+        ManualSaveKeyBind = Config.Bind("6. Controls", "Manual Save Key Bind", new KeyboardShortcut(KeyCode.K), new ConfigDescription("Key bind for manually saving the game.", null, new ConfigurationManagerAttributes {Order = 6}));
             
-            _enableManualSaveControllerButton = Config.Bind("6. Controls", "Enable Manual Save Controller Button", false, new ConfigDescription("Enable or disable the manual save controller button.", null, new ConfigurationManagerAttributes {Order = 5}));
-            _manualSaveControllerButton = Config.Bind("6. Controls", "Manual Save Controller Button", Enum.GetName(typeof(GamePadButton), GamePadButton.LT), new ConfigDescription("Controller button for manually saving the game.", new AcceptableValueList<string>(Enum.GetNames(typeof(GamePadButton))), new ConfigurationManagerAttributes {Order = 4}));
+        EnableManualSaveControllerButton = Config.Bind("6. Controls", "Enable Manual Save Controller Button", false, new ConfigDescription("Enable or disable the manual save controller button.", null, new ConfigurationManagerAttributes {Order = 5}));
+        ManualSaveControllerButton = Config.Bind("6. Controls", "Manual Save Controller Button", Enum.GetName(typeof(GamePadButton), GamePadButton.LT), new ConfigDescription("Controller button for manually saving the game.", new AcceptableValueList<string>(Enum.GetNames(typeof(GamePadButton))), new ConfigurationManagerAttributes {Order = 4}));
 
-            _debug = Config.Bind("7. Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 3}));
+        Debug = Config.Bind("7. Advanced", "Debug Logging", false, new ConfigDescription("Enable or disable debug logging.", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 3}));
+    }
+
+    private static void UpdateSaveData()
+    {
+        SavePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "SaveBackup");
+
+
+        if (!Directory.Exists(SavePath))
+        {
+            Directory.CreateDirectory(SavePath);
         }
 
-        private static void UpdateSaveData()
+        DataPath = Path.Combine(PlatformSpecific.GetSaveFolder(), "save-locations-savenow.dat");
+        LoadSaveLocations();
+    }
+
+    private void Update()
+    {
+        if (!MainGame.game_started || !Tools.TutorialDone()) return;
+
+        if (ManualSaveKeyBind.Value.IsUp() ||
+            (EnableManualSaveControllerButton.Value && LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(ManualSaveControllerButton.Value)))
         {
-            _savePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "SaveBackup");
+            PerformManualSave();
+        }
+    }
 
-
-            if (!Directory.Exists(_savePath))
-            {
-                Directory.CreateDirectory(_savePath);
-            }
-
-            _dataPath = Path.Combine(PlatformSpecific.GetSaveFolder(), "save-locations-savenow.dat");
-            LoadSaveLocations();
+    private static void PerformManualSave()
+    {
+        if (CrossModFields.IsInDungeon)
+        {
+            Tools.SpawnGerry(GetLocalizedString(strings.CantSaveHere), Vector3.zero, CrossModFields.ModGerryTag);
+            return;
         }
 
-        private void Update()
-        {
-            if (!MainGame.game_started || !Tools.TutorialDone()) return;
+        GUIElements.me.ShowSavingStatus(true);
 
-            if (_manualSaveKeyBind.Value.IsUp() ||
-                (_enableManualSaveControllerButton.Value && LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(_manualSaveControllerButton.Value)))
-            {
-                PerformManualSave();
-            }
+        void SaveCallback(SaveSlotData slot)
+        {
+            SaveLocation(false, string.Empty);
+            GUIElements.me.ShowSavingStatus(false);
         }
 
-        private static void PerformManualSave()
+        if (NewFileOnManualSave.Value)
         {
-            if (CrossModFields.IsInDungeon)
-            {
-                Tools.SpawnGerry(GetLocalizedString(strings.CantSaveHere), Vector3.zero, CrossModFields.ModGerryTag);
-                return;
-            }
+            var date = DateTime.Now.ToString("ddmmyyhhmmss");
+            var newSlot = $"manualsave.{date}".Trim();
 
-            GUIElements.me.ShowSavingStatus(true);
-
-            void SaveCallback(SaveSlotData slot)
-            {
-                SaveLocation(false, string.Empty);
-                GUIElements.me.ShowSavingStatus(false);
-            }
-
-            if (_newFileOnManualSave.Value)
-            {
-                var date = DateTime.Now.ToString("ddmmyyhhmmss");
-                var newSlot = $"manualsave.{date}".Trim();
-
-                MainGame.me.save_slot.filename_no_extension = newSlot;
-                PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save, SaveCallback);
-            }
-            else
-            {
-                PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save, SaveCallback);
-            }
+            MainGame.me.save_slot.filename_no_extension = newSlot;
+            PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save, SaveCallback);
         }
-
-        private static void ApplyPatches(object sender, EventArgs eventArgs)
+        else
         {
-            if (_modEnabled.Value)
-            {
-                Actions.GameStartedPlaying += RestoreLocation;
-                Log.LogInfo($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-                UpdateSaveData();
-            }
-            else
-            {
-                Actions.GameStartedPlaying -= RestoreLocation;
-                Log.LogInfo($"Removing patches for {PluginName}");
-                _harmony.UnpatchSelf();
-            }
+            PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save, SaveCallback);
+        }
+    }
+
+    private static void ApplyPatches(object sender, EventArgs eventArgs)
+    {
+        if (ModEnabled.Value)
+        {
+            Actions.GameStartedPlaying += RestoreLocation;
+            Log.LogInfo($"Applying patches for {PluginName}");
+            Harmony.PatchAll(Assembly.GetExecutingAssembly());
+            UpdateSaveData();
+        }
+        else
+        {
+            Actions.GameStartedPlaying -= RestoreLocation;
+            Log.LogInfo($"Removing patches for {PluginName}");
+            Harmony.UnpatchSelf();
         }
     }
 }

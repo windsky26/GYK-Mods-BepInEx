@@ -126,7 +126,4 @@
   <data name="HoneyReady" xml:space="preserve">
 		<value>꿀 수확 준비!</value>
 	</data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>구성이 다시 로드되었습니다!</value>
-  </data>
 </root>

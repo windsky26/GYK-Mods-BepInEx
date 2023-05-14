@@ -1,73 +1,47 @@
-﻿using System;
-using System.Reflection;
-using System.Threading;
+﻿using System.Threading;
 using BepInEx;
 using BepInEx.Configuration;
-using BepInEx.Logging;
 using GYKHelper;
-using HarmonyLib;
 using ThoughtfulReminders.lang;
 using UnityEngine;
 
-namespace ThoughtfulReminders
+namespace ThoughtfulReminders;
+
+[BepInPlugin(PluginGuid, PluginName, PluginVer)]
+[BepInDependency("p1xel8ted.gyk.gykhelper")]
+public class Plugin : BaseUnityPlugin
 {
-    [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-    [BepInDependency("p1xel8ted.gyk.gykhelper")]
-    public class Plugin : BaseUnityPlugin
+    private const string PluginGuid = "p1xel8ted.gyk.thoughtfulreminders";
+    private const string PluginName = "Thoughtful Reminders";
+    private const string PluginVer = "2.2.3";
+
+    private static int PrevDayOfWeek { get; set; }
+
+    private static ConfigEntry<bool> ModEnabled { get; set; }
+    internal static ConfigEntry<bool> SpeechBubblesConfig { get; private set; }
+    private static ConfigEntry<bool> DaysOnlyConfig { get; set; }
+
+
+    private void Awake()
     {
-        private const string PluginGuid = "p1xel8ted.gyk.thoughtfulreminders";
-        private const string PluginName = "Thoughtful Reminders";
-        private const string PluginVer = "2.2.3";
+        ModEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 3}));
 
-        private static ManualLogSource Log { get; set; }
-        private static Harmony _harmony;
-        private static int _prevDayOfWeek;
+        SpeechBubblesConfig = Config.Bind("1. General", "Speech Bubbles", true, new ConfigDescription("Enable or disable speech bubbles", null, new ConfigurationManagerAttributes {Order = 2}));
+        DaysOnlyConfig = Config.Bind("1. General", "Days Only", false, new ConfigDescription("Enable or disable days only mode", null, new ConfigurationManagerAttributes {Order = 1}));
 
-        private static ConfigEntry<bool> _modEnabled;
-        internal static ConfigEntry<bool> SpeechBubblesConfig;
-        private static ConfigEntry<bool> _daysOnlyConfig;
+    }
 
+    private void Update()
+    {
+        if (!ModEnabled.Value || !MainGame.game_started || MainGame.me.player.is_dead || !Application.isFocused) return;
 
-        private void Awake()
-        {
-            Log = Logger;
-            _harmony = new Harmony(PluginGuid);
+        var newDayOfWeek = MainGame.me.save.day_of_week;
+        if (PrevDayOfWeek == newDayOfWeek || CrossModFields.TimeOfDayFloat is <= 0.22f or >= 0.25f) return;
 
-            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 3}));
-            _modEnabled.SettingChanged += ApplyPatches;
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+        var localizedStrings = DaysOnlyConfig.Value ? new[] {strings.dSloth, strings.dPride, strings.dLust, strings.dGluttony, strings.dEnvy, strings.dWrath, strings._default} : new[] {strings.dhSloth, MainGame.me.save.unlocked_perks.Contains("p_preacher") ? strings.dhPrideSermon : strings.dhPride, strings.dhLust, strings.dhGluttony, strings.dhEnvy, strings.dhWrath, strings._default};
 
-            SpeechBubblesConfig = Config.Bind("1. General", "Speech Bubbles", true, new ConfigDescription("Enable or disable speech bubbles", null, new ConfigurationManagerAttributes {Order = 2}));
-            _daysOnlyConfig = Config.Bind("1. General", "Days Only", false, new ConfigDescription("Enable or disable days only mode", null, new ConfigurationManagerAttributes {Order = 1}));
-
-            ApplyPatches(this, null);
-        }
-
-        private static void ApplyPatches(object sender, EventArgs eventArgs)
-        {
-            if (_modEnabled.Value)
-            {
-                Log.LogInfo($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
-            else
-            {
-                Log.LogInfo($"Removing patches for {PluginName}");
-                _harmony.UnpatchSelf();
-            }
-        }
-
-        private void Update()
-        {
-            if (!_modEnabled.Value || !MainGame.game_started || MainGame.me.player.is_dead || !Application.isFocused) return;
-
-            var newDayOfWeek = MainGame.me.save.day_of_week;
-            if (_prevDayOfWeek == newDayOfWeek || CrossModFields.TimeOfDayFloat is <= 0.22f or >= 0.25f) return;
-
-            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-            var localizedStrings = _daysOnlyConfig.Value ? new[] {strings.dSloth, strings.dPride, strings.dLust, strings.dGluttony, strings.dEnvy, strings.dWrath, strings._default} : new[] {strings.dhSloth, MainGame.me.save.unlocked_perks.Contains("p_preacher") ? strings.dhPrideSermon : strings.dhPride, strings.dhLust, strings.dhGluttony, strings.dhEnvy, strings.dhWrath, strings._default};
-
-            Helpers.SayMessage(Helpers.GetLocalizedString(localizedStrings[newDayOfWeek]));
-            _prevDayOfWeek = newDayOfWeek;
-        }
+        Helpers.SayMessage(Helpers.GetLocalizedString(localizedStrings[newDayOfWeek]));
+        PrevDayOfWeek = newDayOfWeek;
     }
 }

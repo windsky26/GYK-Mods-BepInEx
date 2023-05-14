@@ -18,7 +18,7 @@ public partial class Plugin
     public static void BuildModeLogics_CanBuild(ref bool __result, ref CraftDefinition cd)
     {
         //
-        if (_internalShippingBoxBuilt.Value && _shippingBox != null)
+        if (InternalShippingBoxBuilt.Value && _shippingBox != null)
         {
             if (cd.id.Contains(ShippingItem))
             {
@@ -114,7 +114,7 @@ public partial class Plugin
     {
         Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
 
-        if (!_showItemPriceTooltips.Value || !UnlockedShippingBox() || __instance == null || item_gui == null ||
+        if (!ShowItemPriceTooltips.Value || !UnlockedShippingBox() || __instance == null || item_gui == null ||
             AlreadyDone.Contains(item_gui) || item_gui.id_empty)
             return;
 
@@ -148,7 +148,7 @@ public partial class Plugin
     {
         Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
 
-        if (!UnlockedShippingBox() || !_internalShippingBoxBuilt.Value || _shippingBox == null) return;
+        if (!UnlockedShippingBox() || !InternalShippingBoxBuilt.Value || _shippingBox == null) return;
 
         foreach (var item in _shippingBox.data.inventory)
         {
@@ -168,12 +168,12 @@ public partial class Plugin
         MainGame.me.player.data.money += earnings;
         var money = Trading.FormatMoney(earnings, true);
 
-        var position = _showSoldMessagesOnPlayer.Value
+        var position = ShowSoldMessagesOnPlayer.Value
             ? MainGame.me.player_pos + new Vector3(0, 125f, 0)
             : _shippingBox.pos3 + new Vector3(0, 100f, 0);
-        var time = _showSoldMessagesOnPlayer.Value ? 4f : 7f;
+        var time = ShowSoldMessagesOnPlayer.Value ? 4f : 7f;
 
-        if (_enableGerry.Value)
+        if (EnableGerry.Value)
         {
             StartGerryRoutine(earnings);
         }
@@ -182,7 +182,7 @@ public partial class Plugin
             Sounds.PlaySound("coins_sound", position, true);
             _shippingBox.data.inventory.Clear();
 
-            if (_showSoldMessageWhenNoSale.Value)
+            if (ShowSoldMessageWhenNoSale.Value)
             {
                 EffectBubblesManager.ShowImmediately(position, $"{money}",
                     earnings > 0 ? EffectBubblesManager.BubbleColor.Green : EffectBubblesManager.BubbleColor.Red,
@@ -190,7 +190,7 @@ public partial class Plugin
             }
         }
 
-        if (_showSummaryMessage.Value && !_enableGerry.Value && earnings > 0)
+        if (ShowSummaryMessage.Value && !EnableGerry.Value && earnings > 0)
         {
             ShowSummary(money);
         }
@@ -305,7 +305,7 @@ public partial class Plugin
                     _ => $"{strings.Header} (T{tier})"
                 };
                 inventoryWidget.header_label.text =
-                    _showKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
+                    ShowKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
                 inventoryWidget.dont_show_empty_rows = true;
                 inventoryWidget.SetInactiveStateToEmptyCells();
             }
@@ -337,7 +337,7 @@ public partial class Plugin
                     _ => $"{strings.Header} (T{tier})"
                 };
                 inventoryWidget.header_label.text =
-                    _showKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
+                    ShowKnownVendorCount.Value ? header : $"{strings.Header} (T{tier})";
                 inventoryWidget.dont_show_empty_rows = true;
                 inventoryWidget.SetInactiveStateToEmptyCells();
             }
@@ -451,7 +451,7 @@ public partial class Plugin
         {
             WriteLog($"Removed Shipping Box!");
             _shippingBox = null;
-            _internalShippingBoxBuilt.Value = false;
+            InternalShippingBoxBuilt.Value = false;
             var sbCraft = GameBalance.me.GetData<ObjectCraftDefinition>(ShippingBoxId);
             sbCraft.hidden = false;
         }
@@ -489,7 +489,7 @@ public partial class Plugin
     public static void WorldGameObject_ReplaceWithObject(ref WorldGameObject __instance, ref string new_obj_id)
     {
         if (!UnlockedShippingBox() || __instance == null ||
-            _internalShippingBoxBuilt.Value && _shippingBox != null) return;
+            InternalShippingBoxBuilt.Value && _shippingBox != null) return;
 
         if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
         {
@@ -501,7 +501,7 @@ public partial class Plugin
             _shippingBuild = false;
             _shippingBox = __instance;
 
-            _internalShippingBoxBuilt.Value = true;
+            InternalShippingBoxBuilt.Value = true;
 
             UpdateShippingBox(sbCraft, __instance);
         }

@@ -117,21 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OreFull" xml:space="preserve">
-    <value>Phew...ore storage is now full!</value>
-  </data>
-  <data name="StoneFull" xml:space="preserve">
-    <value>Phew...stone storage is now full!</value>
-  </data>
-  <data name="TimberFull" xml:space="preserve">
-    <value>Phew...timber storage is now full!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>Teleporting to dump sites when all stockpiles are full is now ON.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>Teleporting to dump sites when all stockpiles are full is now OFF.</value>
-  </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>Dump timber here!</value>
   </data>
@@ -140,8 +125,5 @@
   </data>
   <data name="DumpStone" xml:space="preserve">
     <value>Dump stone &amp; marble here!</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Config Reloaded!</value>
   </data>
 </root>

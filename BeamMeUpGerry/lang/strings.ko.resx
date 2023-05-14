@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NotReady" xml:space="preserve">
-		<value>아직 사용할 수 없습니다!</value>
-	</data>
-  <data name="Ready" xml:space="preserve">
-		<value>텔레포트스톤 준비!</value>
-	</data>
   <data name="WhereIsIt" xml:space="preserve">
 		<value>저 돌 어디다 뒀더라...</value>
 	</data>
@@ -176,9 +170,6 @@
   </data>
   <data name="Coal" xml:space="preserve">
     <value>탄광</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>구성이 다시 로드되었습니다!</value>
   </data>
   <data name="CantUseHere" xml:space="preserve">
     <value>여기에서는 사용할 수 없습니다, 보스!</value>

@@ -7,13 +7,13 @@ namespace FogBeGone;
 [HarmonyPatch]
 public static class Patches
 {
-    private static bool _introPlaying;
+    private static bool IntroPlaying { get; set; }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CustomFlowScript), nameof(CustomFlowScript.Create), typeof(GameObject), typeof(FlowGraph), typeof(bool), typeof(CustomFlowScript.OnFinishedDelegate), typeof(string))]
     public static void CustomFlowScript_Create(ref FlowGraph g)
     {
-        _introPlaying = string.Equals(g.name, "red_eye_talk_1");
+        IntroPlaying = string.Equals(g.name, "red_eye_talk_1");
     }
 
 
@@ -21,7 +21,7 @@ public static class Patches
     [HarmonyPatch(typeof(SmartWeatherState), nameof(SmartWeatherState.Update))]
     public static void SmartWeatherState_Update(SmartWeatherState __instance)
     {
-        if (!MainGame.game_started || __instance == null || _introPlaying) return;
+        if (!MainGame.game_started || __instance == null || IntroPlaying) return;
         switch (__instance.type)
         {
             case SmartWeatherState.WeatherType.Fog:

@@ -14,7 +14,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ShowBuildGrid))]
     public static void BuildGrid_ShowBuildGrid(ref bool show)
     {
-        if(_grid.Value) return;
+        if(Grid.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
         show = false;
     }
@@ -23,7 +23,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ClearPreviousTotemRadius))]
     public static void BuildGrid_ClearPreviousTotemRadius(ref bool apply_colors)
     {
-        if(_grid.Value) return;
+        if(Grid.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
         apply_colors = false;
     }
@@ -32,7 +32,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.EnterRemoveMode))]
     public static void BuildModeLogics_EnterRemoveMode(ref BuildModeLogics __instance)
     {
-        if (_greyOverlay.Value) return;
+        if (GreyOverlay.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
         __instance._remove_grey_spr.SetActive(false);
     }
@@ -94,7 +94,7 @@ public partial class Plugin
     {
         if (!CrossModFields.CraftAnywhere) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
-        BuildModeLogics.last_build_desk = _buildDeskClone;
+        BuildModeLogics.last_build_desk = BuildDeskClone;
         __instance._cur_build_zone_id = Zone;
         __instance._cur_build_zone = WorldZone.GetZoneByID(Zone);
         __instance._cur_build_zone_bounds = __instance._cur_build_zone.GetBounds();
@@ -105,7 +105,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(FloatingWorldGameObject), nameof(FloatingWorldGameObject.RecalculateAvailability))]
     public static void FloatingWorldGameObject_RecalculateAvailability()
     {
-        if (_buildingCollision.Value) return;
+        if (BuildingCollision.Value) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
     
         FloatingWorldGameObject.can_be_built = true;
@@ -132,8 +132,8 @@ public partial class Plugin
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetUniversalObjectInfo))]
     public static void WorldGameObject_GetUniversalObjectInfo(ref WorldGameObject __instance, ref UniversalObjectInfo __result)
     {
-        if (_buildDeskClone == null) return;
-        if (__instance != _buildDeskClone) return;
+        if (BuildDeskClone == null) return;
+        if (__instance != BuildDeskClone) return;
         if (MainGame.me.player.GetMyWorldZoneId().Contains(RefugeeZoneId)) return;
         __result.header = GetLocalizedString(strings.Header);
         __result.descr = GetLocalizedString(strings.Description);

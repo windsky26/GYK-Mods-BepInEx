@@ -1,46 +1,44 @@
 ﻿using AutoLootHeavies.lang;
-using BepInEx;
 using GYKHelper;
 
 
-namespace AutoLootHeavies
+namespace AutoLootHeavies;
+
+public partial class Plugin
 {
-    public partial class Plugin
+    private static bool InitialFullUpdate { get; set; }
+
+    private void Update()
     {
-        private static bool _initialFullUpdate;
+        if (!MainGame.game_started) return;
 
-        private void Update()
+        if (!InitialFullUpdate)
         {
-            if (!MainGame.game_started) return;
-
-            if (!_initialFullUpdate)
-            {
-                _initialFullUpdate = true;
-                MainGame.me.StartCoroutine(RunFullUpdate());
-            }
-
-            CheckKeybinds();
+            InitialFullUpdate = true;
+            MainGame.me.StartCoroutine(RunFullUpdate());
         }
 
-        private static void CheckKeybinds()
+        CheckKeybinds();
+    }
+
+    private static void CheckKeybinds()
+    {
+        if (SetTimberLocationKeybind.Value.IsUp())
         {
-            if (_setTimberLocationKeybind.Value.IsUp())
-            {
-                _designatedTimberLocation.Value = MainGame.me.player_pos;
-                Tools.ShowMessage(strings.DumpTimber, _designatedTimberLocation.Value);
-            }
+            DesignatedTimberLocation.Value = MainGame.me.player_pos;
+            Tools.ShowMessage(strings.DumpTimber, DesignatedTimberLocation.Value);
+        }
 
-            if (_setOreLocationKeybind.Value.IsUp())
-            {
-                _designatedOreLocation.Value = MainGame.me.player_pos;
-                Tools.ShowMessage(strings.DumpOre, _designatedOreLocation.Value);
-            }
+        if (SetOreLocationKeybind.Value.IsUp())
+        {
+            DesignatedOreLocation.Value = MainGame.me.player_pos;
+            Tools.ShowMessage(strings.DumpOre, DesignatedOreLocation.Value);
+        }
 
-            if (_setStoneLocationKeybind.Value.IsUp())
-            {
-                _designatedStoneLocation.Value = MainGame.me.player_pos;
-                Tools.ShowMessage(strings.DumpStone, _designatedStoneLocation.Value);
-            }
+        if (SetStoneLocationKeybind.Value.IsUp())
+        {
+            DesignatedStoneLocation.Value = MainGame.me.player_pos;
+            Tools.ShowMessage(strings.DumpStone, DesignatedStoneLocation.Value);
         }
     }
 }

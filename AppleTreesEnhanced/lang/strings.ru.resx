@@ -126,7 +126,4 @@
   <data name="HoneyReady" xml:space="preserve">
 		<value>Мед можно собрать!</value>
 	</data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Настройки перезагружены!</value>
-  </data>
 </root>

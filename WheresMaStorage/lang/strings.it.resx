@@ -103,7 +103,4 @@
     <data name="Wilderness" xml:space="preserve">
 		<value>Natura selvaggia</value>
 	</data>
-    <data name="ConfigMessage" xml:space="preserve">
-    <value>Configurazione ricaricata!</value>
-  </data>
 </root>

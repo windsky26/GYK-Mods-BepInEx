@@ -15,31 +15,31 @@ public class Plugin : BaseUnityPlugin
     private const string PluginVer = "2.4.3";
 
     private static ManualLogSource Log { get; set; }
-    private static Harmony _harmony;
+    private static Harmony Harmony { get; set; }
 
-    private static ConfigEntry<bool> _modEnabled;
+    private static ConfigEntry<bool> ModEnabled { get; set; }
 
     private void Awake()
     {
         Log = Logger;
-        _harmony = new Harmony(PluginGuid);
+        Harmony = new Harmony(PluginGuid);
 
-        _modEnabled = Config.Bind("1. General", "Enabled", true, $"Toggle {PluginName}");
-        _modEnabled.SettingChanged += ApplyPatches;
+        ModEnabled = Config.Bind("1. General", "Enabled", true, $"Toggle {PluginName}");
+        ModEnabled.SettingChanged += ApplyPatches;
         ApplyPatches(this,null);
     }
 
     private static void ApplyPatches(object sender, EventArgs eventArgs)
     {
-        if (_modEnabled.Value)
+        if (ModEnabled.Value)
         {
             Log.LogInfo($"Applying patches for {PluginName}");
-            _harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
         else
         {
             Log.LogInfo($"Removing patches for {PluginName}");
-            _harmony.UnpatchSelf();
+            Harmony.UnpatchSelf();
         }
     }
 }

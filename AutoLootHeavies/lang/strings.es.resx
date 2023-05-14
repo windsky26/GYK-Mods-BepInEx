@@ -117,15 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OreFull" xml:space="preserve">
-    <value>¡Uf... el almacenamiento de mineral ahora está lleno!</value>
-  </data>
-  <data name="StoneFull" xml:space="preserve">
-    <value>¡Uf... el almacenamiento de piedras ahora está lleno!</value>
-  </data>
-  <data name="TimberFull" xml:space="preserve">
-    <value>¡Uf... el depósito de madera ya está lleno!</value>
-  </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>¡Tira la madera aquí!</value>
   </data>
@@ -134,14 +125,5 @@
   </data>
   <data name="DumpStone" xml:space="preserve">
     <value>¡Vuelca piedra y mármol aquí!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>Teletransportarse a los vertederos cuando todas las reservas están llenas ahora está ACTIVADO.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>La teletransportación a los vertederos cuando todas las reservas están llenas ahora está DESACTIVADA.</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>¡Configuración recargada!</value>
   </data>
 </root>

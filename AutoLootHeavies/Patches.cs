@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using AutoLootHeavies.lang;
 using HarmonyLib;
 using UnityEngine;
 
@@ -43,7 +42,7 @@ public partial class Plugin
 
         if (__instance.overhead_item != null)
         {
-            if (_teleportToDumpSiteWhenAllStockPilesFull.Value)
+            if (TeleportToDumpSiteWhenAllStockPilesFull.Value)
             {
                 TeleportItem(__instance, __instance.overhead_item);
                 //WriteLog($"Teleporting {itemId} to dump site.");

@@ -103,7 +103,4 @@
     <data name="Wilderness" xml:space="preserve">
 		<value>Região selvagem</value>
 	</data>
-    <data name="ConfigMessage" xml:space="preserve">
-    <value>Configuração recarregada!</value>
-  </data>
 </root>

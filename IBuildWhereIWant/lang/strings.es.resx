@@ -123,7 +123,4 @@
   <data name="Header" xml:space="preserve">
 		<value>Crea en cualquier lugar</value>
 	</data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>¡Configuración recargada!</value>
-  </data>
 </root>

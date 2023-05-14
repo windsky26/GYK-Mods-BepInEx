@@ -7,7 +7,7 @@ namespace EconomyReloaded;
 [HarmonyPatch]
 public static class Patches
 {
-    private static bool _gameBalanceAlreadyRun;
+    private static bool GameBalanceAlreadyRun { get; set; }
     private static readonly Dictionary<string, bool> BackedUpIsStaticCost = new();
     private static readonly HashSet<string> StaticCostItemIds = new();
 
@@ -71,8 +71,8 @@ public static class Patches
 
     public static void GameBalance_LoadGameBalance(GameBalance obj)
     {
-        if (_gameBalanceAlreadyRun) return;
-        _gameBalanceAlreadyRun = true;
+        if (GameBalanceAlreadyRun) return;
+        GameBalanceAlreadyRun = true;
 
         var itemsWithBasePrice = GameBalance.me.items_data.Where(itemDef => itemDef.base_price > 0).ToList();
         BackedUpIsStaticCost.Clear();

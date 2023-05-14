@@ -159,7 +159,4 @@
   <data name="dWrath" xml:space="preserve">
     <value>Dzień Gniewu...</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Konfiguracja została ponownie załadowana!</value>
-  </data>
 </root>

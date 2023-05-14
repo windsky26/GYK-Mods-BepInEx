@@ -126,7 +126,4 @@
   <data name="HoneyReady" xml:space="preserve">
 		<value>蜂蜜の収穫の準備ができました！</value>
 	</data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>設定がリロードされました!</value>
-  </data>
 </root>

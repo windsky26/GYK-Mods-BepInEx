@@ -126,12 +126,6 @@
   <data name="Mill" xml:space="preserve">
     <value>Mill</value>
   </data>
-  <data name="NotReady" xml:space="preserve">
-    <value>Can't use that yet!</value>
-  </data>
-  <data name="Ready" xml:space="preserve">
-    <value>Teleportstone Ready!</value>
-  </data>
   <data name="Sand" xml:space="preserve">
     <value>Sand mound</value>
   </data>
@@ -176,9 +170,6 @@
   </data>
   <data name="Coal" xml:space="preserve">
     <value>Coal vein</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Config Reloaded!</value>
   </data>
   <data name="CantUseHere" xml:space="preserve">
     <value>I can’t use that here, boss!</value>

@@ -2,23 +2,22 @@
 using System.Linq;
 using System.Threading;
 using GYKHelper;
-using UnityEngine;
 
 namespace IBuildWhereIWant;
 
 public partial class Plugin
 {
-    private static WorldGameObject _buildDesk;
-    private static WorldGameObject _buildDeskClone;
+    private static WorldGameObject BuildDesk { get; set; }
+    private static WorldGameObject BuildDeskClone { get; set; }
 
-    private static CraftsInventory _craftsInventory;
+    private static CraftsInventory CraftsInventory { get; set; }
 
-    private static Dictionary<string, string> _craftDictionary;
+    private static Dictionary<string, string> CraftDictionary { get; set; } = new();
     private const string Zone = "mf_wood";
 
-    private const string BuildDesk = "buildanywhere_desk";
+    private const string BuildDeskConst = "buildanywhere_desk";
 
-    private static int _unlockedCraftListCount;
+    private static int UnlockedCraftListCount { get; set; }
 
     private static string GetLocalizedString(string content)
     {
@@ -36,34 +35,34 @@ public partial class Plugin
             return;
         }
 
-        _craftsInventory ??= new CraftsInventory();
+        CraftsInventory ??= new CraftsInventory();
 
-        _craftDictionary ??= new Dictionary<string, string>();
+        CraftDictionary ??= new Dictionary<string, string>();
 
-        if (_buildDesk == null)
+        if (BuildDesk == null)
         {
-            _buildDesk = FindObjectsOfType<WorldGameObject>(true)
+            BuildDesk = FindObjectsOfType<WorldGameObject>(true)
                 .FirstOrDefault(x => string.Equals(x.obj_id, "mf_wood_builddesk"));
         }
 
         WriteLog(
-            _buildDesk != null
-                ? $"Found Build Desk: {_buildDesk}, Zone: {_buildDesk.GetMyWorldZone()}"
-                : "Unable to locate a build desk.", _buildDesk == null);
+            BuildDesk != null
+                ? $"Found Build Desk: {BuildDesk}, Zone: {BuildDesk.GetMyWorldZone()}"
+                : "Unable to locate a build desk.", BuildDesk == null);
 
-        if (_buildDeskClone != null)
+        if (BuildDeskClone != null)
         {
-            Destroy(_buildDeskClone);
+            Destroy(BuildDeskClone);
         }
 
-        _buildDeskClone = Instantiate(_buildDesk);
+        BuildDeskClone = Instantiate(BuildDesk);
 
-        _buildDeskClone.name = BuildDesk;
+        BuildDeskClone.name = BuildDeskConst;
 
         var needsRefresh = false;
-        if (MainGame.me.save.unlocked_crafts.Count > _unlockedCraftListCount)
+        if (MainGame.me.save.unlocked_crafts.Count > UnlockedCraftListCount)
         {
-            _unlockedCraftListCount = MainGame.me.save.unlocked_crafts.Count;
+            UnlockedCraftListCount = MainGame.me.save.unlocked_crafts.Count;
             needsRefresh = true;
         }
 
@@ -74,26 +73,26 @@ public partial class Plugin
                          .Where(a => a.icon.Length > 0)
                          .Where(b => !b.id.Contains("refugee"))
                          .Where(d => MainGame.me.save.IsCraftVisible(d))
-                         .Where(e => !_craftDictionary.TryGetValue(GJL.L(e.GetNameNonLocalized()), out _)))
+                         .Where(e => !CraftDictionary.TryGetValue(GJL.L(e.GetNameNonLocalized()), out _)))
 
             {
                 var itemName = GJL.L(objectCraftDefinition.GetNameNonLocalized());
-                _craftDictionary.Add(itemName, objectCraftDefinition.id);
+                CraftDictionary.Add(itemName, objectCraftDefinition.id);
             }
 
 
-            var craftList = _craftDictionary.ToList();
+            var craftList = CraftDictionary.ToList();
             craftList.Sort((pair1, pair2) => string.CompareOrdinal(pair1.Key, pair2.Key));
 
-            craftList.ForEach(craft => { _craftsInventory.AddCraft(craft.Value); });
+            craftList.ForEach(craft => { CraftsInventory.AddCraft(craft.Value); });
         }
 
         CrossModFields.CraftAnywhere = true;
 
-        BuildModeLogics.last_build_desk = _buildDeskClone;
+        BuildModeLogics.last_build_desk = BuildDeskClone;
 
-        MainGame.me.build_mode_logics.SetCurrentBuildZone(_buildDeskClone.obj_def.zone_id, "");
-        GUIElements.me.craft.OpenAsBuild(_buildDeskClone, _craftsInventory);
+        MainGame.me.build_mode_logics.SetCurrentBuildZone(BuildDeskClone.obj_def.zone_id, "");
+        GUIElements.me.craft.OpenAsBuild(BuildDeskClone, CraftsInventory);
         MainGame.paused = false;
     }
 
@@ -105,7 +104,7 @@ public partial class Plugin
         }
         else
         {
-            if (_debug.Value)
+            if (Debug.Value)
             {
                 Log.LogInfo($"{message}");
             }

@@ -126,7 +126,4 @@
   <data name="HoneyReady" xml:space="preserve">
 		<value>Miele pronto!</value>
 	</data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Configurazione ricaricata!</value>
-  </data>
 </root>

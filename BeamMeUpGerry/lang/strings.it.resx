@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NotReady" xml:space="preserve">
-		<value>Non posso ancora usarlo!</value>
-	</data>
-  <data name="Ready" xml:space="preserve">
-		<value>Teletrasporto pronto!</value>
-	</data>
   <data name="WhereIsIt" xml:space="preserve">
 		<value>Dove ho lasciato quella pietra...</value>
 	</data>
@@ -176,9 +170,6 @@
   </data>
   <data name="Coal" xml:space="preserve">
     <value>Vena di carbone</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Configurazione ricaricata!</value>
   </data>
   <data name="CantUseHere" xml:space="preserve">
     <value>Non posso usarlo qui, capo!</value>

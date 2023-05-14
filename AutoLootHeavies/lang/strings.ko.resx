@@ -117,15 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OreFull" xml:space="preserve">
-    <value>휴...광석 저장소가 가득 찼습니다!</value>
-  </data>
-  <data name="StoneFull" xml:space="preserve">
-    <value>휴...스톤 창고가 가득 찼습니다!</value>
-  </data>
-  <data name="TimberFull" xml:space="preserve">
-    <value>휴...목재 창고가 가득 찼습니다!</value>
-  </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>여기에 목재를 버리십시오!</value>
   </data>
@@ -134,14 +125,5 @@
   </data>
   <data name="DumpStone" xml:space="preserve">
     <value>여기에 돌과 대리석을 버리십시오!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>모든 비축량이 가득 찼을 때 투기장으로 순간이동하는 기능이 켜져 있습니다.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>모든 비축량이 가득 찼을 때 덤프 사이트로 순간 이동하는 기능이 해제되었습니다.</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>구성이 다시 로드되었습니다!</value>
   </data>
 </root>

@@ -126,7 +126,4 @@
   <data name="HoneyReady" xml:space="preserve">
     <value>Honiglese fertig!!</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Konfiguration neu geladen!</value>
-  </data>
 </root>

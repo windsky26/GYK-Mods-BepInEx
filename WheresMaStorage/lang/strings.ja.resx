@@ -103,7 +103,4 @@
     <data name="Wilderness" xml:space="preserve">
 		<value>荒野</value>
 	</data>
-    <data name="ConfigMessage" xml:space="preserve">
-    <value>設定がリロードされました!</value>
-  </data>
 </root>

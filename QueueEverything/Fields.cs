@@ -4,7 +4,7 @@ namespace QueueEverything;
 
 public partial class Plugin
 {
-    private static readonly List<WorldGameObject> currentlyCrafting = new();
+    private static readonly List<WorldGameObject> CurrentlyCrafting = new();
 
     //"axe", "hammer", "shovel", "sword",
     private static readonly string[] MultiOutCantQueue =
@@ -29,17 +29,16 @@ public partial class Plugin
         "mf_balsamation_3", "blockage_H_high", "soul_workbench_craft", "grow_desk_planting", "grow_vineyard_planting"
     };
 
-    private static bool _alreadyRun;
-    private static bool _ccAlreadyRun;
- 
-    private static bool _craftsStarted;
-    private static bool _exhaustlessEnabled;
+    private static bool AlreadyRun { get; set; }
+    private static bool CcAlreadyRun { get; set; }
 
-    private static bool _fasterCraftEnabled;
-    private static bool _fasterCraftReloaded;
-    //private static bool _originalFasterCraft;
+    private static bool CraftsStarted { get; set; }
+    private static bool ExhaustlessEnabled { get; set; }
 
-private static float _timeAdjustment;
-    
-    
+    private static bool FasterCraftEnabled { get; set; }
+
+    private static bool FasterCraftReloaded { get; set; }
+    // private static bool OriginalFasterCraft { get; set; }
+
+    private static float TimeAdjustment { get; set; }
 }

@@ -103,7 +103,4 @@
     <data name="Wilderness" xml:space="preserve">
 		<value>Пустошь</value>
 	</data>
-    <data name="ConfigMessage" xml:space="preserve">
-    <value>Настройки перезагружены!</value>
-  </data>
 </root>

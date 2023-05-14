@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FlowCanvas.Nodes;
 using GerrysJunkTrunk.lang;
 using GYKHelper;
 using UnityEngine;
@@ -34,7 +33,7 @@ public partial class Plugin
         {
             Log.LogError(message);
         }
-        else if (_debug.Value)
+        else if (Debug.Value)
         {
             Log.LogInfo(message);
         }
@@ -249,7 +248,7 @@ public partial class Plugin
 
     private static void PlayCoinsSoundAndShowMessage(float num, WorldGameObject gerry2, string money)
     {
-        if (_showSoldMessagesOnPlayer.Value)
+        if (ShowSoldMessagesOnPlayer.Value)
         {
             Sounds.PlaySound("coins_sound", MainGame.me.player_pos, true);
             var pos = MainGame.me.player_pos;

@@ -6,6 +6,7 @@
 
   <!--Base Settings-->
   <PropertyGroup>
+     
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,6 +17,7 @@
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <NoWarn>Publicizer001,CS1591</NoWarn>
         <Nullable>disable</Nullable>
+      <Description>$(MSBuildProjectName)</Description>
   </PropertyGroup>
 
   <!--Default all references to CopyLocal False.-->
@@ -24,7 +26,8 @@
     <ProjectReference><Private>False</Private></ProjectReference>
     <PackageReference><Private>False</Private></PackageReference>
   </ItemDefinitionGroup>
-  
+
+
       <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <OutputPath>H:\Games\steamapps\common\Graveyard Keeper\BepInEx\plugins\$(MSBuildProjectName)</OutputPath>
     </PropertyGroup>
@@ -33,6 +36,8 @@
       <OutputPath>H:\Games\steamapps\common\Graveyard Keeper\BepInEx\plugins\$(MSBuildProjectName)</OutputPath>
     </PropertyGroup>
 
+
+    
     <ItemGroup>
         <PackageReference Include="BepInEx.Core" Version="5.4.21" />
         <PackageReference Include="GraveyardKeeper.GameLibs" Version="1.405.1" />

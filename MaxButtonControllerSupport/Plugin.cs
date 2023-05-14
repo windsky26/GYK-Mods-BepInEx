@@ -13,6 +13,7 @@ namespace MaxButtonControllerSupport;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
 [BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("com.graveyardkeeper.urbanvibes.maxbutton")]
 public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.maxbuttoncontrollersupport";
@@ -20,32 +21,32 @@ public partial class Plugin : BaseUnityPlugin
     private const string PluginVer = "1.3.2";
 
     private static ManualLogSource Log { get; set; }
-    private static Harmony _harmony;
+    private static Harmony Harmony { get; set; }
 
-    private static ConfigEntry<bool> _modEnabled;
+    private static ConfigEntry<bool> ModEnabled { get; set; }
 
     private void Awake()
     {
         Log = Logger;
-        _harmony = new Harmony(PluginGuid);
-        _modEnabled = Config.Bind("General", "Enabled", true, $"Toggle {PluginName}");
-        _modEnabled.SettingChanged += ApplyPatches;
+        Harmony = new Harmony(PluginGuid);
+        ModEnabled = Config.Bind("General", "Enabled", true, $"Toggle {PluginName}");
+        ModEnabled.SettingChanged += ApplyPatches;
         ApplyPatches(this, null);
     }
 
     private static void ApplyPatches(object sender, EventArgs eventArgs)
     {
-        if (_modEnabled.Value)
+        if (ModEnabled.Value)
         {
             Actions.WorldGameObjectInteractPrefix += WorldGameObject_Interact;
             Log.LogInfo($"Applying patches for {PluginName}");
-            _harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
         else
         {
             Actions.WorldGameObjectInteractPrefix -= WorldGameObject_Interact;
             Log.LogInfo($"Removing patches for {PluginName}");
-            _harmony.UnpatchSelf();
+            Harmony.UnpatchSelf();
         }
     }
 

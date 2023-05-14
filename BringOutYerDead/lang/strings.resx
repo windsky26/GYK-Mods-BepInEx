@@ -120,7 +120,4 @@
   <data name="CarrotMessage" xml:space="preserve">
     <value>Blimey! I'm out of carrots for the donkey!</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Config Reloaded!</value>
-  </data>
 </root>

@@ -159,7 +159,4 @@
   <data name="dhWrath" xml:space="preserve">
     <value>День гнева... интересно, нашел ли Инквизитор ведьму, которую можно сжечь...</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Настройки перезагружены!</value>
-  </data>
 </root>

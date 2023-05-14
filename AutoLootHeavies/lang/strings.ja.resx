@@ -117,15 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OreFull" xml:space="preserve">
-    <value>ふぅ...鉱石のストレージがいっぱいになりました！</value>
-  </data>
-  <data name="StoneFull" xml:space="preserve">
-    <value>ふぅ...石の貯蔵庫がいっぱいになりました！</value>
-  </data>
-  <data name="TimberFull" xml:space="preserve">
-    <value>ふぅ...材木貯蔵庫がいっぱいになりました！</value>
-  </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>ここに材木を捨ててください！</value>
   </data>
@@ -134,14 +125,5 @@
   </data>
   <data name="DumpStone" xml:space="preserve">
     <value>ここに石と大理石を捨ててください！</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>すべての備蓄がいっぱいになったときのゴミ捨て場へのテレポートがオンになりました。</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>すべての備蓄がいっぱいになったときのゴミ捨て場へのテレポートはオフになりました。</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>設定がリロードされました!</value>
   </data>
 </root>

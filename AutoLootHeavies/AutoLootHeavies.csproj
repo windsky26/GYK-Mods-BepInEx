@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Description>$(MSBuildProjectName)</Description>
         <Version>3.4.6</Version>
         <AssemblyVersion>$(Version)</AssemblyVersion>
         <FileVersion>$(Version)</FileVersion>
@@ -8,4 +7,5 @@
     <ItemGroup>
         <ProjectReference Include="..\GYKHelper\GYKHelper.csproj" />
     </ItemGroup>
+    <Import Project="..\zip.target" />
 </Project>

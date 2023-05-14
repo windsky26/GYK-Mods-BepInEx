@@ -103,21 +103,6 @@
   <data name="Rush" xml:space="preserve">
 		<value>Co za pośpiech! Dopada mnie za każdym razem!</value>
 	</data>
-  <data name="InfoAutoSave" xml:space="preserve">
-		<value>Autozapis</value>
-	</data>
-  <data name="InfoPeriod" xml:space="preserve">
-		<value>Okres</value>
-	</data>
-  <data name="InfoMinutes" xml:space="preserve">
-		<value>minuta</value>
-	</data>
-  <data name="InfoNewSaveOnAutoSave" xml:space="preserve">
-		<value>Nowy Zapisz przy automatycznym zapisie</value>
-	</data>
-  <data name="InfoSavesToKeep" xml:space="preserve">
-		<value>Zapisy do zachowania</value>
-	</data>
   <data name="SaveAreYouSureMenu" xml:space="preserve">
 		<value>Czy na pewno chcesz wrócić do menu głównego?</value>
 	</data>

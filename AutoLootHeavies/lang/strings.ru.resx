@@ -117,15 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OreFull" xml:space="preserve">
-    <value>Уф... склад руды заполнен!</value>
-  </data>
-  <data name="StoneFull" xml:space="preserve">
-    <value>Уф... склад камней заполнен!</value>
-  </data>
-  <data name="TimberFull" xml:space="preserve">
-    <value>Уф... склад бревен заполнен!</value>
-  </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>Сваливай бревна сюда!</value>
   </data>
@@ -134,14 +125,5 @@
   </data>
   <data name="DumpStone" xml:space="preserve">
     <value>Сваливай камень и мрамор сюда!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>Телепортация на свалку, когда все склады заполнены, теперь включена.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>Телепортация на свалку, когда все склады заполнены, теперь отключена.</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Настройки перезагружены!</value>
   </data>
 </root>

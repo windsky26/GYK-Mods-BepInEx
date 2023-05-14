@@ -1,6 +1,4 @@
-﻿using System;
-using BepInEx;
-using BringOutYerDead.lang;
+﻿using BringOutYerDead.lang;
 using GYKHelper;
 using HarmonyLib;
 
@@ -15,19 +13,16 @@ public static class Patches
     private static int _deliveryCount;
     private static bool _strikeDone;
     internal static LogicData Ld;
-
-    //TODO: Create an Action for this
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.OnEndOfDay))]
-    public static void EnvironmentEngine_OnEndOfDay(ref EnvironmentEngine __instance)
+    
+    public static void EnvironmentEngine_OnEndOfDay(EnvironmentEngine obj)
     {
-        if (__instance == null) return;
+        if (obj == null) return;
         Plugin.InternalMorningDelivery.Value = false;
         Plugin.InternalDayDelivery.Value = false;
         Plugin.InternalEveningDelivery.Value = false;
         Plugin.InternalNightDelivery.Value = false;
         Plugin.PrideDayLogged = false;
-        Helpers.Log("Resetting donkey day delivery flags!");
+        Helpers.Log("Resetting donkey day delivery flags!");   
     }
 
     internal static bool ForceDonkey(WorldGameObject donkey)

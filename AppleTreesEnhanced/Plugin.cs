@@ -6,7 +6,6 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using GYKHelper;
 using HarmonyLib;
-using UnityEngine;
 
 namespace AppleTreesEnhanced
 {
@@ -18,25 +17,22 @@ namespace AppleTreesEnhanced
         private const string PluginName = "Apple Tree's Enhanced!";
         private const string PluginVer = "2.7.4";
         private static ManualLogSource Log { get; set; }
-        private static Harmony _harmony;
-
-        private static ConfigEntry<bool> _debug;
-        private static ConfigEntry<bool> _modEnabled;
+        private static Harmony Harmony { get; set; }
+        private static ConfigEntry<bool> Debug { get; set; }
+        private static ConfigEntry<bool> ModEnabled { get; set; }
 
         private void Awake()
         {
             Log = Logger;
-            _harmony = new Harmony(PluginGuid);
-
+            Harmony = new Harmony(PluginGuid);
             InitConfiguration();
-
             ApplyPatches(this, null);
         }
 
         private void InitConfiguration()
         {
-            _modEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 10}));
-            _modEnabled.SettingChanged += ApplyPatches;
+            ModEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Toggle {PluginName}", null, new ConfigurationManagerAttributes {Order = 10}));
+            ModEnabled.SettingChanged += ApplyPatches;
 
             IncludeGardenBerryBushes = Config.Bind("2. Player Garden", "Include Garden Berry Bushes", true, new ConfigDescription("Enable enhancements for player garden berry bushes", null, new ConfigurationManagerAttributes {Order = 9}));
             IncludeGardenTrees = Config.Bind("2. Player Garden", "Include Garden Trees", true, new ConfigDescription("Enable enhancements for player garden trees", null, new ConfigurationManagerAttributes {Order = 8}));
@@ -49,23 +45,23 @@ namespace AppleTreesEnhanced
 
             BeeKeeperBuyback = Config.Bind("5. Economy", "Bee Keeper Buyback", false, new ConfigDescription("Allow beekeeper to buy back bees", null, new ConfigurationManagerAttributes {Order = 3}));
 
-            _debug = Config.Bind("6. Advanced", "Debug Logging", false, new ConfigDescription("Toggle debug logging on or off", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 2}));
+            Debug = Config.Bind("6. Advanced", "Debug Logging", false, new ConfigDescription("Toggle debug logging on or off", null, new ConfigurationManagerAttributes {IsAdvanced = true, Order = 2}));
         }
 
 
         private static void ApplyPatches(object sender, EventArgs eventArgs)
         {
-            if (_modEnabled.Value)
+            if (ModEnabled.Value)
             {
                 Log.LogInfo($"Applying patches for {PluginName}");
                 Actions.GameStartedPlaying += CleanUpTrees;
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
+                Harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             else
             {
                 Log.LogInfo($"Removing patches for {PluginName}");
                 Actions.GameStartedPlaying -= CleanUpTrees;
-                _harmony.UnpatchSelf();
+                Harmony.UnpatchSelf();
             }
         }
 
@@ -91,7 +87,7 @@ namespace AppleTreesEnhanced
                 dudBeesCount++;
                 Helpers.ProcessBeeRespawn(dudBee);
 
-                if (_debug.Value)
+                if (Debug.Value)
                 {
                     Log.LogMessage($"Fixed DudBee {dudBeesCount}");
                 }
@@ -110,7 +106,7 @@ namespace AppleTreesEnhanced
                 Helpers.ProcessRespawn(dudTree, Helpers.Constants.HarvestGrowing.GardenAppleTree,
                     Helpers.Constants.HarvestSpawner.GardenAppleTree);
 
-                if (_debug.Value)
+                if (Debug.Value)
                 {
                     Log.LogMessage($"Fixed DudGardenTree {dudTreeCount}");
                 }
@@ -129,7 +125,7 @@ namespace AppleTreesEnhanced
                 Helpers.ProcessRespawn(dudBush, Helpers.Constants.HarvestGrowing.GardenBerryBush,
                     Helpers.Constants.HarvestSpawner.GardenBerryBush);
 
-                if (_debug.Value)
+                if (Debug.Value)
                 {
                     Log.LogMessage($"Fixed DudGardenBush {dudBushCount}");
                 }

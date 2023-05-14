@@ -28,7 +28,7 @@ public partial class Plugin
         }
         else
         {
-            if (_debug.Value)
+            if (Debug.Value)
             {
                 Log.LogInfo($"{message}");
             }
@@ -37,7 +37,7 @@ public partial class Plugin
 
     private static void WriteSavesToFile()
     {
-        using var file = new StreamWriter(_dataPath, false);
+        using var file = new StreamWriter(DataPath, false);
         foreach (var entry in SaveLocationsDictionary)
         {
             var result = entry.Value.ToString().Substring(1, entry.Value.ToString().Length - 2);
@@ -45,7 +45,7 @@ public partial class Plugin
             file.WriteLine("{0}={1}", entry.Key, result);
         }
 
-        if (_backupSavesOnSave.Value)
+        if (BackupSavesOnSave.Value)
         {
             MainGame.me.StartCoroutine(BackUpSaveDirectory());
         }
@@ -57,9 +57,9 @@ public partial class Plugin
         {
             foreach (var file in Directory.GetFiles(PlatformSpecific.GetSaveFolder()))
             {
-                if (!File.Exists(Path.Combine(_savePath, Path.GetFileName(file))))
+                if (!File.Exists(Path.Combine(SavePath, Path.GetFileName(file))))
                 {
-                    File.Copy(file, Path.Combine(_savePath, Path.GetFileName(file)));
+                    File.Copy(file, Path.Combine(SavePath, Path.GetFileName(file)));
                 }
             }
         }
@@ -73,9 +73,9 @@ public partial class Plugin
 
     private static void LoadSaveLocations()
     {
-        if (!File.Exists(_dataPath)) return;
+        if (!File.Exists(DataPath)) return;
 
-        var lines = File.ReadAllLines(_dataPath, Encoding.Default);
+        var lines = File.ReadAllLines(DataPath, Encoding.Default);
         foreach (var line in lines)
         {
             if (!line.Contains('=')) continue;
@@ -98,28 +98,28 @@ public partial class Plugin
         if (!Tools.TutorialDone()) return true;
         Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
 
-        _pos = MainGame.me.player.pos3;
-        _currentSave = MainGame.me.save_slot.filename_no_extension;
+        Pos = MainGame.me.player.pos3;
+        CurrentSave = MainGame.me.save_slot.filename_no_extension;
 
-        var overwrite = SaveLocationsDictionary.TryGetValue(_currentSave, out _);
+        var overwrite = SaveLocationsDictionary.TryGetValue(CurrentSave, out _);
         if (overwrite)
         {
-            SaveLocationsDictionary.Remove(_currentSave);
-            SaveLocationsDictionary.Add(_currentSave, _pos);
+            SaveLocationsDictionary.Remove(CurrentSave);
+            SaveLocationsDictionary.Add(CurrentSave, Pos);
         }
         else
         {
-            SaveLocationsDictionary.Add(_currentSave, _pos);
+            SaveLocationsDictionary.Add(CurrentSave, Pos);
         }
 
         WriteSavesToFile();
 
         if (menuExit) return true;
-        if (_saveGameNotificationText.Value)
+        if (SaveGameNotificationText.Value)
         {
             if (!saveFile.Equals(string.Empty))
             {
-                if (_newFileOnAutoSave.Value)
+                if (NewFileOnAutoSave.Value)
                     Tools.ShowMessage(strings.AutoSave + ": " + saveFile, Vector3.zero);
                 else
                     Tools.ShowMessage(strings.AutoSave + "!", Vector3.zero);
@@ -150,16 +150,16 @@ public partial class Plugin
             SaveLocationsDictionary.TryGetValue(mainGame.save_slot.filename_no_extension, out var posVector3);
         var pos = foundLocation ? posVector3 : homeVector;
         mainGame.player.PlaceAtPos(pos);
-        if (_travelMessages.Value) Tools.ShowMessage(strings.Rush, pos);
+        if (TravelMessages.Value) Tools.ShowMessage(strings.Rush, pos);
 
         StartTimer();
     }
 
     private static void StartTimer()
     {
-        if (_autoSaveConfig.Value)
+        if (AutoSaveConfig.Value)
         {
-            GJTimer.AddTimer(_saveInterval.Value, AutoSave);
+            GJTimer.AddTimer(SaveInterval.Value, AutoSave);
         }
     }
 
@@ -168,8 +168,8 @@ public partial class Plugin
         if (!Tools.TutorialDone()) return;
         if (EnvironmentEngine.me.IsTimeStopped()) return;
         if (!Application.isFocused) return;
-        if (!_canSave) return;
-        if (!_newFileOnAutoSave.Value)
+        if (!CanSave) return;
+        if (!NewFileOnAutoSave.Value)
         {
             PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
                 delegate { SaveLocation(false, MainGame.me.save_slot.filename_no_extension); });

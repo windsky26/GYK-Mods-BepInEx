@@ -5,10 +5,10 @@ namespace BringOutYerDead;
 
 public partial class Plugin
 {
-    internal static bool PrideDayLogged;
-    private static WorldGameObject _donkey;
-    private static bool _strikeDone;
-    
+    internal static bool PrideDayLogged { get; set; }
+    private static WorldGameObject Donkey { get; set; }
+    private static bool StrikeDone { get; set; }
+
     private void OnEnable()
     {
         Log.LogInfo($"Plugin {PluginName} has been enabled!");
@@ -24,9 +24,9 @@ public partial class Plugin
         if (!MainGame.game_started) return;
         if (MainGame.paused) return;
 
-        if (!Tools.TutorialDone() && !_internalTutMessageShown.Value)
+        if (!Tools.TutorialDone() && !InternalTutMessageShown.Value)
         {
-            _internalTutMessageShown.Value = true;
+            InternalTutMessageShown.Value = true;
             Helpers.Log("Need to complete all 'tutorial' quests first, upto and including the repair the sword quest.");
             return;
         }
@@ -37,27 +37,27 @@ public partial class Plugin
         };
 
 
-        if (_donkey == null)
+        if (Donkey == null)
         {
-            _donkey = WorldMap.GetWorldGameObjectByCustomTag("donkey", true);
+            Donkey = WorldMap.GetWorldGameObjectByCustomTag("donkey", true);
         }
 
 
-        if (_donkey != null)
+        if (Donkey != null)
         {
-            var dataGetParam = _donkey.data.GetParam("speed");
-            var getParam = _donkey.GetParam("speed");
+            var dataGetParam = Donkey.data.GetParam("speed");
+            var getParam = Donkey.GetParam("speed");
 
-            _strikeDone = _donkey.GetParam("strike_completed") > 0f;
+            StrikeDone = Donkey.GetParam("strike_completed") > 0f;
 
             if (dataGetParam < DonkeySpeed.Value || getParam < DonkeySpeed.Value)
             {
                 Helpers.Log($"TDU: Donkey old speeds: DataGetParam: {dataGetParam}, GetParam: {getParam}");
-                _donkey.components.character.SetSpeed(DonkeySpeed.Value);
+                Donkey.components.character.SetSpeed(DonkeySpeed.Value);
                 Helpers.Log($"TDU: Donkey new speeds: DataGetParam: {dataGetParam}, GetParam: {getParam}");
             }
 
-            if (!_strikeDone)
+            if (!StrikeDone)
             {
                 Helpers.Log($"Must complete the donkey strike first! Pay him 10 carrots, grease his wheels etc.");
                 return;
@@ -85,7 +85,7 @@ public partial class Plugin
         switch (TimeOfDay.me.time_of_day_enum)
         {
             case TimeOfDay.TimeOfDayEnum.Night:
-                if (!_nightDelivery.Value)
+                if (!NightDelivery.Value)
                 {
                     Helpers.Log("Night delivery is disabled in config!");
                     break;
@@ -95,7 +95,7 @@ public partial class Plugin
                 {
                     //Tools.ShowMessage("Night Delivery!", MainGame.me.player_pos);
 
-                    if (Patches.ForceDonkey(_donkey))
+                    if (Patches.ForceDonkey(Donkey))
                     {
                         Helpers.Log($"It's night! Beginning night time delivery!");
                         InternalNightDelivery.Value = true;
@@ -109,7 +109,7 @@ public partial class Plugin
 
                 break;
             case TimeOfDay.TimeOfDayEnum.Morning:
-                if (!_morningDelivery.Value)
+                if (!MorningDelivery.Value)
                 {
                     Helpers.Log("Morning delivery is disabled in config!");
                     break;
@@ -119,7 +119,7 @@ public partial class Plugin
                 {
                     //Tools.ShowMessage("Morning Delivery!", MainGame.me.player_pos);
                     Helpers.Log($"It's morning! Beginning morning delivery!");
-                    if (Patches.ForceDonkey(_donkey))
+                    if (Patches.ForceDonkey(Donkey))
                     {
                         InternalMorningDelivery.Value = true;
                     }
@@ -132,7 +132,7 @@ public partial class Plugin
 
                 break;
             case TimeOfDay.TimeOfDayEnum.Day:
-                if (!_dayDelivery.Value)
+                if (!DayDelivery.Value)
                 {
                     Helpers.Log("Day delivery is disabled in config!");
                     return;
@@ -142,7 +142,7 @@ public partial class Plugin
                 {
                     // Tools.ShowMessage("Day Delivery!", MainGame.me.player_pos);
                     Helpers.Log($"It's Day! Beginning midday delivery!");
-                    if (Patches.ForceDonkey(_donkey))
+                    if (Patches.ForceDonkey(Donkey))
                     {
                         InternalDayDelivery.Value = true;
                     }
@@ -155,7 +155,7 @@ public partial class Plugin
 
                 break;
             case TimeOfDay.TimeOfDayEnum.Evening:
-                if (!_eveningDelivery.Value)
+                if (!EveningDelivery.Value)
                 {
                     Helpers.Log("Evening delivery is disabled in config!");
                     return;
@@ -163,7 +163,7 @@ public partial class Plugin
 
                 if (!InternalEveningDelivery.Value)
                 {
-                    if (Patches.ForceDonkey(_donkey))
+                    if (Patches.ForceDonkey(Donkey))
                     {
                         Helpers.Log($"It's evening! Beginning evening delivery!");
                         InternalEveningDelivery.Value = true;

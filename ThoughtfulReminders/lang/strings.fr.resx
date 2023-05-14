@@ -159,7 +159,4 @@
   <data name="dWrath" xml:space="preserve">
     <value>Jour de la colère...</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Configuration rechargée !</value>
-  </data>
 </root>

@@ -126,7 +126,4 @@
   <data name="HoneyReady" xml:space="preserve">
 		<value>Zbiór miodu gotowy!</value>
 	</data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Konfiguracja została ponownie załadowana!</value>
-  </data>
 </root>

@@ -159,7 +159,4 @@
   <data name="dWrath" xml:space="preserve">
     <value>Tag des Zorns...</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Konfiguration neu geladen!</value>
-  </data>
 </root>

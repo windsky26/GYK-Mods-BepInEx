@@ -2,7 +2,6 @@
 using GYKHelper;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace GerryFixer;
 

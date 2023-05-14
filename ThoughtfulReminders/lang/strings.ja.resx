@@ -159,7 +159,4 @@
   <data name="dWrath" xml:space="preserve">
     <value>怒りの日...</value>
   </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>設定がリロードされました!</value>
-  </data>
 </root>

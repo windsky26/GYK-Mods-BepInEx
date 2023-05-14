@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using GYKHelper;
 using HarmonyLib;
-using Rewired;
 using SaveNow.lang;
 using UnityEngine;
 
@@ -14,13 +13,13 @@ namespace SaveNow;
 [HarmonyPatch]
 public partial class Plugin
 {
-    private static Vector3 _pos;
-    private static string _dataPath;
-    private static string _savePath;
+    private static Vector3 Pos { get; set; }
+    private static string DataPath { get; set; }
+    private static string SavePath { get; set; }
     private static readonly List<SaveSlotData> AllSaveGames = new();
-    private static List<SaveSlotData> _sortedTrimmedSaveGames = new();
-    private static bool _canSave;
-    private static string _currentSave;
+    private static List<SaveSlotData> SortedTrimmedSaveGames  { get; set; } = new();
+    private static bool CanSave { get; set; }
+    private static string CurrentSave { get; set; }
     private static readonly Dictionary<string, Vector3> SaveLocationsDictionary = new();
 
 
@@ -30,18 +29,18 @@ public partial class Plugin
     {
         slot_datas.Clear();
         AllSaveGames.Clear();
-        _sortedTrimmedSaveGames.Clear();
+        SortedTrimmedSaveGames.Clear();
 
         LoadSaveGames();
 
-        _sortedTrimmedSaveGames = SortSaveGames();
+        SortedTrimmedSaveGames = SortSaveGames();
 
-        if (_sortedTrimmedSaveGames.Count > _maximumSavesVisible.Value)
+        if (SortedTrimmedSaveGames.Count > MaximumSavesVisible.Value)
         {
-            Resize(_sortedTrimmedSaveGames, _maximumSavesVisible.Value);
+            Resize(SortedTrimmedSaveGames, MaximumSavesVisible.Value);
         }
 
-        slot_datas = _sortedTrimmedSaveGames;
+        slot_datas = SortedTrimmedSaveGames;
         focus_on_first = true;
     }
 
@@ -61,11 +60,11 @@ public partial class Plugin
 
     private static List<SaveSlotData> SortSaveGames()
     {
-        return _sortByRealTime.Value
-            ? (_ascendingSort.Value
+        return SortByRealTime.Value
+            ? (AscendingSort.Value
                 ? AllSaveGames.OrderBy(o => o.real_time).ToList()
                 : AllSaveGames.OrderByDescending(o => o.real_time).ToList())
-            : (_ascendingSort.Value
+            : (AscendingSort.Value
                 ? AllSaveGames.OrderBy(o => o.game_time).ToList()
                 : AllSaveGames.OrderByDescending(o => o.game_time).ToList());
     }
@@ -90,15 +89,15 @@ public partial class Plugin
 
         string CreateMessageText()
         {
-            var baseMessage = _exitToDesktop.Value ? strings.SaveAreYouSureDesktop : strings.SaveAreYouSureMenu;
-            var progressMessage = _disableSaveOnExit.Value || CrossModFields.IsInDungeon ? strings.SaveProgressNotSaved : strings.SaveProgressSaved;
+            var baseMessage = ExitToDesktop.Value ? strings.SaveAreYouSureDesktop : strings.SaveAreYouSureMenu;
+            var progressMessage = DisableSaveOnExit.Value || CrossModFields.IsInDungeon ? strings.SaveProgressNotSaved : strings.SaveProgressSaved;
 
             return $"{baseMessage}?\n\n{progressMessage}.";
         }
 
         void SaveAndExit()
         {
-            if (_disableSaveOnExit.Value || CrossModFields.IsInDungeon)
+            if (DisableSaveOnExit.Value || CrossModFields.IsInDungeon)
             {
                 PerformExit();
             }
@@ -113,7 +112,7 @@ public partial class Plugin
 
         void PerformExit()
         {
-            if (_exitToDesktop.Value)
+            if (ExitToDesktop.Value)
             {
                 GC.Collect();
                 Resources.UnloadUnusedAssets();
@@ -140,7 +139,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.Open))]
     public static void InGameMenuGUI_Open(ref InGameMenuGUI __instance)
     {
-        if (__instance == null || !_exitToDesktop.Value) return;
+        if (__instance == null || !ExitToDesktop.Value) return;
 
         var exitButtons = __instance.GetComponentsInChildren<UIButton>()
             .Where(x => x.name.Contains("exit"));
@@ -159,6 +158,6 @@ public partial class Plugin
     [HarmonyPatch(typeof(MovementComponent), nameof(MovementComponent.UpdateMovement), null)]
     public static void MovementComponent_UpdateMovement(MovementComponent __instance)
     {
-        _canSave = !__instance.player_controlled_by_script;
+        CanSave = !__instance.player_controlled_by_script;
     }
 }

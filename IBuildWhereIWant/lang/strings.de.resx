@@ -123,7 +123,4 @@
   <data name="Header" xml:space="preserve">
 		<value>Basteln Sie überall</value>
 	</data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Konfiguration neu geladen!</value>
-  </data>
 </root>

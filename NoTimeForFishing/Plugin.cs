@@ -5,41 +5,40 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 
-namespace NoTimeForFishing
+namespace NoTimeForFishing;
+
+[BepInPlugin(PluginGuid, PluginName, PluginVer)]
+public class Plugin : BaseUnityPlugin
 {
-    [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-    public class Plugin : BaseUnityPlugin
+    private const string PluginGuid = "p1xel8ted.gyk.notimeforfishing";
+    private const string PluginName = "No Time For Fishing!";
+    private const string PluginVer = "3.2.2";
+    private static ManualLogSource Log { get; set; }
+    private static Harmony Harmony { get; set; }
+
+    private static ConfigEntry<bool> ModEnabled { get; set; }
+
+    private void Awake()
     {
-        private const string PluginGuid = "p1xel8ted.gyk.notimeforfishing";
-        private const string PluginName = "No Time For Fishing!";
-        private const string PluginVer = "3.2.2";
-        private static ManualLogSource Log { get; set; }
-        private static Harmony _harmony;
+        Log = Logger;
+        Harmony = new Harmony(PluginGuid);
+        ModEnabled = Config.Bind("General", "Enabled", true, $"Toggle {PluginName}");
+        ModEnabled.SettingChanged += ApplyPatches;
 
-        private static ConfigEntry<bool> _modEnabled;
+        ApplyPatches(this, null);
+    }
 
-        private void Awake()
+    private static void ApplyPatches(object sender, EventArgs eventArgs)
+    {
+        if (ModEnabled.Value)
         {
-            Log = Logger;
-            _harmony = new Harmony(PluginGuid);
-            _modEnabled = Config.Bind("General", "Enabled", true, $"Toggle {PluginName}");
-            _modEnabled.SettingChanged += ApplyPatches;
-
-            ApplyPatches(this, null);
+            Log.LogInfo($"Applying patches for {PluginName}");
+            Harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
-
-        private static void ApplyPatches(object sender, EventArgs eventArgs)
+        else
         {
-            if (_modEnabled.Value)
-            {
-                Log.LogInfo($"Applying patches for {PluginName}");
-                _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
-            else
-            {
-                Log.LogInfo($"Removing patches for {PluginName}");
-                _harmony.UnpatchSelf();
-            }
+            Log.LogInfo($"Removing patches for {PluginName}");
+            Harmony.UnpatchSelf();
         }
     }
 }

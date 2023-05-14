@@ -7,172 +7,172 @@ using System.Threading;
 using HarmonyLib;
 using UnityEngine;
 
-namespace GYKHelper
+namespace GYKHelper;
+
+[HarmonyPriority(1)]
+public static class Patches
 {
+    [HarmonyPostfix]
     [HarmonyPriority(1)]
-    public static class Patches
+    [HarmonyPatch(typeof(BaseGUI), nameof(BaseGUI.Hide), typeof(bool))]
+    public static void BaseGuiHidePostfix()
     {
-        [HarmonyPostfix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(BaseGUI), nameof(BaseGUI.Hide), typeof(bool))]
-        public static void BaseGuiHidePostfix()
+        if (BaseGUI.all_guis_closed)
         {
-            if (BaseGUI.all_guis_closed)
-            {
-                Tools.SetAllInteractionsFalse();
-            }
+            Tools.SetAllInteractionsFalse();
         }
+    }
 
 
-        [HarmonyPrefix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(SaveSlotsMenuGUI), nameof(SaveSlotsMenuGUI.Open))]
-        public static void SaveSlotsMenuGUI_Open()
+    [HarmonyPrefix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(SaveSlotsMenuGUI), nameof(SaveSlotsMenuGUI.Open))]
+    public static void SaveSlotsMenuGUI_Open()
+    {
+        MainGame.game_started = false;
+
+        if (!Plugin.DisplayDuplicateHarmonyPatches.Value) return;
+
+        static IEnumerable<MethodInfo> GetAllPatchedMethodsManually()
         {
-            MainGame.game_started = false;
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            if (!Plugin.DisplayDuplicateHarmonyPatches.Value) return;
-
-            static IEnumerable<MethodInfo> GetAllPatchedMethodsManually()
+            foreach (var assembly in assemblies)
             {
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                var types = assembly.GetTypes();
 
-                foreach (var assembly in assemblies)
+                foreach (var type in types)
                 {
-                    var types = assembly.GetTypes();
-
-                    foreach (var type in types)
+                    var methods = type.GetMethods(AccessTools.all);
+                    foreach (var method in methods)
                     {
-                        var methods = type.GetMethods(AccessTools.all);
-                        foreach (var method in methods)
+                        var harmonyPatchAttributes = method.GetCustomAttributes<HarmonyPatch>(false);
+                        foreach (var patchAttribute in harmonyPatchAttributes)
                         {
-                            var harmonyPatchAttributes = method.GetCustomAttributes<HarmonyPatch>(false);
-                            foreach (var patchAttribute in harmonyPatchAttributes)
+                            var targetType = patchAttribute.info.declaringType;
+                            var targetMethodName = patchAttribute.info.methodName;
+                            var targetMethodArguments = patchAttribute.info.argumentTypes;
+
+                            if (targetType != null && targetMethodName != null)
                             {
-                                var targetType = patchAttribute.info.declaringType;
-                                var targetMethodName = patchAttribute.info.methodName;
-                                var targetMethodArguments = patchAttribute.info.argumentTypes;
-
-                                if (targetType != null && targetMethodName != null)
+                                MethodInfo targetMethod = null;
+                                try
                                 {
-                                    MethodInfo targetMethod = null;
-                                    try
-                                    {
-                                        targetMethod = targetMethodArguments == null
-                                            ? targetType.GetMethod(targetMethodName, AccessTools.all)
-                                            : targetType.GetMethod(targetMethodName, AccessTools.all, null,
-                                                targetMethodArguments, null);
-                                    }
-                                    catch (AmbiguousMatchException)
-                                    {
-                                        // If multiple methods match, you may need to refine the search criteria.
-                                    }
+                                    targetMethod = targetMethodArguments == null
+                                        ? targetType.GetMethod(targetMethodName, AccessTools.all)
+                                        : targetType.GetMethod(targetMethodName, AccessTools.all, null,
+                                            targetMethodArguments, null);
+                                }
+                                catch (AmbiguousMatchException)
+                                {
+                                    Plugin.Log.LogWarning(
+                                        $"AmbiguousMatchException for {targetType}.{targetMethodName}");
+                                }
 
-                                    if (targetMethod != null)
-                                    {
-                                        yield return targetMethod;
-                                    }
+                                if (targetMethod != null)
+                                {
+                                    yield return targetMethod;
                                 }
                             }
                         }
                     }
                 }
             }
-
-            var originalMethods = GetAllPatchedMethodsManually();
-            var groupedMethods = originalMethods.GroupBy(method => new {method.DeclaringType, method.Name});
-
-            var sortedMethods = groupedMethods.Where(group => group.Count() > 1)
-                .SelectMany(group => group)
-                .OrderBy(method => method.DeclaringType!.ToString())
-                .ThenBy(method => method.Name);
-
-            foreach (var method in sortedMethods)
-            {
-                Plugin.Log.LogWarning($"Type: {method.DeclaringType}, Method: {method.Name}");
-            }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-        public static void GameSettingsApplyLanguageChangePostfix()
+        var originalMethods = GetAllPatchedMethodsManually();
+        var groupedMethods = originalMethods.GroupBy(method => new {method.DeclaringType, method.Name});
+
+        var sortedMethods = groupedMethods.Where(group => group.Count() > 1)
+            .SelectMany(group => group)
+            .OrderBy(method => method.DeclaringType!.ToString())
+            .ThenBy(method => method.Name);
+
+        foreach (var method in sortedMethods)
         {
-            CrossModFields.Lang =
-                GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            CrossModFields.Culture = CultureInfo.GetCultureInfo(CrossModFields.Lang);
-            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+            Plugin.Log.LogWarning($"Type: {method.DeclaringType}, Method: {method.Name}");
         }
+    }
 
-        [HarmonyPrefix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(SmartAudioEngine), nameof(SmartAudioEngine.OnEndNPCInteraction))]
-        public static void OnEndNPCInteractionPrefix()
+    [HarmonyPostfix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
+    public static void GameSettingsApplyLanguageChangePostfix()
+    {
+        CrossModFields.Lang =
+            GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+        CrossModFields.Culture = CultureInfo.GetCultureInfo(CrossModFields.Lang);
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(SmartAudioEngine), nameof(SmartAudioEngine.OnEndNPCInteraction))]
+    public static void OnEndNPCInteractionPrefix()
+    {
+        CrossModFields.TalkingToNpc(false);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(MovementComponent), nameof(MovementComponent.UpdateMovement), typeof(Vector2),
+        typeof(float))]
+    public static void Prefix(ref MovementComponent __instance)
+    {
+        if (__instance.wgo.is_player)
         {
-            CrossModFields.TalkingToNpc(false);
+            CrossModFields.PlayerIsDead = __instance.wgo.is_dead;
+            CrossModFields.PlayerIsControlled = __instance.player_controlled_by_script;
+            CrossModFields.PlayerFollowingTarget = __instance.is_following_target;
         }
+    }
 
-        [HarmonyPrefix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(MovementComponent), nameof(MovementComponent.UpdateMovement), typeof(Vector2),
-            typeof(float))]
-        public static void Prefix(ref MovementComponent __instance)
+
+    [HarmonyPostfix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
+    public static void MainMenuGUI_Open_Postfix(ref MainMenuGUI __instance)
+    {
+        if (__instance == null) return;
+
+        foreach (var comp in __instance.GetComponentsInChildren<UILabel>()
+                     .Where(x => x.name.Contains("ver txt")))
         {
-            if (__instance.wgo.is_player)
-            {
-                CrossModFields.PlayerIsDead = __instance.wgo.is_dead;
-                CrossModFields.PlayerIsControlled = __instance.player_controlled_by_script;
-                CrossModFields.PlayerFollowingTarget = __instance.is_following_target;
-            }
+            comp.text =
+                $"[F7B000] BepInEx Modded[-] [F7B000]GYKHelper v{Assembly.GetExecutingAssembly().GetName().Version.Major}.{Assembly.GetExecutingAssembly().GetName().Version.Minor}.{Assembly.GetExecutingAssembly().GetName().Version.Build}[-]";
+            comp.overflowMethod = UILabel.Overflow.ResizeFreely;
+            comp.multiLine = true;
+            comp.MakePixelPerfect();
+            //labelToMimic = comp;
         }
+    }
 
 
-        [HarmonyPostfix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
-        public static void MainMenuGUI_Open_Postfix(ref MainMenuGUI __instance)
-        {
-            if (__instance == null) return;
+    [HarmonyPrefix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.Open), typeof(WorldGameObject),
+        typeof(GJCommons.VoidDelegate))]
+    public static void VendorGUI_Open()
+    {
+        if (!MainGame.game_started) return;
+        CrossModFields.TalkingToNpc(true);
+    }
 
-            foreach (var comp in __instance.GetComponentsInChildren<UILabel>()
-                         .Where(x => x.name.Contains("ver txt")))
-            {
-                comp.text =
-                    $"[F7B000] BepInEx Modded[-] [F7B000]GYKHelper v{Assembly.GetExecutingAssembly().GetName().Version.Major}.{Assembly.GetExecutingAssembly().GetName().Version.Minor}.{Assembly.GetExecutingAssembly().GetName().Version.Build}[-]";
-                comp.overflowMethod = UILabel.Overflow.ResizeFreely;
-                comp.multiLine = true;
-                comp.MakePixelPerfect();
-                //labelToMimic = comp;
-            }
-        }
+    [HarmonyPrefix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.Hide), typeof(bool))]
+    public static void VendorGUI_Hide()
+    {
+        if (!MainGame.game_started) return;
+        CrossModFields.TalkingToNpc(false);
+    }
 
-
-        [HarmonyPrefix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.Open), typeof(WorldGameObject),
-            typeof(GJCommons.VoidDelegate))]
-        public static void VendorGUI_Open()
-        {
-            if (!MainGame.game_started) return;
-            CrossModFields.TalkingToNpc(true);
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.Hide), typeof(bool))]
-        public static void VendorGUI_Hide()
-        {
-            if (!MainGame.game_started) return;
-            CrossModFields.TalkingToNpc(false);
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPriority(1)]
-        [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.OnClosePressed))]
-        public static void VendorGUI_OnClosePressed()
-        {
-            if (!MainGame.game_started) return;
-            CrossModFields.TalkingToNpc(false);
-        }
+    [HarmonyPrefix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.OnClosePressed))]
+    public static void VendorGUI_OnClosePressed()
+    {
+        if (!MainGame.game_started) return;
+        CrossModFields.TalkingToNpc(false);
     }
 }

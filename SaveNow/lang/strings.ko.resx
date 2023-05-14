@@ -103,21 +103,6 @@
   <data name="Rush" xml:space="preserve">
 		<value>급해! 매번 날 잡아!</value>
 	</data>
-  <data name="InfoAutoSave" xml:space="preserve">
-		<value>자동 저장</value>
-	</data>
-  <data name="InfoPeriod" xml:space="preserve">
-		<value>기간</value>
-	</data>
-  <data name="InfoMinutes" xml:space="preserve">
-		<value>분</value>
-	</data>
-  <data name="InfoNewSaveOnAutoSave" xml:space="preserve">
-		<value>자동 저장 시 새로운 저장</value>
-	</data>
-  <data name="InfoSavesToKeep" xml:space="preserve">
-		<value>보관하기 위해 저장</value>
-	</data>
   <data name="SaveAreYouSureMenu" xml:space="preserve">
 		<value>주 메뉴로 돌아가시겠습니까?</value>
 	</data>

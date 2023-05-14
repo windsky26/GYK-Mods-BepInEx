@@ -1,8 +1,4 @@
-﻿using System.Threading;
-using GYKHelper;
-using HarmonyLib;
-using ThoughtfulReminders.lang;
-using UnityEngine;
+﻿using HarmonyLib;
 
 namespace ThoughtfulReminders;
 

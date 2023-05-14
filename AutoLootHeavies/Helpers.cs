@@ -17,7 +17,7 @@ public partial class Plugin
         {
             Log.LogError(message);
         }
-        else if (_debug.Value)
+        else if (Debug.Value)
         {
             Log.LogInfo(message);
         }
@@ -64,7 +64,7 @@ public partial class Plugin
     private static void TeleportItem(BaseCharacterComponent __instance, Item item)
     {
         var pwo = MainGame.me.player;
-        var needEnergy = !_immersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
+        var needEnergy = !ImmersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
 
         if (pwo.energy >= needEnergy)
         {
@@ -74,9 +74,9 @@ public partial class Plugin
             var loc = GetGridLocation();
             float xAdjustment = loc.Item1 * 75;
 
-            var timber = _designatedTimberLocation.Value + new Vector3(xAdjustment, 0, 0);
-            var ore = _designatedOreLocation.Value + new Vector3(xAdjustment, 0, 0);
-            var stone = _designatedStoneLocation.Value + new Vector3(xAdjustment, 0, 0);
+            var timber = DesignatedTimberLocation.Value + new Vector3(xAdjustment, 0, 0);
+            var ore = DesignatedOreLocation.Value + new Vector3(xAdjustment, 0, 0);
+            var stone = DesignatedStoneLocation.Value + new Vector3(xAdjustment, 0, 0);
 
             var location = item.id switch
             {
@@ -95,9 +95,9 @@ public partial class Plugin
         {
             DropObjectAndNull(__instance, item);
 
-            if (Time.time - _lastBubbleTime >= 0.5f)
+            if (Time.time - LastBubbleTime >= 0.5f)
             {
-                _lastBubbleTime = Time.time;
+                LastBubbleTime = Time.time;
 
                 EffectBubblesManager.ShowImmediately(pwo.bubble_pos,
                     GJL.L("not_enough_something", $"(en)"),
@@ -111,7 +111,7 @@ public partial class Plugin
     private static bool TryPutToInventoryAndNull(BaseCharacterComponent __instance, WorldGameObject wgo, List<Item> itemsToInsert)
     {
         var pwo = MainGame.me.player;
-        var needEnergy = !_immersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
+        var needEnergy = !ImmersionMode.Value || pwo.IsPlayerInvulnerable() ? 0f : EnergyRequirement;
 
         if (pwo.energy >= needEnergy)
         {
@@ -124,9 +124,9 @@ public partial class Plugin
                 return true;
             }
         }
-        else if (Time.time - _lastBubbleTime > 0.5f)
+        else if (Time.time - LastBubbleTime > 0.5f)
         {
-            _lastBubbleTime = Time.time;
+            LastBubbleTime = Time.time;
             EffectBubblesManager.ShowImmediately(pwo.bubble_pos,
                 GJL.L("not_enough_something", $"(en)"),
                 EffectBubblesManager.BubbleColor.Energy, true, 1f);
@@ -234,23 +234,23 @@ public partial class Plugin
         sw.Start();
 
         var allObjects = CrossModFields.WorldObjects;
-        _objects = allObjects!
+        Objects = allObjects!
             .Where(x => x.obj_id.Contains(Constants.ItemObjectId.Timber) || x.obj_id.Contains(Constants.ItemObjectId.Ore) ||
                         x.obj_id.Contains(Constants.ItemObjectId.Stone))
             .Where(x => x.data.inventory_size > 0)
             .ToList();
 
         WriteLog($"[ALH]: Scanning world for stockpiles.");
-        _objects.RemoveAll(a => a.obj_id.Contains("decor"));
+        Objects.RemoveAll(a => a.obj_id.Contains("decor"));
 
-        foreach (var obj in _objects)
+        foreach (var obj in Objects)
         {
             WriteLog($"Found stockpile: location: {GetLocation(obj)}, type: {GetStockpileType(obj)}, distance: {GetDistance(obj)}");
         }
 
         WriteLog($"[ALH]: Updating stockpiles distance, type etc and sorting by distance to player.");
 
-        foreach (var stockpile in _objects.Where(a => a != null))
+        foreach (var stockpile in Objects.Where(a => a != null))
         {
             WriteLog(AddStockpile(stockpile) ? $"Added stockpile: location: {GetLocation(stockpile)}, type: {GetStockpileType(stockpile)}, distance: {GetDistance(stockpile)}" : $"Stockpile already exists in list - updating distance from player.");
         }

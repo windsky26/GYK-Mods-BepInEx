@@ -1,6 +1,4 @@
 ﻿using System.Linq;
-using System.Threading;
-using GYKHelper;
 
 namespace QueueEverything;
 
@@ -36,7 +34,7 @@ public partial class Plugin
         }
         else
         {
-            if (_debug.Value)
+            if (Debug.Value)
             {
                 Log.LogInfo($"{message}");
             }

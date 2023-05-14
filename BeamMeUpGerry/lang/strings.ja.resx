@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NotReady" xml:space="preserve">
-		<value>まだ使えない！</value>
-	</data>
-  <data name="Ready" xml:space="preserve">
-		<value>テレポート準備完了！</value>
-	</data>
   <data name="WhereIsIt" xml:space="preserve">
 		<value>その石をどこに置いたのか...</value>
 	</data>
@@ -176,9 +170,6 @@
   </data>
   <data name="Coal" xml:space="preserve">
     <value>石炭鉱脈</value>
-  </data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>設定がリロードされました!</value>
   </data>
   <data name="CantUseHere" xml:space="preserve">
     <value>ここでは使えません、ボス！</value>

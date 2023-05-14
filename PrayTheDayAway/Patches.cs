@@ -10,9 +10,10 @@ namespace PrayTheDayAway;
 [HarmonyPatch]
 public partial class Plugin
 {
-    private static bool _lostPrayerItem;
-    private static Item _prayerItem;
-    private static bool _showPrayerItem;
+    private static bool LostPrayerItem { get; set; }
+
+    private static Item PrayerItem{ get; set; }
+    private static bool ShowPrayerItem{ get; set; }
 
     private static void ProcessCraftDoodad(ref Item selectedItem)
     {
@@ -27,19 +28,19 @@ public partial class Plugin
             return;
         }
 
-        _showPrayerItem = false;
-        _prayerItem = null;
+        ShowPrayerItem = false;
+        PrayerItem = null;
 
-        if (_randomlyUpgradeBasicPrayer.Value && item.id == "b_empty")
+        if (RandomlyUpgradeBasicPrayer.Value && item.id == "b_empty")
         {
             UpgradePrayer(playerInv, item);
         }
 
-        if (_sermonOverAndOver.Value || _everydayIsSermonDay.Value)
+        if (SermonOverAndOver.Value || EverydayIsSermonDay.Value)
         {
             MainGame.me.player.SetParam("prayed_this_week", 0f);
 
-            if (_alternateMode.Value)
+            if (AlternateMode.Value)
             {
                 LowerCraftLevel(playerInv, item);
                 return;
@@ -53,7 +54,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnMiddlePrayBuffAnimation))]
     public static void PrayCraftGUI_OnFinishedPrayBuffAnimation()
     {
-        if (_notifyOnPrayerLoss.Value && _lostPrayerItem)
+        if (NotifyOnPrayerLoss.Value && LostPrayerItem)
         {
             List<string> lostAnother = new()
             {
@@ -77,9 +78,9 @@ public partial class Plugin
     [HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnMiddlePrayBuffAnimation))]
     public static void PrayCraftGUI_OnMiddlePrayBuffAnimation()
     {
-        if (_prayerItem != null && _showPrayerItem)
+        if (PrayerItem != null && ShowPrayerItem)
         {
-            Tools.ShowLootAddedIcon(_prayerItem);
+            Tools.ShowLootAddedIcon(PrayerItem);
         }
     }
 
@@ -87,7 +88,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.OnEndOfDay))]
     public static void EnvironmentEngine_OnEndOfDay()
     {
-        if (_everydayIsSermonDay.Value)
+        if (EverydayIsSermonDay.Value)
         {
             WriteLog($"EnvironmentEngine_OnEndOfDay: EverydayIsSermonDay = true - New day, new sermon!");
             MainGame.me.player.SetParam("prayed_this_week", 0f);
@@ -98,7 +99,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(Stats), nameof(Stats.DesignEvent), typeof(string))]
     public static void Stats_DesignEvent(string event_name)
     {
-        if (_everydayIsSermonDay.Value && event_name == "day")
+        if (EverydayIsSermonDay.Value && event_name == "day")
         {
             WriteLog($"Stats.DesignEvent: EverydayIsSermonDay = true - New day, new sermon!");
             MainGame.me.player.SetParam("prayed_this_week", 0f);
@@ -108,7 +109,7 @@ public partial class Plugin
     private static void RemovePrayCraft(MultiInventory inventory, Item item)
     {
         if (item.id == "b_empty") return;
-        _lostPrayerItem = false;
+        LostPrayerItem = false;
         WriteLog($"RemovePrayCraft: {item.id}");
         float roll = Random.Range(0, 101);
         var remove = false;
@@ -133,7 +134,7 @@ public partial class Plugin
 
         if (remove)
         {
-            _lostPrayerItem = true;
+            LostPrayerItem = true;
             WriteLog($"Removed 1x {item.id}.");
             inventory.RemoveItem(item, 1);
         }
@@ -150,9 +151,9 @@ public partial class Plugin
         var newItem = faithItems.RandomElement().id;
         inventory.RemoveItem(item, 1);
 
-        _prayerItem = new Item(newItem, 1);
-        _showPrayerItem = true;
-        inventory.AddItem(_prayerItem);
+        PrayerItem = new Item(newItem, 1);
+        ShowPrayerItem = true;
+        inventory.AddItem(PrayerItem);
 
         WriteLog($"UpgradePrayer: Removing 1x {item.id} and adding 1x {newItem}.");
     }
@@ -195,17 +196,17 @@ public partial class Plugin
                 var newItem = oldItemName + ":" + newItemLevel;
                 WriteLog($"LowerCraftLevel: Removing 1x {item.id} and adding 1x {newItem}.");
                 inventory.RemoveItem(item, 1);
-                _prayerItem = new Item(newItem, 1);
-                _showPrayerItem = true;
-                inventory.AddItem(_prayerItem);
+                PrayerItem = new Item(newItem, 1);
+                ShowPrayerItem = true;
+                inventory.AddItem(PrayerItem);
 
                 break;
             case 1:
                 WriteLog($"LowerCraftLevel: Removing 1x {item.id} and adding 1x b_empty.");
                 inventory.RemoveItem(item, 1);
-                _prayerItem = new Item("b_empty", 1);
-                _showPrayerItem = true;
-                inventory.AddItem(_prayerItem);
+                PrayerItem = new Item("b_empty", 1);
+                ShowPrayerItem = true;
+                inventory.AddItem(PrayerItem);
                 break;
         }
     }
@@ -233,13 +234,13 @@ public partial class Plugin
             return true;
         }
 
-        if (!_everydayIsSermonDay.Value)
+        if (!EverydayIsSermonDay.Value)
         {
             WriteLog("EverydayIsSermonDay = false, bailing!");
             return true;
         }
 
-        if (_everydayIsSermonDay.Value && !_sermonOverAndOver.Value && MainGame.me.player.GetParam("prayed_this_week") >= 1)
+        if (EverydayIsSermonDay.Value && !SermonOverAndOver.Value && MainGame.me.player.GetParam("prayed_this_week") >= 1)
         {
             WriteLog("EverydayIsSermonDay = true, SermonOverAndOver = false, AlreadyPrayedThisWeek = true - bailing!");
             return true;

@@ -123,7 +123,4 @@
   <data name="Header" xml:space="preserve">
 		<value>Создавайте где угодно</value>
 	</data>
-  <data name="ConfigMessage" xml:space="preserve">
-    <value>Настройки перезагружены!</value>
-  </data>
 </root>

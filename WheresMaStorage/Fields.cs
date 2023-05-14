@@ -19,7 +19,7 @@ public static class Fields
     internal const string Bag = "bag";
 
     internal const string ShippingBoxTag = "shipping_box";
-    internal static bool DebugMessageShown;
+    internal static bool DebugMessageShown { get; set; }
 
     internal static readonly string[] AlwaysHidePartials =
     {
@@ -55,18 +55,18 @@ public static class Fields
         ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword, ItemDefinition.ItemType.Preach
     };
 
-    internal static bool GameBalanceAlreadyRun;
-    internal static bool GratitudeCraft;
-    internal static int InvSize;
+    internal static bool GameBalanceAlreadyRun { get; set; }
+    internal static bool GratitudeCraft { get; set; }
+    internal static int InvSize { get; set; }
 
-    internal static MultiInventory Mi = new();
-    internal static MultiInventory RefugeeMi = new();
-    internal static float TimeSix;
-    internal static float TimeEight;
-    internal static float TimeNine;
-    internal static bool UsingBag;
-    internal static bool ZombieWorker;
-    internal static List<Item> OldDrops = new();
+    internal static MultiInventory Mi  { get; set; }= new();
+    internal static MultiInventory RefugeeMi  { get; set; }= new();
+    internal static float TimeSix { get; set; }
+    internal static float TimeEight { get; set; }
+    internal static float TimeNine { get; set; }
+    internal static bool UsingBag { get; set; }
+    internal static bool ZombieWorker { get; set; }
+    internal static List<Item> OldDrops  { get; set; }= new();
 
     internal static readonly string[] ExcludeTheseWildernessInventories =
     {
@@ -76,6 +76,6 @@ public static class Fields
     internal static readonly Dictionary<WorldGameObject, MultiInventory> WildernessMultiInventories = new();
     internal static readonly List<Inventory> WildernessInventories = new();
 
-    internal static bool InvsLoaded;
-    public static bool DropsCleaned;
+    internal static bool InvsLoaded { get; set; }
+    public static bool DropsCleaned { get; set; }
 }
