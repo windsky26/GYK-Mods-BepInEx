@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Object = UnityEngine.Object;
@@ -34,11 +33,58 @@ public static class Actions
     public static Action GameStatusUndefined;
     public static Action<MainGame> GameStartedPlaying;
 
+    public static Action<EnvironmentEngine> EnvironmentEnginePrefix;
+    public static Action<EnvironmentEngine> EnvironmentEnginePostfix;
     public static Action<GameBalance> GameBalanceLoad;
     public static Action<WorldGameObject> WorldGameObjectInteract;
 
     public static Action<WorldGameObject, WorldGameObject> WorldGameObjectInteractPrefix;
 
+    
+    [HarmonyPrefix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.OnEndOfDay))]
+    public static void EnvironmentEngine_OnEndOfDay_Prefix()
+    {
+        if (EnvironmentEnginePrefix?.GetInvocationList().Length > 0)
+        {
+            var delegates = EnvironmentEnginePrefix.GetInvocationList();
+            Plugin.Log.LogInfo($"End of day beginning. Invoking EnvironmentEnginePrefix Action for {delegates.Length} attached mods.");
+            foreach (var del in delegates)
+            {
+                Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
+            }
+
+            EnvironmentEnginePrefix.Invoke(EnvironmentEngine.me);
+        }
+        else
+        {
+            Plugin.Log.LogInfo("End of day beginning. No mods attached to EnvironmentEnginePrefix Action.");
+        }
+    }
+    
+    [HarmonyPostfix]
+    [HarmonyPriority(1)]
+    [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.OnEndOfDay))]
+    public static void EnvironmentEngine_OnEndOfDay_Postfix()
+    {
+        if (EnvironmentEnginePostfix?.GetInvocationList().Length > 0)
+        {
+            var delegates = EnvironmentEnginePrefix.GetInvocationList();
+            Plugin.Log.LogInfo($"End of day finished. Invoking EnvironmentEnginePostfix Action for {delegates.Length} attached mods.");
+            foreach (var del in delegates)
+            {
+                Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
+            }
+
+            EnvironmentEnginePostfix.Invoke(EnvironmentEngine.me);
+        }
+        else
+        {
+            Plugin.Log.LogInfo("End of day finished. No mods attached to EnvironmentEnginePostfix Action.");
+        }
+    }
+    
     [HarmonyPrefix]
     [HarmonyPriority(1)]
     [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnPressedSaveAndExit))]
