@@ -6,9 +6,9 @@
 bin/
 obj/
 
-GYK-BepInEx-Template
+GYK-BepInEx-Template/
 /GYK-BepInEx-Template
-aaa_releases
+aaa_releases/
 /aaa_releases
 
 # Common node modules locations
