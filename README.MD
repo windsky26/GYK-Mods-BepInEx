@@ -9,6 +9,7 @@
 
 - Larger Scale and Ultra-Wide have been combined as they were effectivly the same mod patch wise. It's now called ShowMeMoar and **isn't limited** to ultra-wide users. The zoom functions have been greatly enhanced as well (among other things.)
 - Some mod features may have changed/behave differently than before. If anything is broken, let me know as usual.
+- You need to install the helper separately. It is no longer bundled. Get it [here.](https://github.com/p1xel8ted/GYK-Mods-BepInEx/releases/download/bepinex/GYKHelper_v3.0_BepInEx.zip)
 
 ## Features
 
@@ -22,7 +23,7 @@
 
 ### Extension Installation
 
-Download the extension [here.](https://github.com/p1xel8ted/GYK-Mods-BepInEx/raw/master/AAA_Releases/Nexus/Graveyard%20Keeper%20Vortex%20Extension%20v1.0.0.zip)
+Download the extension [here.](https://github.com/p1xel8ted/GYK-Mods-BepInEx/releases/download/bepinex/Graveyard.Keeper.Vortex.Extension.v1.0.0.zip)
 
 ![Game Logo](vortex.png)<br>
 
@@ -30,7 +31,7 @@ Download the extension [here.](https://github.com/p1xel8ted/GYK-Mods-BepInEx/raw
 
 ### Windows
 
-- Grab BepInEx 5.4.21 Windows from [here.](https://github.com/p1xel8ted/GYK-Mods-BepInEx/raw/master/AAA_Releases/BepInEx/BepInEx_5.4.21%20(Windows).zip)
+- Grab BepInEx 5.4.21 Windows from [here.](https://github.com/p1xel8ted/GYK-Mods-BepInEx/releases/download/bepinex/BepInEx_5.4.21.Windows.zip)
 - Copy the contents of the zip into main game directory like so:
 
 `...\steamapps\common\Graveyard Keeper`
@@ -41,7 +42,7 @@ Download the extension [here.](https://github.com/p1xel8ted/GYK-Mods-BepInEx/raw
 
 *The Windows version does work with configuration - but that is out of the scope of this short guide.
 
-- Grab BepInEx 5.4.21 Unix from [here.](https://github.com/p1xel8ted/GYK-Mods-BepInEx/raw/master/AAA_Releases/BepInEx/BepInEx_5.4.21%20(NativeUnix).zip)
+- Grab BepInEx 5.4.21 Unix from [here.](https://github.com/p1xel8ted/GYK-Mods-BepInEx/releases/download/bepinex/BepInEx_5.4.21.NativeUnix.zip)
 
 Installing BepInEx on Linux/MacOS
 
