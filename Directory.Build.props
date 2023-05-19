@@ -24,7 +24,10 @@
     <ProjectReference><Private>False</Private></ProjectReference>
     <PackageReference><Private>False</Private></PackageReference>
   </ItemDefinitionGroup>
-
+    
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DebugType>portable</DebugType>
+    </PropertyGroup>
 
       <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <OutputPath>H:\Games\steamapps\common\Graveyard Keeper\BepInEx\plugins\$(MSBuildProjectName)</OutputPath>

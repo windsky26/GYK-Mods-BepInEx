@@ -1,7 +1,16 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">    
+
+  <ItemGroup>
+    <PackageReference Include="MSBuildTasks" Version="1.5.0.235">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  
 <Target Name="ZipOutputPath" AfterTargets="Build">
         <PropertyGroup>
             <TempDir>$(MSBuildProjectDirectory)\temp\plugins\$(MSBuildProjectName)</TempDir>
+              <PluginDir>$(MSBuildProjectDirectory)\temp\plugins</PluginDir>
         </PropertyGroup>
         <MakeDir Directories="$(TempDir)" />
         <MakeDir Directories="$(SolutionDir)\AAA_Releases" />
