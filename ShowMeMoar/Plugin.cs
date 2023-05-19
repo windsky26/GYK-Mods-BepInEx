@@ -15,24 +15,36 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.showmemoar";
     private const string PluginName = "Show Me Moar!";
-    private const string PluginVer = "0.0.1";
+    private const string PluginVer = "0.1.0";
     private static Harmony Harmony { get; set; }
     private static ConfigEntry<bool> ModEnabled { get; set; }
     private static ConfigEntry<KeyboardShortcut> ZoomIn { get; set; }
     private static ConfigEntry<KeyboardShortcut> ZoomOut { get; set; }
 
+    internal static ConfigEntry<float> HudScale { get; set; }
+    internal static ConfigEntry<float> HorizontalHudPosition { get; set; }
+    internal static ConfigEntry<float> VerticalHudPosition { get; set; }
     private static ConfigEntry<float> Zoom { get; set; }
     private static ConfigEntry<float> CraftIconAboveStations { get; set; }
 
     private static GameObject Icons { get; set; }
     internal static ManualLogSource Log { get; private set; }
+    
+   
 
     private void Awake()
     {
+        Actions.GameStartedPlaying += OnGameStartedPlaying;
         Log = Logger;
         Harmony = new Harmony(PluginGuid);
         InitConfiguration();
         ApplyPatches(this, null);
+    }
+
+    private static void OnGameStartedPlaying(MainGame obj)
+    {
+        Patches.ScreenSize = GameObject.Find("UI Root/Screen size panel").transform;
+        if(Patches.ScreenSize == null) Log.LogError("Screen size panel not found!");
     }
 
     private void InitConfiguration()
@@ -40,16 +52,37 @@ public class Plugin : BaseUnityPlugin
         var defaultZoom = Screen.currentResolution.height / 2f;
         var min = 0 - defaultZoom;
 
-        ModEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 4}));
+        ModEnabled = Config.Bind("1. General", "Enabled", true, new ConfigDescription($"Enable or disable {PluginName}", null, new ConfigurationManagerAttributes {Order = 7}));
         ModEnabled.SettingChanged += ApplyPatches;
 
-        CraftIconAboveStations = Config.Bind("2. General", "Interaction Bubble Scale", 1f, new ConfigDescription("Changes the scale of the icons that appear above crafting stations and interaction icons.", new AcceptableValueRange<float>(0.1f, 10f), new ConfigurationManagerAttributes {Order = 3}));
+        CraftIconAboveStations = Config.Bind("2. General", "Interaction Bubble Scale", 1f, new ConfigDescription("Changes the scale of the icons that appear above crafting stations and interaction icons.", new AcceptableValueRange<float>(0.1f, 10f), new ConfigurationManagerAttributes {Order = 6}));
         CraftIconAboveStations.SettingChanged += (_, _) =>
         {
             if (!MainGame.game_started) return;
             UpdateCraftIconScale(CraftIconAboveStations.Value);
         };
-
+        HudScale = Config.Bind("2. General", "HUD Scale", 1f, new ConfigDescription("Changes the scale of the HUD.", new AcceptableValueRange<float>(0.1f, 10f), new ConfigurationManagerAttributes {Order = 5}));
+        HudScale.SettingChanged += (_, _) =>
+        {
+            if (!MainGame.game_started) return;
+            if (Patches.HUD != null) Patches.HUD.transform.localScale = new Vector3(HudScale.Value, HudScale.Value, 1);
+        };
+        
+        HorizontalHudPosition = Config.Bind("2. General", "Horizontal HUD Position", 1f, new ConfigDescription("Changes the horizontal position of the HUD.", new AcceptableValueRange<float>(-5, 5), new ConfigurationManagerAttributes {Order = 4}));
+        HorizontalHudPosition.SettingChanged += (_, _) =>
+        {
+            if (!MainGame.game_started) return;
+            if (Patches.ScreenSize != null) Patches.ScreenSize.transform.localScale = new Vector3(HorizontalHudPosition.Value, VerticalHudPosition.Value, 1);
+        };
+        
+        VerticalHudPosition = Config.Bind("2. General", "Vertical HUD Position", 1f, new ConfigDescription("Changes the vertical position of the HUD.", new AcceptableValueRange<float>(-5, 5), new ConfigurationManagerAttributes {Order = 3}));
+        VerticalHudPosition.SettingChanged += (_, _) =>
+        {
+            if (!MainGame.game_started) return;
+            if (Patches.ScreenSize != null) Patches.ScreenSize.transform.localScale = new Vector3(HorizontalHudPosition.Value, VerticalHudPosition.Value, 1);
+        };
+        
+        
         Zoom = Config.Bind("3. General", "Zoom", 0f, new ConfigDescription("Zoom", new AcceptableValueRange<float>(min + 10, defaultZoom * 2), new ConfigurationManagerAttributes {Order = 2}));
         Zoom.SettingChanged += (_, _) =>
         {
