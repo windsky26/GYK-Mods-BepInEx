@@ -6,6 +6,32 @@ namespace ShowMeMoar;
 [HarmonyPatch]
 public static class Patches
 {
+    internal static UIPanel HUD { get; private set; }
+    internal static Transform ScreenSize { get; set; }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(UIPanel), nameof(UIPanel.Awake))]
+    [HarmonyPatch(typeof(UIPanel), nameof(UIPanel.OnEnable))]
+    [HarmonyPatch(typeof(UIPanel), nameof(UIPanel.OnStart))]
+    [HarmonyPatch(typeof(UIPanel), nameof(UIPanel.OnInit))]
+    public static void UIPanel_Patches(ref UIPanel __instance)
+    {
+        if (!MainGame.game_started) return;
+        if (__instance.name.Equals("HUD"))
+        {
+            HUD = __instance;
+            __instance.transform.localScale = new Vector3(Plugin.HudScale.Value, Plugin.HudScale.Value, 1);
+        }
+
+        if (__instance.name.StartsWith("Screen size"))
+        {
+            Plugin.Log.LogWarning($"Screen size: {__instance.name}");
+            var transform = __instance.transform;
+            ScreenSize = transform;
+            transform.localScale = new Vector3(Plugin.HorizontalHudPosition.Value, Plugin.VerticalHudPosition.Value, 1);
+        }
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]
     public static void ResolutionConfig_GetResolutionConfigOrNull(int width, int height, ref ResolutionConfig __result)
@@ -19,7 +45,7 @@ public static class Patches
         Plugin.Log.LogInfo($"ResolutionConfig_GetResolutionConfigOrNull: Width: {width}, Height: {height}, Pixel Size: {res.pixel_size}");
         __result = res;
     }
-    
+
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(FogObject), nameof(FogObject.InitFog))]
