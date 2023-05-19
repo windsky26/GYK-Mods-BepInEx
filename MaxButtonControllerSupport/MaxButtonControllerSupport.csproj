@@ -7,10 +7,5 @@
     <ItemGroup>
         <ProjectReference Include="..\GYKHelper\GYKHelper.csproj" />
     </ItemGroup>
-    <ItemGroup>
-      <Reference Include="MaxButton">
-        <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\BepInEx\plugins\MaxButton\MaxButton.dll</HintPath>
-      </Reference>
-    </ItemGroup>
     <Import Project="..\zip.target" />
 </Project>
