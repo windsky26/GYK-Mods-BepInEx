@@ -272,12 +272,12 @@ public partial class Plugin
         newCd.enqueue_type = cd.enqueue_type;
         newCd.id = ShippingBoxId;
 
-        _newItem = newCd;
+        NewItem = newCd;
 
-        gameBalance.craft_data.Add(_newItem);
-        gameBalance.craft_obj_data.Add(_newItem);
-        gameBalance.AddDataUniversal(_newItem);
-        gameBalance.AddData(_newItem);
+        gameBalance.craft_data.Add(NewItem);
+        gameBalance.craft_obj_data.Add(NewItem);
+        gameBalance.AddDataUniversal(NewItem);
+        gameBalance.AddData(NewItem);
     }
 
 

@@ -269,23 +269,26 @@ public static class Patches
         if (Plugin.AddZombiesToPyreAndCrematoriumConfig.Value)
         {
             var mfPyre = GameBalance.me.GetData<ObjectDefinition>("mf_pyre");
-            mfPyre.can_insert_items.Add("working_zombie_on_ground_1");
-            mfPyre.can_insert_items.Add("working_zombie_pseudoitem_1");
-            mfPyre.can_insert_zombie = true;
+            if (mfPyre != null)
+            {
+                mfPyre.can_insert_items.Add("working_zombie_on_ground_1");
+                mfPyre.can_insert_items.Add("working_zombie_pseudoitem_1");
+                mfPyre.can_insert_zombie = true;
 
-            var mfCrematorium = GameBalance.me.GetData<ObjectDefinition>("mf_crematorium");
-            mfCrematorium.can_insert_items.Add("working_zombie_on_ground_1");
-            mfCrematorium.can_insert_items.Add("working_zombie_pseudoitem_1");
-            mfCrematorium.can_insert_items.Add("body");
-            mfCrematorium.can_insert_items.Add("body_guard");
-            mfCrematorium.can_insert_zombie = true;
+                var mfCrematorium = GameBalance.me.GetData<ObjectDefinition>("mf_crematorium");
+                mfCrematorium.can_insert_items.Add("working_zombie_on_ground_1");
+                mfCrematorium.can_insert_items.Add("working_zombie_pseudoitem_1");
+                mfCrematorium.can_insert_items.Add("body");
+                mfCrematorium.can_insert_items.Add("body_guard");
+                mfCrematorium.can_insert_zombie = true;
 
-            var mfCrematoriumCorp = GameBalance.me.GetData<ObjectDefinition>("mf_crematorium_corp");
-            mfCrematoriumCorp.can_insert_items.Add("working_zombie_on_ground_1");
-            mfCrematoriumCorp.can_insert_items.Add("working_zombie_pseudoitem_1");
-            mfCrematoriumCorp.can_insert_items.Add("body");
-            mfCrematoriumCorp.can_insert_items.Add("body_guard");
-            mfCrematoriumCorp.can_insert_zombie = true;
+                var mfCrematoriumCorp = GameBalance.me.GetData<ObjectDefinition>("mf_crematorium_corp");
+                mfCrematoriumCorp.can_insert_items.Add("working_zombie_on_ground_1");
+                mfCrematoriumCorp.can_insert_items.Add("working_zombie_pseudoitem_1");
+                mfCrematoriumCorp.can_insert_items.Add("body");
+                mfCrematoriumCorp.can_insert_items.Add("body_guard");
+                mfCrematoriumCorp.can_insert_zombie = true;
+            }
         }
     }
 }

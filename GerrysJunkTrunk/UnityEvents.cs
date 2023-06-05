@@ -27,17 +27,17 @@ public partial class Plugin
         var sbCraft = GameBalance.me.GetData<ObjectCraftDefinition>(ShippingBoxId);
         if (InternalShippingBoxBuilt.Value && _shippingBox == null)
         {
-            _shippingBox = Object.FindObjectsOfType<WorldGameObject>(true)
+            _shippingBox = FindObjectsOfType<WorldGameObject>(true)
                 .FirstOrDefault(x => string.Equals(x.custom_tag, ShippingBoxTag));
             if (_shippingBox == null)
             {
-                Plugin.Log.LogWarning("Update: No Shipping Box Found!");
+                Log.LogWarning("Update: No Shipping Box Found!");
                 InternalShippingBoxBuilt.Value = false;
                 sbCraft.hidden = false;
             }
             else
             {
-                Plugin.Log.LogWarning($"Update: Found Shipping Box at {_shippingBox.pos3}");
+                Log.LogWarning($"Update: Found Shipping Box at {_shippingBox.pos3}");
                 InternalShippingBoxBuilt.Value = true;
                 _shippingBox.data.drop_zone_id = ShippingBoxTag;
 

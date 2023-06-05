@@ -6,19 +6,17 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using GYKHelper;
 using HarmonyLib;
-using MaxButton;
 using Rewired;
 
 namespace MaxButtonControllerSupport;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
 [BepInDependency("p1xel8ted.gyk.gykhelper")]
-[BepInDependency("com.graveyardkeeper.urbanvibes.maxbutton")]
 public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.maxbuttoncontrollersupport";
     private const string PluginName = "Max Button Controller Support";
-    private const string PluginVer = "1.3.2";
+    private const string PluginVer = "1.3.3";
 
     private static ManualLogSource Log { get; set; }
     private static Harmony Harmony { get; set; }

@@ -18,7 +18,7 @@ public partial class Plugin : BaseUnityPlugin
 
 
     private static ConfigEntry<bool> Debug { get; set; }
-    private static ManualLogSource Log { get;  set; }
+    internal static ManualLogSource Log { get;  set; }
     private static Harmony Harmony { get; set; }
 
     private static ConfigEntry<bool> ModEnabled { get; set; }

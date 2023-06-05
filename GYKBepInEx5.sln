@@ -64,6 +64,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WheresMaVeggies", "WheresMa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddStraightToTable", "AddStraightToTable\AddStraightToTable.csproj", "{7296159B-BB05-4472-8C94-C5577F886122}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerJudderFix", "PlayerJudderFix\PlayerJudderFix.csproj", "{06F5F32A-070A-4B6C-BD44-44801E111681}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -198,5 +200,9 @@ Global
 		{7296159B-BB05-4472-8C94-C5577F886122}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7296159B-BB05-4472-8C94-C5577F886122}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7296159B-BB05-4472-8C94-C5577F886122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06F5F32A-070A-4B6C-BD44-44801E111681}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06F5F32A-070A-4B6C-BD44-44801E111681}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06F5F32A-070A-4B6C-BD44-44801E111681}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06F5F32A-070A-4B6C-BD44-44801E111681}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

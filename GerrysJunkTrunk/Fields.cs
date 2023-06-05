@@ -27,6 +27,6 @@ public partial class Plugin
     private static List<VendorSale> _vendorSales = new();
     private static readonly List<ItemPrice> PriceCache = new();
     private static readonly List<BaseItemCellGUI> AlreadyDone = new();
-    private static ObjectCraftDefinition _newItem;
+    internal static ObjectCraftDefinition NewItem { get; private set; }
     private const string ShippingBoxId = "mf_wood_builddesk:p:mf_shipping_box_place";  
 }

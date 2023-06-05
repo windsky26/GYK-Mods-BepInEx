@@ -1,11 +1,50 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
+using UnityEngine;
 
 namespace AddStraightToTable;
 
 [HarmonyPatch]
 public static class Patches
 {
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.DoDrop), typeof(Item), typeof(int), typeof(bool))]
+    private static void DropResGameObject_DoDrop(ref DropResGameObject __instance, ref Item drop_item)
+    {
+        if (__instance._body != null)
+        {
+            var bodyList = new List<Item> {__instance.res};
+            var cantPut = new List<Item>();
+            Debug.LogWarning($"DropResGameObject.DoDrop: __instance._body != null: {drop_item.definition.id}");
+            var bodyStorage = WorldMap._objs.Where(a => a.is_body_storage).ToList();
+            foreach (var storage in bodyStorage)
+            {
+                storage.TryPutToInventory(bodyList, out var tempList);
+                if (tempList.Count > 0)
+                {
+                    cantPut.AddRange(tempList);
+                }
+                else
+                {
+          
+                    __instance.DestroyLinkedHint();
+                    __instance.DestroyGO();
+                    DropsList.me.drops.Remove(__instance);
+                    DropResHint._list.Remove(__instance._linked_hint);
+                }
+            }
+
+            if (cantPut.Count > 0)
+            {
+                Debug.LogWarning($"DropResGameObject.DoDrop: cantPut.Count > 0: {drop_item.definition.id}");
+            }
+
+            DropsList.me.drops.RemoveAll(a => a == null);
+            DropResHint._list.RemoveAll(a => a == null);
+        }
+    }
+
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(AutopsyGUI), nameof(AutopsyGUI.OnBodyItemPress), typeof(BaseItemCellGUI))]
@@ -22,7 +61,6 @@ public static class Patches
                 {
                     if (item != null && item.IsEmpty())
                     {
-
                         return InventoryWidget.ItemFilterResult.Hide;
                     }
 
@@ -56,9 +94,8 @@ public static class Patches
         AutopsyGUI.RemoveBodyPartFromBody(__instance._body, item_gui.item);
 
         __instance._autopti_obj.components.craft.CraftAsPlayer(craftDefinition, item_gui.item);
-        
-            __instance.Hide();
-            return false;
+
+        __instance.Hide();
+        return false;
     }
-    
 }
