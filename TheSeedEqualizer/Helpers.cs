@@ -69,7 +69,7 @@ public static class Helpers
         }
     }
 
-    internal static void GameBalancePostfix(GameBalance obj)
+    internal static void GameBalancePostfix()
     {
         if (AlreadyRun) return;
         AlreadyRun = true;

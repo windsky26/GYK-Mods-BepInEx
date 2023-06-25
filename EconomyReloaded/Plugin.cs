@@ -14,7 +14,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.economyreloaded";
     private const string PluginName = "Economy Reloaded";
-    private const string PluginVer = "1.3.3";
+    private const string PluginVer = "1.3.4";
 
     internal static ManualLogSource Log { get; private set; }
     private static Harmony Harmony { get; set; }
@@ -47,7 +47,7 @@ public class Plugin : BaseUnityPlugin
             Actions.GameBalanceLoad += Patches.GameBalance_LoadGameBalance;
             Log.LogInfo($"Applying patches for {PluginName}");
             Harmony.PatchAll(Assembly.GetExecutingAssembly());
-            Patches.MakeIsStaticCost();
+           
         }
         else
         {

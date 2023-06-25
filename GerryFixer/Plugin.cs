@@ -14,7 +14,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.gerryfixer";
     private const string PluginName = "Gerry Fixer...";
-    private const string PluginVer = "0.1.3";
+    private const string PluginVer = "0.1.4";
 
     internal static ConfigEntry<bool> Debug;
     internal static ConfigEntry<bool> AttemptToFixCutsceneGerrys { get; private set; }

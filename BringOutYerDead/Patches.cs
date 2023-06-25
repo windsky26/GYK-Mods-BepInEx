@@ -14,9 +14,9 @@ public static class Patches
     private static bool _strikeDone;
     internal static LogicData Ld;
     
-    public static void EnvironmentEngine_OnEndOfDay(EnvironmentEngine obj)
+    public static void EnvironmentEngine_OnEndOfDay()
     {
-        if (obj == null) return;
+        if (EnvironmentEngine.me == null) return;
         Plugin.InternalMorningDelivery.Value = false;
         Plugin.InternalDayDelivery.Value = false;
         Plugin.InternalEveningDelivery.Value = false;

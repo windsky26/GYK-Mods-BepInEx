@@ -17,7 +17,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.treesnomore";
     private const string PluginName = "Trees, No More!";
-    private const string PluginVer = "2.5.3";
+    private const string PluginVer = "2.5.4";
     private static bool ShowConfirmationDialog { get;set; }
     internal static ManualLogSource Log { get; private set; }
     private static Harmony Harmony { get; set; }

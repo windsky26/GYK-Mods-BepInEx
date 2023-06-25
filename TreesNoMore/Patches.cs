@@ -8,7 +8,7 @@ namespace TreesNoMore;
 [HarmonyPatch]
 public static class Patches
 {
-    internal static void DestroyTress(MainGame mainGame)
+    internal static void DestroyTress()
     {
         var sw = new System.Diagnostics.Stopwatch();
         sw.Start();

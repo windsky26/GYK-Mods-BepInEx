@@ -11,6 +11,8 @@ namespace GerrysJunkTrunk;
 
 public partial class Plugin
 {
+    private static List<WorldGameObject> VendorWgo { get; } = new();
+
     private static readonly ItemDefinition.ItemType[] ExcludeItems =
     {
         ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
@@ -95,7 +97,7 @@ public partial class Plugin
     {
         return shippingBox.data.inventory.Sum(GetItemEarnings);
     }
-
+    
     private static float GetItemEarnings(Item selectedItem)
     {
         var itemCache = PriceCache.Find(a =>
@@ -115,6 +117,7 @@ public partial class Plugin
             return ApplyPriceModifier(price);
         }
 
+
         var totalSalePrice = 0f;
         _vendorSales.Clear();
         var totalCount = selectedItem.value;
@@ -122,17 +125,12 @@ public partial class Plugin
         List<Vendor> vendorList = new();
         List<float> priceList = new();
 
-        var vendors = WorldMap._vendors;
-
-        foreach (var vendor in vendors)
+        foreach (var vendor in KnownVendors)
         {
-            var myVendor = WorldMap.GetNPCByObjID(vendor.id, true);
-
-            if (!KnownVendors.Contains(myVendor)) continue;
-
+            Log.LogWarning($"Getting Price For Vendor: {vendor.obj_id}");
             float num = 0;
-            var myTrader = new Trading(myVendor);
-            _myVendor = myVendor;
+            var myTrader = new Trading(vendor);
+            _myVendor = vendor;
 
             if (selectedItem.definition.base_price <= 0)
             {
@@ -157,7 +155,7 @@ public partial class Plugin
                 }
             }
 
-            vendorList.Add(vendor);
+            vendorList.Add(vendor.vendor);
             priceList.Add(num);
         }
 
@@ -169,7 +167,7 @@ public partial class Plugin
         totalSalePrice += priceList[maxSaleIndex];
 
         PriceCache.Add(new ItemPrice(selectedItem, totalCount, priceList[maxSaleIndex]));
-
+        _myVendor = null;
         if (totalSalePrice <= 0)
         {
             var price = PityPrice * totalCount;
@@ -194,10 +192,7 @@ public partial class Plugin
         var gerry = SpawnGerry(_shippingBox.transform, _shippingBox.pos3);
 
         GJTimer.AddTimer(2f,
-            delegate
-            {
-                gerry.Say(noSales ? strings.Nothing : strings.WorkWork, delegate { DestroyGerryWithDelay(gerry, 1f); });
-            });
+            delegate { gerry.Say(noSales ? strings.Nothing : strings.WorkWork, delegate { DestroyGerryWithDelay(gerry, 1f); }); });
 
         if (noSales) return;
 
@@ -272,9 +267,8 @@ public partial class Plugin
 
     private static bool UnlockedFullPrice()
     {
-        
         MainGame.me.save.unlocked_techs.Add("my perk");
-        
+
         return UnlockedShippingBoxExpansion() &&
                MainGame.me.save.unlocked_techs.Exists(
                    a => a.ToLowerInvariant().Equals("Best friend".ToLowerInvariant()));

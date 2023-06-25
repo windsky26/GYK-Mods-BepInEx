@@ -22,12 +22,12 @@ public static class Patches
                 __result = item.definition.base_price;
             }
 
-            Plugin.Log.LogWarning(
-                $"GetSingleItemCostInTraderInventory: Inflation is off, returning base price: {item.definition.base_price}");
+            // Plugin.Log.LogWarning(
+            //     $"GetSingleItemCostInTraderInventory: Inflation is off, returning base price: {item.definition.base_price}");
         }
 
-        Plugin.Log.LogWarning(
-            $"GetSingleItemCostInTraderInventory: Inflation is on, returning normal price: {__result}");
+        // Plugin.Log.LogWarning(
+        //     $"GetSingleItemCostInTraderInventory: Inflation is on, returning normal price: {__result}");
     }
 
     [HarmonyPostfix]
@@ -41,16 +41,17 @@ public static class Patches
                 __result = item.definition.base_price;
             }
 
-            Plugin.Log.LogWarning(
-                $"GetSingleItemCostInPlayerInventory: Deflation is off, returning base price: {item.definition.base_price}");
+            // Plugin.Log.LogWarning(
+            //     $"GetSingleItemCostInPlayerInventory: Deflation is off, returning base price: {item.definition.base_price}");
         }
 
-        Plugin.Log.LogWarning(
-            $"GetSingleItemCostInPlayerInventory: Deflation is on, returning normal price: {__result}");
+        // Plugin.Log.LogWarning(
+        //     $"GetSingleItemCostInPlayerInventory: Deflation is on, returning normal price: {__result}");
     }
 
     public static void RestoreIsStaticCost()
     {
+        if (GameBalance.me == null) return;
         foreach (var itemDef in GameBalance.me.items_data.Where(itemDef => StaticCostItemIds.Contains(itemDef.id)))
         {
             itemDef.is_static_cost = BackedUpIsStaticCost[itemDef.id];
@@ -59,8 +60,9 @@ public static class Patches
         Plugin.Log.LogWarning($"Restored {BackedUpIsStaticCost.Count} items to their original is_static_cost value.");
     }
 
-    public static void MakeIsStaticCost()
+    private static void MakeIsStaticCost()
     {
+        if (GameBalance.me == null) return;
         foreach (var itemDef in GameBalance.me.items_data.Where(itemDef => StaticCostItemIds.Contains(itemDef.id)))
         {
             itemDef.is_static_cost = true;
@@ -69,7 +71,7 @@ public static class Patches
         Plugin.Log.LogWarning($"Set {BackedUpIsStaticCost.Count} items to is_static_cost = true.");
     }
 
-    public static void GameBalance_LoadGameBalance(GameBalance obj)
+    public static void GameBalance_LoadGameBalance()
     {
         if (GameBalanceAlreadyRun) return;
         GameBalanceAlreadyRun = true;
@@ -84,5 +86,7 @@ public static class Patches
             StaticCostItemIds.Add(itemDef.id);
             itemDef.is_static_cost = true;
         }
+        
+        MakeIsStaticCost();
     }
 }

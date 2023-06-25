@@ -140,16 +140,16 @@ public partial class Plugin
     }
 
     //reads co-ords from file and teleports player there
-    private static void RestoreLocation(MainGame mainGame)
+    private static void RestoreLocation()
     {
         LoadSaveLocations();
         Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
 
         var homeVector = new Vector3(2841, -6396, -1332);
         var foundLocation =
-            SaveLocationsDictionary.TryGetValue(mainGame.save_slot.filename_no_extension, out var posVector3);
+            SaveLocationsDictionary.TryGetValue(MainGame.me.save_slot.filename_no_extension, out var posVector3);
         var pos = foundLocation ? posVector3 : homeVector;
-        mainGame.player.PlaceAtPos(pos);
+        MainGame.me.player.PlaceAtPos(pos);
         if (TravelMessages.Value) Tools.ShowMessage(strings.Rush, pos);
 
         StartTimer();

@@ -14,7 +14,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.wheresmastorage";
     private const string PluginName = "Where's Ma' Storage!";
-    private const string PluginVer = "0.0.1";
+    private const string PluginVer = "2.1.3";
 
     internal static ManualLogSource Log { get; private set; }
     private static Harmony Harmony { get; set; }

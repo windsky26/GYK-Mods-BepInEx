@@ -14,7 +14,7 @@ public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.gerrysjunktrunk";
     private const string PluginName = "Gerry's Junk Trunk";
-    private const string PluginVer = "1.8.6";
+    private const string PluginVer = "1.8.8";
 
 
     private static ConfigEntry<bool> Debug { get; set; }

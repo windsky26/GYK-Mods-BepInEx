@@ -5,5 +5,17 @@
         <FileVersion>0.0.2</FileVersion>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Costura.Fody" Version="5.7.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Remove="Costura.Fody" />
+      <PackageReference Remove="Fody" />
+      <PackageReference Update="Costura.Fody" Version="5.7.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
     <Import Project="..\zip.target" />
 </Project>

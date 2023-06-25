@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using GYKHelper;
+using HarmonyLib;
 
 namespace INeedSticks;
 
@@ -14,43 +16,23 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.ineedsticks";
     private const string PluginName = "I Neeeed Sticks!";
-    private const string PluginVer = "1.6.2";
+    private const string PluginVer = "1.6.3";
     private static CraftDefinition _newItem;
     private const string WoodenStick = "wooden_stick";
     private static ManualLogSource Log { get; set; }
-    private static ConfigEntry<bool> ModEnabled { get; set; }
 
     private void Awake()
     {
-        ModEnabled = Config.Bind("General", "Enabled", true, $"Toggle {PluginName}");
-        ModEnabled.SettingChanged += ApplyPatches;
         Log = Logger;
-        ApplyPatches(this,null);
+        Actions.GameBalanceLoad += GameBalance_LoadGameBalance;
     }
-
-    private static void RemoveStick()
+    
+    private static void GameBalance_LoadGameBalance()
     {
-        if (_newItem != null)
-        {
-            GameBalance.me.craft_data.Remove(_newItem);
-            GameBalance.me.craft_data.RemoveAll(a => a.id == WoodenStick);
-            Log.LogInfo($"Removed {WoodenStick} from game balance.");
-        }
-    }
-
-    private static void AddStick(GameBalance obj)
-    {
-        if (obj.craft_data.Exists(a => a == _newItem)) return;
-        if (_newItem != null)
-        {
-            obj.craft_data.Add(_newItem);
-            obj.AddDataUniversal(_newItem);
-            obj.AddData(_newItem);
-            Log.LogInfo($"Added {WoodenStick} to game balance.");
-        }
+        if (GameBalance.me.craft_data.Exists(a => a == _newItem)) return;
 
         var newCd = new CraftDefinition();
-        var cd = obj.GetData<CraftDefinition>("wood1_2");
+        var cd = GameBalance.me.GetData<CraftDefinition>("wood1_2");
         var output = new List<Item>
         {
             new("stick", 1),
@@ -60,6 +42,7 @@ public class Plugin : BaseUnityPlugin
         newCd.needs = cd.needs;
         newCd.needs_from_wgo = cd.needs_from_wgo;
         newCd.output = output;
+        newCd.output[0].definition.base_price = 1;
         newCd.output[0].min_value = SmartExpression.ParseExpression("12");
         newCd.output[0].max_value = SmartExpression.ParseExpression("12");
         newCd.output[0].self_chance = SmartExpression.ParseExpression("1");
@@ -130,24 +113,9 @@ public class Plugin : BaseUnityPlugin
         newCd.id = WoodenStick;
         _newItem = newCd;
 
-        obj.craft_data.Add(_newItem);
-        obj.AddDataUniversal(_newItem);
-        obj.AddData(_newItem);
-        Log.LogInfo($"Added {WoodenStick} to game balance.");
-    }
-
-    private static void ApplyPatches(object sender, EventArgs eventArgs)
-    {
-        if (ModEnabled.Value)
-        {
-            Log.LogInfo($"Applying changes for {PluginName}");
-            Actions.GameBalanceLoad += AddStick;
-        }
-        else
-        {
-            Log.LogInfo($"Removing changes for {PluginName}");
-            Actions.GameBalanceLoad -= AddStick;
-            RemoveStick();
-        }
+        GameBalance.me.craft_data.Add(_newItem);
+        GameBalance.me.AddDataUniversal(_newItem);
+        GameBalance.me.AddData(_newItem);
+        Log.LogWarning($"Added {WoodenStick} to game balance.");
     }
 }

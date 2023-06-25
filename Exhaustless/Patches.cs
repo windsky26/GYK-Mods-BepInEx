@@ -22,11 +22,11 @@ public static class Patches
         if (Plugin.SpendHalfGratitude.Value) value /= 2f;
     }
 
-    public static void GameBalance_LoadGameBalance(GameBalance gameBalance)
+    public static void GameBalance_LoadGameBalance()
     {
         if (!Plugin.MakeToolsLastLonger.Value) return;
 
-        var itemsToUpdate = gameBalance.items_data
+        var itemsToUpdate = GameBalance.me.items_data
             .Where(itemDef => ToolItems.Contains(itemDef.type) && itemDef.durability_decrease_on_use);
 
         foreach (var itemDef in itemsToUpdate)

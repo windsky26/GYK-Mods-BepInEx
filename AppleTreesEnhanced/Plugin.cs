@@ -15,7 +15,7 @@ namespace AppleTreesEnhanced
     {
         private const string PluginGuid = "p1xel8ted.gyk.appletreesenhanced";
         private const string PluginName = "Apple Tree's Enhanced!";
-        private const string PluginVer = "2.7.4";
+        private const string PluginVer = "2.7.5";
         private static ManualLogSource Log { get; set; }
         private static Harmony Harmony { get; set; }
         private static ConfigEntry<bool> Debug { get; set; }
@@ -65,7 +65,7 @@ namespace AppleTreesEnhanced
             }
         }
 
-        private static void CleanUpTrees(MainGame mainGame)
+        private static void CleanUpTrees()
         {
             if (!MainGame.game_started) return;
             Log.LogInfo($"Running CleanUpTrees as Player has spawned in.");

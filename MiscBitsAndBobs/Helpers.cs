@@ -14,7 +14,7 @@ public static class Helpers
         return content;
     }
 
-    internal static void ActionsOnSpawnPlayer(MainGame mainGame)
+    internal static void ActionsOnSpawnPlayer()
     {
         Plugin.Log.LogInfo($"Running MiscBitsAndBobs ActionsOnSpawnPlayer as Player has spawned in.");
         if (MainGame.game_started && !_sprintMsgShown && Sprint && Plugin.ModifyPlayerMovementSpeedConfig.Value)

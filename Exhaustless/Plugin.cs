@@ -14,7 +14,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.exhaustless";
     private const string PluginName = "Exhaust-less!";
-    private const string PluginVer = "3.4.4";
+    private const string PluginVer = "3.4.5";
 
     private static ConfigEntry<bool> ModEnabled { get; set; }
     internal static ConfigEntry<bool> MakeToolsLastLonger { get;private set; }

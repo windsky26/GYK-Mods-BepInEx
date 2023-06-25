@@ -37,11 +37,11 @@
       <OutputPath>H:\Games\steamapps\common\Graveyard Keeper\BepInEx\plugins\$(MSBuildProjectName)</OutputPath>
     </PropertyGroup>
 
-
-    
     <ItemGroup>
         <PackageReference Include="BepInEx.Core" Version="5.4.21" />
         <PackageReference Include="GraveyardKeeper.GameLibs" Version="1.405.1" />
+        <PackageReference Include="BepInEx.BaseLib" Version="5.4.21" />
+        <PackageReference Include="Resource.Embedder" Version="2.2.0" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">

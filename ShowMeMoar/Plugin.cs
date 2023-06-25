@@ -15,7 +15,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.showmemoar";
     private const string PluginName = "Show Me Moar!";
-    private const string PluginVer = "0.1.0";
+    private const string PluginVer = "0.1.1";
     private static Harmony Harmony { get; set; }
     private static ConfigEntry<bool> ModEnabled { get; set; }
     private static ConfigEntry<KeyboardShortcut> ZoomIn { get; set; }
@@ -41,7 +41,7 @@ public class Plugin : BaseUnityPlugin
         ApplyPatches(this, null);
     }
 
-    private static void OnGameStartedPlaying(MainGame obj)
+    private static void OnGameStartedPlaying()
     {
         Patches.ScreenSize = GameObject.Find("UI Root/Screen size panel").transform;
         if(Patches.ScreenSize == null) Log.LogError("Screen size panel not found!");
@@ -120,7 +120,7 @@ public class Plugin : BaseUnityPlugin
         }
     }
 
-    private static void GameStartedPlaying(MainGame obj)
+    private static void GameStartedPlaying()
     {
         if (!MainGame.game_started) return;
         var setting = Zoom.Value;

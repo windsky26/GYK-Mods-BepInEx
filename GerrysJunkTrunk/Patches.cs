@@ -196,13 +196,13 @@ public partial class Plugin
         }
     }
 
-    public static void GameBalance_LoadGameBalance(GameBalance gameBalance)
+    public static void GameBalance_LoadGameBalance()
     {
-        // if (gameBalance.craft_data.Exists(a => a == _newItem)) return;
+         if (GameBalance.me.craft_data.Exists(a => a == NewItem)) return;
 
         //Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
         var newCd = new ObjectCraftDefinition();
-        var cd = gameBalance.GetData<ObjectCraftDefinition>("mf_wood_builddesk:p:mf_box_stuff_place");
+        var cd = GameBalance.me.GetData<ObjectCraftDefinition>("mf_wood_builddesk:p:mf_box_stuff_place");
         newCd.craft_in = cd.craft_in;
         newCd.builder_ids = cd.builder_ids;
         newCd.out_obj = "mf_shipping_box_place";
@@ -274,10 +274,10 @@ public partial class Plugin
 
         NewItem = newCd;
 
-        gameBalance.craft_data.Add(NewItem);
-        gameBalance.craft_obj_data.Add(NewItem);
-        gameBalance.AddDataUniversal(NewItem);
-        gameBalance.AddData(NewItem);
+        GameBalance.me.craft_data.Add(NewItem);
+        GameBalance.me.craft_obj_data.Add(NewItem);
+        GameBalance.me.AddDataUniversal(NewItem);
+        GameBalance.me.AddData(NewItem);
     }
 
 
@@ -430,7 +430,7 @@ public partial class Plugin
     [HarmonyPatch(typeof(Vendor), nameof(Vendor.CanTradeItem))]
     public static void Vendor_CanTradeItem(ref Vendor __instance, ref bool __result)
     {
-        //
+        
         if (!UnlockedShippingBox()) return;
         if (__instance == null || _myVendor == null || _myVendor.vendor == null) return;
         if (__instance.Equals(_myVendor.vendor))

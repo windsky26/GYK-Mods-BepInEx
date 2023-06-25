@@ -31,11 +31,11 @@ public static class Actions
     //public static Action PlayerSpawnedIn;
     public static Action ReturnToMenu;
     public static Action GameStatusUndefined;
-    public static Action<MainGame> GameStartedPlaying;
+    public static Action GameStartedPlaying;
 
-    public static Action<EnvironmentEngine> EnvironmentEnginePrefix;
-    public static Action<EnvironmentEngine> EnvironmentEnginePostfix;
-    public static Action<GameBalance> GameBalanceLoad;
+    public static Action  EnvironmentEnginePrefix;
+    public static Action EnvironmentEnginePostfix;
+    public static Action GameBalanceLoad;
     public static Action<WorldGameObject> WorldGameObjectInteract;
 
     public static Action<WorldGameObject, WorldGameObject> WorldGameObjectInteractPrefix;
@@ -55,7 +55,7 @@ public static class Actions
                 Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
             }
 
-            EnvironmentEnginePrefix.Invoke(EnvironmentEngine.me);
+            EnvironmentEnginePrefix.Invoke();
         }
         else
         {
@@ -77,7 +77,7 @@ public static class Actions
                 Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
             }
 
-            EnvironmentEnginePostfix.Invoke(EnvironmentEngine.me);
+            EnvironmentEnginePostfix.Invoke();
         }
         else
         {
@@ -136,7 +136,7 @@ public static class Actions
                 Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
             }
 
-            GameStartedPlaying.Invoke(MainGame.me);
+            GameStartedPlaying.Invoke();
         }
         else
         {
@@ -158,7 +158,7 @@ public static class Actions
                 Plugin.Log.LogInfo($"Type: {del.Method.DeclaringType}, Method: {del.Method.Name}");
             }
 
-            GameBalanceLoad.Invoke(GameBalance.me);
+            GameBalanceLoad.Invoke();
         }
         else
         {
@@ -258,7 +258,7 @@ public static class Actions
         //Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
     }
 
-    public static void CleanGerries(MainGame mainGame)
+    public static void CleanGerries()
     {
         if (!MainGame.game_started) return;
 
