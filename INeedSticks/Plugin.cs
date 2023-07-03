@@ -11,7 +11,7 @@ using HarmonyLib;
 namespace INeedSticks;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.ineedsticks";
@@ -20,15 +20,46 @@ public class Plugin : BaseUnityPlugin
     private static CraftDefinition _newItem;
     private const string WoodenStick = "wooden_stick";
     private static ManualLogSource Log { get; set; }
+    private static Harmony Harmony { get; set; }
+    private static ConfigEntry<bool> ModEnabled { get; set; }
 
     private void Awake()
     {
         Log = Logger;
-        Actions.GameBalanceLoad += GameBalance_LoadGameBalance;
+        Harmony = new Harmony(PluginGuid);
+
+        ModEnabled = Config.Bind("1. General", "Enabled", true, $"Toggle {PluginName}");
+        ModEnabled.SettingChanged += ApplyPatches;
+        ApplyPatches(this, null);
     }
-    
+
+    private static void ApplyPatches(object sender, EventArgs args)
+    {
+        if (ModEnabled.Value)
+        {
+            Actions.GameBalanceLoad += GameBalance_LoadGameBalance;
+            Log.LogInfo($"Applying patches for {PluginName}");
+            Harmony.PatchAll(Assembly.GetExecutingAssembly());
+            GameBalance_LoadGameBalance();
+        }
+        else
+        {
+            Actions.GameBalanceLoad -= GameBalance_LoadGameBalance;
+            if (GameBalance.me != null && _newItem != null)
+            {
+                GameBalance.me.craft_data.RemoveAll(a => a.id == _newItem.id);
+                Log.LogWarning($"Removed {WoodenStick} from game balance.");
+            }
+
+            Log.LogInfo($"Removing patches for {PluginName}");
+            Harmony.UnpatchSelf();
+        }
+    }
+
+
     private static void GameBalance_LoadGameBalance()
     {
+        if (GameBalance.me == null) return;
         if (GameBalance.me.craft_data.Exists(a => a == _newItem)) return;
 
         var newCd = new CraftDefinition();

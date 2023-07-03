@@ -1,14 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using HarmonyLib;
-using UnityEngine;
 
 namespace AddStraightToTable;
 
 [HarmonyPatch]
 public static class Patches
 {
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(AutopsyGUI), nameof(AutopsyGUI.OnBodyItemPress), typeof(BaseItemCellGUI))]
     public static bool AutopsyGUI_OnBodyItemPress_Postfix(ref AutopsyGUI __instance, BaseItemCellGUI item_gui)

@@ -9,12 +9,12 @@ using HarmonyLib;
 namespace PrayTheDayAway;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.praythedayaway";
     private const string PluginName = "Pray The Day Away!";
-    private const string PluginVer = "0.2.8";
+    private const string PluginVer = "0.2.9";
 
     private static ConfigEntry<bool> _debug;
     private static ManualLogSource Log { get; set; }

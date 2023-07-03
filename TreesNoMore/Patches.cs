@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
@@ -12,20 +13,33 @@ public static class Patches
     {
         var sw = new System.Diagnostics.Stopwatch();
         sw.Start();
+
+        // Create a new list to hold the trees that you want to destroy.
+        List<WorldGameObject> treesToDestroy = new List<WorldGameObject>();
+
         foreach (var tree in WorldMap.objs.Where(o => o.name.Contains("tree") && !o.name.Contains("bees") && !o.name.Contains("apple")))
         {
             var treeExists = Plugin.Trees.Any(x => Vector3.Distance(x.location, tree.pos3) <= Plugin.TreeSearchDistance.Value);
             if (treeExists)
             {
                 Plugin.Log.LogWarning($"Found existing tree at {tree.pos3} that should be removed.");
-                UnityEngine.Object.DestroyImmediate(tree.gameObject);
+                // Add the tree to the treesToDestroy list instead of destroying it immediately.
+                treesToDestroy.Add(tree);
             }
+        }
+
+        // Now you can destroy the trees without modifying the collection you're iterating over.
+        foreach (var tree in treesToDestroy)
+        {
+            WorldMap.objs.Remove(tree); // removing the reference from WorldMap.objs
+            UnityEngine.Object.DestroyImmediate(tree);
         }
 
         sw.Stop();
         Plugin.Log.LogWarning($"Search N Destroyed {Plugin.Trees.Count} trees in {sw.ElapsedMilliseconds}ms");
         WorldMap.RescanWGOsList();
     }
+
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.SmartInstantiate))]

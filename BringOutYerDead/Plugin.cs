@@ -9,7 +9,7 @@ using HarmonyLib;
 namespace BringOutYerDead;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.bringoutyerdead";

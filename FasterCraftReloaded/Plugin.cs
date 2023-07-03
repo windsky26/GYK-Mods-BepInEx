@@ -9,12 +9,12 @@ using HarmonyLib;
 namespace FasterCraftReloaded;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.fastercraftreloaded";
     private const string PluginName = "FasterCraft Reloaded";
-    private const string PluginVer = "1.4.4";
+    private const string PluginVer = "1.4.5";
 
     private static ConfigEntry<bool> ModEnabled { get; set; }
     internal static ConfigEntry<bool> Debug { get; set; }

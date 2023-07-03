@@ -12,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.addstraighttotable";
     private const string PluginName = "Add Straight to Table!";
-    private const string PluginVer = "2.4.3";
+    private const string PluginVer = "2.4.4";
 
     private static ManualLogSource Log { get; set; }
     private static Harmony Harmony { get; set; }

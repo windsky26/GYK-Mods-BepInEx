@@ -10,7 +10,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.nointros";
     private const string PluginName = "No Intros!";
-    private const string PluginVer = "2.2.2";
+    private const string PluginVer = "2.2.3";
     private static ManualLogSource Log { get; set; }
 
     private void Awake()

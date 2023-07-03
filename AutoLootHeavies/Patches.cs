@@ -16,9 +16,10 @@ public partial class Plugin
     {
         if (!__instance.wgo.is_player || !OverheadItemIsHeavy(__instance.overhead_item))
             return true;
-
-        List<Item> insert = new() { __instance.overhead_item };
-        var itemId = __instance.overhead_item.id;
+        var item = __instance.overhead_item;
+        
+        List<Item> insert = new() { item };
+        var itemId = item.id;
 
         WriteLog($"Refreshing and re-sorting stockpile distances.");
         foreach (var pile in SortedStockpiles)
@@ -26,26 +27,24 @@ public partial class Plugin
 
         SortedStockpiles.Sort((x, y) => x.DistanceFromPlayer.CompareTo(y.DistanceFromPlayer));
 
+        var itemDumped = false;
         foreach (var stockpile in SortedStockpiles)
         {
             WriteLog($"Trying to insert {itemId} into {stockpile.Wgo}, {stockpile.DistanceFromPlayer} units away.");
             var success = TryPutToInventoryAndNull(__instance, stockpile.Wgo, insert);
-            if (success)
-            {
-                WriteLog($"Successfully inserted {itemId} into {stockpile.Wgo}, {stockpile.DistanceFromPlayer} units away.");
-                ShowLootAddedIcon(__instance.overhead_item);
-                break;
-            }
-
-            WriteLog($"Failed to insert {itemId} into {stockpile.Wgo}, {stockpile.DistanceFromPlayer} units away.");
+            if (!success) continue;
+            itemDumped = true;
+            WriteLog($"Successfully inserted {itemId} into {stockpile.Wgo}, {stockpile.DistanceFromPlayer} units away.");
+            ShowLootAddedIcon(item);
+            break;
         }
 
-        if (__instance.overhead_item != null)
+        if (__instance.overhead_item != null || !itemDumped)
         {
             if (TeleportToDumpSiteWhenAllStockPilesFull.Value)
             {
                 TeleportItem(__instance, __instance.overhead_item);
-                //WriteLog($"Teleporting {itemId} to dump site.");
+                WriteLog($"Teleporting {itemId} to dump site.");
             }
             else
             {

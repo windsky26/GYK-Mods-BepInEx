@@ -9,12 +9,12 @@ using HarmonyLib;
 namespace WheresMaVeggies;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.wheresmaveggies";
     private const string PluginName = "Where's Ma' Veggies!";
-    private const string PluginVer = "0.1.1";
+    private const string PluginVer = "0.1.2";
 
     internal static ConfigEntry<bool> Debug { get; private set; }
     internal static ManualLogSource Log { get; private set; }

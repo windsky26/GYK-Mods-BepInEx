@@ -75,7 +75,7 @@ public static class Patches
     [HarmonyPatch(typeof(Intro), nameof(Intro.ShowIntro))]
     public static void Intro_ShowIntro()
     {
-        Intro.need_show_first_intro = Plugin.SkipIntroVideoOnNewGameConfig.Value;
+        Intro.need_show_first_intro = !Plugin.SkipIntroVideoOnNewGameConfig.Value;
     }
 
 

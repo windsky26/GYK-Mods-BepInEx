@@ -10,12 +10,12 @@ using UnityEngine;
 namespace ShowMeMoar;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.showmemoar";
     private const string PluginName = "Show Me Moar!";
-    private const string PluginVer = "0.1.1";
+    private const string PluginVer = "0.1.2";
     private static Harmony Harmony { get; set; }
     private static ConfigEntry<bool> ModEnabled { get; set; }
     private static ConfigEntry<KeyboardShortcut> ZoomIn { get; set; }
@@ -30,7 +30,7 @@ public class Plugin : BaseUnityPlugin
     private static GameObject Icons { get; set; }
     internal static ManualLogSource Log { get; private set; }
     
-   
+    internal static bool Ultrawide => (Display.main.systemWidth / (float) Display.main.systemHeight) > (16 / (float) 9);
 
     private void Awake()
     {

@@ -7,9 +7,5 @@
     <ItemGroup>
         <ProjectReference Include="..\GYKHelper\GYKHelper.csproj" />
     </ItemGroup>
-    <ItemGroup>
-      <PackageReference Remove="Fody" />
-      <PackageReference Remove="Costura.Fody" />
-    </ItemGroup>
     <Import Project="..\zip.target" />
 </Project>

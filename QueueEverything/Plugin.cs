@@ -10,12 +10,12 @@ using HarmonyLib;
 namespace QueueEverything;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.queueeverything";
     private const string PluginName = "Queue Everything!*";
-    private const string PluginVer = "2.1.4";
+    private const string PluginVer = "2.1.5";
 
     private static ConfigEntry<bool> HalfFireRequirements { get; set; }
     private static ConfigEntry<bool> AutoMaxMultiQualCrafts { get; set; }

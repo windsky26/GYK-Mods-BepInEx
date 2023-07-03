@@ -11,12 +11,12 @@ using UnityEngine;
 namespace BeamMeUpGerry;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.beammeupgerry";
     private const string PluginName = "Beam Me Up Gerry!";
-    private const string PluginVer = "2.0.7";
+    private const string PluginVer = "2.0.8";
 
     internal static ConfigEntry<bool> Debug;
     internal static ManualLogSource Log { get; private set; }

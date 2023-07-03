@@ -8,6 +8,7 @@ public static class Patches
 {
     internal static UIPanel HUD { get; private set; }
     internal static Transform ScreenSize { get; set; }
+   
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(UIPanel), nameof(UIPanel.Awake))]
@@ -36,6 +37,7 @@ public static class Patches
     [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]
     public static void ResolutionConfig_GetResolutionConfigOrNull(int width, int height, ref ResolutionConfig __result)
     {
+        if (!Plugin.Ultrawide) return;
         var res = new ResolutionConfig(width, height);
         if (height < 900 || width < 1280)
         {
@@ -51,6 +53,7 @@ public static class Patches
     [HarmonyPatch(typeof(FogObject), nameof(FogObject.InitFog))]
     public static bool FogObject_InitFog(FogObject prefab)
     {
+        if (!Plugin.Ultrawide) return true;
         if (prefab == null)
         {
             Debug.LogError("Fog object not found on a scene");

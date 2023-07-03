@@ -13,7 +13,7 @@ using UnityEngine;
 namespace SaveNow;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.savenow";

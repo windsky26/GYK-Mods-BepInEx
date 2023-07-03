@@ -9,12 +9,12 @@ using HarmonyLib;
 namespace WheresMaStorage;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.wheresmastorage";
     private const string PluginName = "Where's Ma' Storage!";
-    private const string PluginVer = "2.1.3";
+    private const string PluginVer = "2.1.2";
 
     internal static ManualLogSource Log { get; private set; }
     private static Harmony Harmony { get; set; }

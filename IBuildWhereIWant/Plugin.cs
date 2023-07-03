@@ -11,12 +11,12 @@ using UnityEngine;
 namespace IBuildWhereIWant;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.ibuildwhereiwant";
     private const string PluginName = "I Build Where I Want!";
-    private const string PluginVer = "1.7.3";
+    private const string PluginVer = "1.7.4";
     
     private static ManualLogSource Log { get; set; }
     private static Harmony Harmony { get;set; }

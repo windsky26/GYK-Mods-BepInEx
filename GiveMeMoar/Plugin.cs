@@ -9,12 +9,12 @@ using HarmonyLib;
 namespace GiveMeMoar;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.givememoar";
     private const string PluginName = "Give Me Moar!";
-    private const string PluginVer = "1.2.6";
+    private const string PluginVer = "1.2.7";
 
     private static ConfigEntry<bool> ModEnabled { get; set; }
     internal static ConfigEntry<bool> Debug { get; private set; }

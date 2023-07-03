@@ -212,7 +212,10 @@ public partial class Plugin
                         gerry2.Say(strings.Bye, delegate
                         {
                             DestroyGerryWithDelay(gerry2, 1f);
-                            GJTimer.AddTimer(1f, delegate { ShowSummary(money); });
+                            if (ShowSummaryMessage.Value && !EnableGerry.Value && num > 0)
+                            {
+                                GJTimer.AddTimer(1f, delegate { ShowSummary(money); });
+                            }
                         });
                     });
                 });

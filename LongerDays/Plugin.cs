@@ -10,12 +10,12 @@ using UnityEngine;
 namespace LongerDays;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.longerdays";
     private const string PluginName = "Longer Days";
-    private const string PluginVer = "1.6.3";
+    private const string PluginVer = "1.6.4";
 
     internal const float MadnessSeconds = 1350f;
     internal const float EvenLongerSeconds = 1125f; 

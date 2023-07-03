@@ -9,12 +9,12 @@ using HarmonyLib;
 namespace WheresMaPoints;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVer)]
-[BepInDependency("p1xel8ted.gyk.gykhelper")]
+[BepInDependency("p1xel8ted.gyk.gykhelper", "3.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.gyk.wheresmapoints";
     private const string PluginName = "Where's Ma' Points!";
-    private const string PluginVer = "0.2.5";
+    private const string PluginVer = "0.2.6";
 
     internal static ConfigEntry<bool> ShowPointGainAboveKeeper { get; private set; }
     internal static ConfigEntry<bool> StillPlayCollectAudio { get; private set; }
