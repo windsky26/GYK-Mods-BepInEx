@@ -25,7 +25,7 @@ internal static class PlayerJudderFix
 
         return codes.Manipulator(
             i => i.Calls(positionSetter),
-            i => new[]
+            _ => new[]
             {
                 new CodeInstruction(OpCodes.Ldarg_0),
                 CodeInstruction.Call(typeof(PlayerJudderFix), nameof(Wrapper))
