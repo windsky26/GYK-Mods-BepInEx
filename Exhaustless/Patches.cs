@@ -13,12 +13,18 @@ public static class Patches
         ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor,
         ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword,
     };
-    
+
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.TrySpendPlayerGratitudePoints))]
     public static void CraftComponent_TrySpendPlayerGratitudePoints(ref float value)
     {
+        if (Plugin.UnlimitedGratitude.Value)
+        {
+            value = 0;
+            return;
+        }
+
         if (Plugin.SpendHalfGratitude.Value) value /= 2f;
     }
 
@@ -34,7 +40,7 @@ public static class Patches
             itemDef.durability_decrease_on_use_speed = 0.005f;
         }
     }
-    
+
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(MainGame), nameof(MainGame.OnEquippedToolBroken))]
@@ -61,12 +67,43 @@ public static class Patches
         }
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(PlayerComponent), nameof(PlayerComponent.Update))]
+    public static void PlayerComponent_Update(ref PlayerComponent __instance)
+    {
+        if (!MainGame.game_started || MainGame.me.player == null || __instance == null) return;
+        
+        var maxEnergy = MainGame.me.save.max_energy;
+        var maxHealth = MainGame.me.save.max_hp;
+        var maxSanity = MainGame.me.save.max_sanity;
+
+        if (Plugin.UnlimitedHealth.Value)
+        {
+            MainGame.me.player.hp = maxHealth;
+        }
+
+        if (Plugin.UnlimitedEnergy.Value)
+        {
+            MainGame.me.player.energy = maxEnergy;
+        }
+
+        if (Plugin.UnlimitedSanity.Value)
+        {
+            MainGame.me.player.sanity = maxSanity;
+        }
+    }
 
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerComponent), nameof(PlayerComponent.SpendSanity))]
     public static void PlayerComponent_SpendSanity(ref float need_sanity)
     {
+        if (Plugin.UnlimitedSanity.Value)
+        {
+            need_sanity = 0;
+            return;
+        }
+
         if (Plugin.SpendHalfSanity.Value) need_sanity /= 2f;
     }
 
@@ -75,6 +112,12 @@ public static class Patches
     [HarmonyPatch(typeof(PlayerComponent), nameof(PlayerComponent.TrySpendEnergy))]
     public static void PlayerComponent_TrySpendEnergy(ref float need_energy)
     {
+        if (Plugin.UnlimitedEnergy.Value)
+        {
+            need_energy = 0;
+            return;
+        }
+
         if (Plugin.SpendHalfEnergy.Value) need_energy /= 2f;
     }
 
@@ -88,7 +131,6 @@ public static class Patches
         MainGame.me.player.energy += 0.25f;
         MainGame.me.player.hp += 0.25f;
     }
-
 
 
     [HarmonyPostfix]
@@ -155,8 +197,7 @@ public static class Patches
         }
 
         var tiredness = __instance._data.GetParam("tiredness");
-        var newTirednessLimit = (float)Plugin.EnergySpendBeforeSleepDebuff.Value;
+        var newTirednessLimit = (float) Plugin.EnergySpendBeforeSleepDebuff.Value;
         __result = tiredness < newTirednessLimit ? 250 : 350;
     }
-
 }
