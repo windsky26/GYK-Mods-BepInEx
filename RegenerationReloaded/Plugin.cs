@@ -42,9 +42,9 @@ public class Plugin : BaseUnityPlugin
 
         LifeRegen = Config.Bind("2. Regeneration", "Life Regeneration Rate", 2f, new ConfigDescription("Set the rate at which life regenerates per tick.", new AcceptableValueRange<float>(1f, 10f), new ConfigurationManagerAttributes {Order = 3}));
 
-        EnergyRegen = Config.Bind("2. Regeneration", "Energy Regeneration Rate", 1f, new ConfigDescription("Set the rate at which energy regenerates per tick.", new AcceptableValueRange<float>(1f, 10f), new ConfigurationManagerAttributes {Order = 2}));
+        EnergyRegen = Config.Bind("2. Regeneration", "Energy Regeneration Rate", 2f, new ConfigDescription("Set the rate at which energy regenerates per tick.", new AcceptableValueRange<float>(1f, 10f), new ConfigurationManagerAttributes {Order = 2}));
 
-        RegenDelay = Config.Bind("2. Regeneration", "Regeneration Delay", 5f, new ConfigDescription("Set the delay in seconds between each regeneration tick.", new AcceptableValueRange<float>(0f, 10f), new ConfigurationManagerAttributes {Order = 1}));
+        RegenDelay = Config.Bind("2. Regeneration", "Regeneration Delay", 2f, new ConfigDescription("Set the delay in seconds between each regeneration tick.", new AcceptableValueRange<float>(0f, 10f), new ConfigurationManagerAttributes {Order = 1}));
 
         Patches.Delay = RegenDelay.Value;
     }
